@@ -1,0 +1,28 @@
+
+echo "Buildjars SnapCode"
+cd /Temp/SnapCode/bin
+date "+%b-%d-%y %H:%M" > ../../RM15/bin/com/reportmill/BuildInfo.txt
+
+echo "Creating SnapCode Manifest"
+echo "Main-Class: snapcodepro.app.App\nClass-Path: tools.jar spell.jar" > MANIFEST.MF
+echo "Application-Name: SnapCode1\nPermissions: all-permissions" >> MANIFEST.MF
+echo "Codebase: *" >> MANIFEST.MF
+
+echo "Creating SnapCode1.jar"
+jar cmf MANIFEST.MF SnapCode1.jar snap \
+    -C ../../RM15/bin com \
+    -C ../../SnapStudio/bin studio \
+    -C ../../SnapBuilder/bin snapbuild \
+    -C ../../SnapKit/bin snap/gfx \
+    -C ../../SnapKit/bin snap/parse \
+    -C ../../SnapKit/bin snap/swing \
+    -C ../../SnapKit/bin snap/util \
+    -C ../../SnapKit/bin snap/view \
+    -C ../../SnapKit/bin snap/viewx \
+    -C ../../SnapKit/bin snap/web
+
+echo "Getting resources"
+cp ../lib/jgit.jar .
+cp ../lib/jsch.jar .
+cp ../lib/tools.jar .
+cp ../../RM15/lib/spell.jar .

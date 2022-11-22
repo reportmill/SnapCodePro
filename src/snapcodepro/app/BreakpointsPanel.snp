@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VBox PrefWidth="640" PrefHeight="480" Padding="4,2,2,2" Spacing="3" FillWidth="true">
+  <HBox Padding="0,16,0,0" Spacing="8">
+    <Button Name="DeleteButton" PrefWidth="80" PrefHeight="22" LeanX="RIGHT" text="Delete">
+      <binding aspect="Enabled" key="SelectedBreakpoint" />
+    </Button>
+    <Button Name="DeleteAllButton" PrefWidth="80" PrefHeight="22" text="Delete All" />
+  </HBox>
+  <ListView Name="BreakpointList" GrowHeight="true" ItemKey="Descriptor">
+    <font name="Arial" size="12" />
+    <binding aspect="Items" key="Breakpoints" />
+  </ListView>
+</VBox>

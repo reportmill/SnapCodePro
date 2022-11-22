@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpringView width="640" height="480" PrefWidth="640" PrefHeight="480">
+  <Label Name="SearchResultsText" x="4" y="4" width="474" height="22" GrowWidth="true" text="Label">
+    <font name="Arial" size="12" />
+  </Label>
+  <Button Name="SearchButton" x="482" y="4" width="75" height="22" LeanX="RIGHT" text="Search" />
+  <Button Name="ClearButton" x="561" y="4" width="75" height="22" LeanX="RIGHT" text="Clear">
+    <binding aspect="Enabled" key="Search" />
+  </Button>
+  <ListView Name="ResultsList" x="2" y="30" width="636" height="448" GrowWidth="true" GrowHeight="true">
+    <font name="Arial" size="12" />
+    <binding aspect="Items" key="Results" />
+    <binding aspect="SelItem" key="SelectedResult" />
+  </ListView>
+</SpringView>

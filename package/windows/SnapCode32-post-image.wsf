@@ -1,0 +1,18 @@
+<?xml version="1.0" ?> 
+<package> 
+  <job id="postImage"> 
+    <script language="JScript"> 
+      <![CDATA[ 
+        var oFSO = new ActiveXObject("Scripting.FileSystemObject"); 
+        var oFolder = oFSO.getFolder("."); 
+        var from = "C:\\Program Files (x86)\\Java\\jdk1.8.0_40\\bin\\java.exe"; 
+        var to = oFolder.path + "\\SnapCode32\\runtime\\bin"; 
+        if (!oFSO.FolderExists(to)) { 
+          oFSO.CreateFolder(to); 
+        }
+        to += "\\";
+        oFSO.CopyFile(from, to); 
+      ]]> 
+    </script> 
+  </job> 
+</package>

@@ -1,0 +1,37 @@
+
+echo "Buildjars SnapCode"
+cd /Temp/SnapCode
+date > bin/BuildInfo.txt
+
+echo "Creating SnapCode Manifest"
+echo "Main-Class: snapcodepro.app.AppLoader\nClass-Path: jgit.jar jsch.jar tools.jar spell.jar" > bin/MANIFEST.MF
+
+echo "Creating AppLoader.jar"
+cd bin
+jar cmf MANIFEST.MF AppLoader.jar snapcodepro/app/AppLoader*.class
+cd ..
+
+echo "Creating SnapCode package"
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.8.0_111.jdk/Contents/Home"
+$JAVA_HOME/bin/javapackager -deploy -native image -Bruntime=$JAVA_HOME \
+-outdir bin/SnapApp -outfile SnapCode -name SnapCode \
+-appclass snapcodepro.app.AppLoader -v -srcdir bin \
+-srcfiles AppLoader.jar:SnapCode1.jar:jgit.jar:jsch.jar:tools.jar:spell.jar:BuildInfo.txt \
+
+echo "Copy java binary to package"
+mkdir bin/SnapApp/bundles/SnapCode.app/Contents/PlugIns/Java.runtime/Contents/Home/jre/bin
+cp $JAVA_HOME/jre/bin/java bin/SnapApp/bundles/SnapCode.app/Contents/PlugIns/Java.runtime/Contents/Home/jre/bin
+
+echo "Running codesign"
+cd bin/SnapApp/bundles
+codesign -f --deep -s "Developer ID Application: ReportMill Software" SnapCode.app
+
+echo "Codesign Verify"
+codesign --verify --verbose=4 SnapCode.app
+
+echo "Spctl Verify"
+spctl --verbose --assess --type execute SnapCode.app
+
+echo "Making zip"
+rm -f SnapCode.app.zip
+zip -rq SnapCode.app.zip SnapCode.app

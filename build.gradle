@@ -1,0 +1,30 @@
+
+plugins {
+    id 'application'
+}
+
+sourceSets.main.java.srcDirs = ['src']
+sourceSets.main.resources.srcDirs = ['src']
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'lib'
+    }
+}
+
+dependencies {
+    implementation project(':SnapKit')
+    implementation project(':JavaKit')
+    implementation name: 'tools'
+    implementation name: 'eawt'
+    //implementation name: 'jgit'
+    //implementation 'org.eclipse.jgit:org.eclipse.jgit:5.7.0.202003110725-r'
+}
+
+mainClassName = 'snapcodepro.app.App'

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VBox Padding="7,0,0,0" Spacing="3">
+  <font name="Arial" size="12" />
+  <Label Padding="0,0,0,5" text="Problems:">
+    <binding aspect="Text" key="BuildStatusText" />
+  </Label>
+  <ListView Name="ErrorsList" GrowWidth="true" GrowHeight="true">
+    <font name="Arial" size="14" />
+    <binding aspect="Items" key="Issues" />
+    <binding aspect="SelItem" key="SelectedIssue" />
+  </ListView>
+</VBox>
