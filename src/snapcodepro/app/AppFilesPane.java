@@ -208,9 +208,8 @@ public class AppFilesPane extends ViewOwner {
         addKeyActionHandler("CopyAction", "Shortcut+C");
         addKeyActionHandler("PasteAction", "Shortcut+V");
 
-
-        // Register for WinActivated update
-        _appPane.getWindow().addEventHandler(e -> windowDidActivate(), WinActivate);
+        // Register for Window.Focused change
+        _appPane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
     }
 
     /**
@@ -817,12 +816,14 @@ public class AppFilesPane extends ViewOwner {
     }
 
     /**
-     * Called when window activates.
+     * Called when window focus changes to check if files have been externally modified.
      */
-    protected void windowDidActivate()
+    protected void windowFocusChanged()
     {
-        for (AppFile file : getRootFiles())
-            checkForExternalMods(file.getFile());
+        if (getWindow().isFocused()) {
+            for (AppFile file : getRootFiles())
+                checkForExternalMods(file.getFile());
+        }
     }
 
     /**
