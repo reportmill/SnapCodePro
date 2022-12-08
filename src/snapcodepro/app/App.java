@@ -2,16 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.app;
-
-import com.apple.eawt.AppEvent.PreferencesEvent;
-import com.apple.eawt.AppEvent.QuitEvent;
-import com.apple.eawt.PreferencesHandler;
-import com.apple.eawt.QuitHandler;
-import com.apple.eawt.QuitResponse;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
 import snap.viewx.ExceptionReporter;
-
 import javax.swing.*;
 
 /**
@@ -25,7 +18,7 @@ public class App {
     public static void main(final String[] args)
     {
         // Mac specific stuff
-        if (SnapUtils.isMac) new AppleAppHandler().init();
+        //if (SnapUtils.isMac) new AppleAppHandler().init();
 
         // Config/init JavaFX and invoke real main on event thread
         SwingUtilities.invokeLater(() -> new App(args));
@@ -37,7 +30,8 @@ public class App {
     public App(String[] args)
     {
         // Set App Prefs class
-        Prefs.setPrefsDefault(Prefs.getPrefs(App.class));
+        Prefs prefs = Prefs.getPrefsForName("SnapCodePro");
+        Prefs.setPrefsDefault(prefs);
 
         // Install Exception reporter
         ExceptionReporter er = new ExceptionReporter("SnapCode");
@@ -68,43 +62,43 @@ public class App {
         System.exit(0);
     }
 
-    /**
-     * A class to handle apple events.
-     */
-    private static class AppleAppHandler implements PreferencesHandler, QuitHandler {
-
-        /**
-         * Initializes Apple Application handling.
-         */
-        public void init()
-        {
-            //System.setProperty("apple.laf.useScreenMenuBar", "true"); // 1.4
-            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "SnapCode");
-            com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
-            app.setPreferencesHandler(this);
-            app.setQuitHandler(this);
-            _appHand = this;
-        }
-
-        /**
-         * Handle Preferences.
-         */
-        public void handlePreferences(PreferencesEvent arg0)
-        {
-            AppPane appPane = AppPane.getOpenAppPane();
-            if (appPane == null) return;
-            appPane.getBrowser().setFile(appPane.getRootSite().getRootDir());
-        }
-
-        /**
-         * Handle QuitRequest.
-         */
-        public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1)
-        {
-            App.quitApp();
-        }
-    }
-
-    static AppleAppHandler _appHand;
+//    /**
+//     * A class to handle apple events.
+//     */
+//    private static class AppleAppHandler implements PreferencesHandler, QuitHandler {
+//
+//        /**
+//         * Initializes Apple Application handling.
+//         */
+//        public void init()
+//        {
+//            //System.setProperty("apple.laf.useScreenMenuBar", "true"); // 1.4
+//            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "SnapCode");
+//            com.apple.eawt.Application app = com.apple.eawt.Application.getApplication();
+//            app.setPreferencesHandler(this);
+//            app.setQuitHandler(this);
+//            _appHand = this;
+//        }
+//
+//        /**
+//         * Handle Preferences.
+//         */
+//        public void handlePreferences(PreferencesEvent arg0)
+//        {
+//            AppPane appPane = AppPane.getOpenAppPane();
+//            if (appPane == null) return;
+//            appPane.getBrowser().setFile(appPane.getRootSite().getRootDir());
+//        }
+//
+//        /**
+//         * Handle QuitRequest.
+//         */
+//        public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1)
+//        {
+//            App.quitApp();
+//        }
+//    }
+//
+//    static AppleAppHandler _appHand;
 
 }
