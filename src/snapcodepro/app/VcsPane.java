@@ -115,7 +115,8 @@ public class VcsPane extends ViewOwner {
         // Get WebBrowser for remote files
         SpringView pane = getView("RemoteBrowserPane", SpringView.class);
         _remoteBrowser = new WebBrowser();
-        _remoteBrowser.setAutosizing("-~-,-~-");
+        _remoteBrowser.setGrowWidth(true);
+        _remoteBrowser.setGrowHeight(true);
         _remoteBrowser.setBounds(2, 2, pane.getWidth() - 4, pane.getHeight() - 4);
         pane.addChild(_remoteBrowser);
 

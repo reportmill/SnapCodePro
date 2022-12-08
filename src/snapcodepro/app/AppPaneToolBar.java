@@ -1,6 +1,7 @@
 package snapcodepro.app;
 import snap.geom.HPos;
 import snap.geom.Polygon;
+import snap.geom.VPos;
 import snap.gfx.*;
 import snap.util.ListUtils;
 import snap.util.StringUtils;
@@ -201,7 +202,8 @@ public class AppPaneToolBar extends ViewOwner {
         _fileTabsBox.setPadding(4, 0, 0, 4);
         _fileTabsBox.setAlign(HPos.LEFT);
         _fileTabsBox.setBounds(0, 45, uin.getWidth() - 10, 24);
-        _fileTabsBox.setAutosizing("-~-,~--");
+        _fileTabsBox.setGrowWidth(true);
+        _fileTabsBox.setLeanY(VPos.BOTTOM);
         uin.addChild(_fileTabsBox);
         buildFileTabs();
 
@@ -211,7 +213,8 @@ public class AppPaneToolBar extends ViewOwner {
         ebtn.setImage(SIDEBAR_EXPAND);
         ebtn.setShowArea(false);
         ebtn.setBounds(uin.getWidth() - 20, uin.getHeight() - 20, 16, 16);
-        ebtn.setAutosizing("~--,~--");
+        ebtn.setLeanX(HPos.RIGHT);
+        ebtn.setLeanY(VPos.BOTTOM);
         uin.addChild(ebtn);
 
         // Set min height and return
