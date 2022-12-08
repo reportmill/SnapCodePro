@@ -31,7 +31,7 @@ public class App {
     {
         // Set App Prefs class
         Prefs prefs = Prefs.getPrefsForName("SnapCodePro");
-        Prefs.setPrefsDefault(prefs);
+        Prefs.setDefaultPrefs(prefs);
 
         // Install Exception reporter
         ExceptionReporter er = new ExceptionReporter("SnapCode");
@@ -58,7 +58,7 @@ public class App {
     private static void quitAppImpl()
     {
         if (AppPane.getOpenAppPane() != null) AppPane.getOpenAppPane().hide();
-        Prefs.get().flush();
+        Prefs.getDefaultPrefs().flush();
         System.exit(0);
     }
 

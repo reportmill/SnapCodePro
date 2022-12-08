@@ -514,7 +514,7 @@ public class AppPane extends ViewOwner {
         if (anEvent.isWinClose()) {
             hide();
             runLater(() -> {
-                Prefs.get().flush();
+                Prefs.getDefaultPrefs().flush();
                 WelcomePanel.getShared().showPanel();
             });
         }

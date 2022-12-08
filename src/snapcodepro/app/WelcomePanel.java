@@ -55,7 +55,7 @@ public class WelcomePanel extends ViewOwner {
 
         // Write current list of sites, flush prefs
         writeSites();
-        Prefs.get().flush();
+        Prefs.getDefaultPrefs().flush();
     }
 
     /**
@@ -460,12 +460,12 @@ public class WelcomePanel extends ViewOwner {
     {
         DialogBox dbox = new DialogBox("Open File Viewer");
         dbox.setQuestionMessage("Enter path:");
-        String path = Prefs.get().getString("SnapFileViewerPath", System.getProperty("user.home"));
+        String path = Prefs.getDefaultPrefs().getString("SnapFileViewerPath", System.getProperty("user.home"));
         path = dbox.showInputDialog(getUI(), path);
         if (path == null) return;
         WebURL url = WebURL.getURL(path);
         if (url == null || url.getFile() == null) return;
-        Prefs.get().setValue("SnapFileViewerPath", path);
+        Prefs.getDefaultPrefs().setValue("SnapFileViewerPath", path);
         AppPane apane = new AppPane();
         WebSite site = url.getAsSite();
         apane.addSite(site);
