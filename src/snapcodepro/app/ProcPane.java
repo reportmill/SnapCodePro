@@ -3,7 +3,6 @@ import javakit.ide.JavaTextArea;
 import snap.gfx.Image;
 import snap.util.ListUtils;
 import snap.view.*;
-import snap.viewx.BindingViewOwner;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
@@ -14,7 +13,7 @@ import java.util.List;
 /**
  * The ProcPane manages run/debug processes for AppPane.
  */
-public class ProcPane extends BindingViewOwner implements RunApp.AppListener {
+public class ProcPane extends ViewOwner implements RunApp.AppListener {
 
     // The AppPane
     AppPane _appPane;
@@ -466,6 +465,16 @@ public class ProcPane extends BindingViewOwner implements RunApp.AppListener {
      */
     protected void resetUI()
     {
+        boolean paused = isPaused();
+        boolean pausable = isPausable();
+        setViewEnabled("ResumeButton", paused);
+        setViewEnabled("SuspendButton", pausable);
+        setViewEnabled("TerminateButton", !isTerminated());
+        setViewEnabled("StepIntoButton", paused);
+        setViewEnabled("StepOverButton", paused);
+        setViewEnabled("StepReturnButton", paused);
+        setViewEnabled("RunToLineButton", paused);
+
         // Reset items, auto expand threads
         List<RunApp> apps = getProcs();
         _procTree.setItems(apps);

@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<VBox Padding="3,0,0,0" FillWidth="true">
+<ColView Padding="3,0,0,0" FillWidth="true">
   <font name="Arial" size="12" />
-  <HBox Padding="0,12,0,4">
+  <RowView Padding="0,12,0,4">
     <Label Name="NameLabel" text="Run Console">
       <font name="Arial" size="13" />
-      <binding aspect="Text" key="ProcPane.SelProc.Name+&quot; Console&quot;" />
     </Label>
     <Button Name="ClearButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" image="Clear.png" ShowBorder="false" />
-    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false">
-      <binding aspect="Enabled" key="!ProcPane.SelApp.Terminated" />
-    </Button>
-  </HBox>
+    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false" />
+  </RowView>
   <ScrollView GrowHeight="true">
     <View Name="OutputText" Class="snapcodepro.app.RunConsole$RCTextView" />
   </ScrollView>
-</VBox>
+</ColView>

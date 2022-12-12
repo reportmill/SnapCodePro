@@ -1,5 +1,5 @@
 package snapcodepro.app;
-import snap.viewx.BindingViewOwner;
+import snap.view.ViewOwner;
 import snapcodepro.debug.RunApp;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -14,7 +14,7 @@ import snap.web.WebFile;
 /**
  * A panel to run a process.
  */
-public class RunConsole extends BindingViewOwner {
+public class RunConsole extends ViewOwner {
 
     // The AppPane
     AppPane _appPane;
@@ -179,6 +179,18 @@ public class RunConsole extends BindingViewOwner {
         _textView = getView("OutputText", RCTextView.class);
         _textView._runConsole = this;
         _textView.setFont(defaultFont);
+    }
+
+    /**
+     * Reset UI.
+     */
+    @Override
+    protected void resetUI()
+    {
+        RunApp selApp = getProcPane().getSelApp();
+        String labelText = selApp.getName() + " Console";
+        setViewText("NameLabel", labelText);
+        setViewEnabled("TerminateButton", !selApp.isTerminated());
     }
 
     /**

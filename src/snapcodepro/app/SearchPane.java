@@ -9,7 +9,6 @@ import javakit.resolver.JavaParameterizedType;
 import javakit.ide.NodeMatcher;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
-import snap.viewx.BindingViewOwner;
 import snapcodepro.project.JavaData;
 import snapcodepro.project.Project;
 import snap.util.ArrayUtils;
@@ -17,7 +16,6 @@ import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.web.WebFile;
 import snap.web.WebSite;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +23,7 @@ import java.util.Set;
 /**
  * A custom class.
  */
-public class SearchPane extends BindingViewOwner {
+public class SearchPane extends ViewOwner {
 
     // The app pane
     AppPane _appPane;
@@ -55,10 +53,7 @@ public class SearchPane extends BindingViewOwner {
     /**
      * Returns the current search.
      */
-    public Search getSearch()
-    {
-        return _search;
-    }
+    public Search getSearch()  { return _search; }
 
     /**
      * Returns the current search results.
@@ -100,6 +95,8 @@ public class SearchPane extends BindingViewOwner {
      */
     public void resetUI()
     {
+        setViewEnabled("ClearButton", _search != null);
+
         String results = "";
         if (_search != null) {
             int hits = 0;
@@ -108,6 +105,9 @@ public class SearchPane extends BindingViewOwner {
             results = String.format("'%s' - %d %s", _search._string, hits, typ);
         }
         setViewValue("SearchResultsText", results);
+
+        setViewItems("ResultsList", getResults());
+        setViewSelItem("ResultsList", getSelectedResult());
     }
 
     /**

@@ -1,7 +1,7 @@
 package snapcodepro.app;
 import javakit.ide.Breakpoint;
 import javakit.ide.Breakpoints;
-import snap.viewx.BindingViewOwner;
+import snap.view.ViewOwner;
 import snapcodepro.project.Project;
 import snap.view.ListView;
 import snap.view.ViewEvent;
@@ -9,7 +9,7 @@ import snap.view.ViewEvent;
 /**
  * A custom class.
  */
-public class BreakpointsPanel extends BindingViewOwner {
+public class BreakpointsPanel extends ViewOwner {
 
     // The AppPane
     AppPane _appPane;
@@ -69,6 +69,17 @@ public class BreakpointsPanel extends BindingViewOwner {
         enableEvents(_bpList, MouseRelease);
         _bpList.setRowHeight(24);
         getBreakpoints().addPropChangeListener(pce -> resetLater());
+    }
+
+    /**
+     * Reset UI.
+     */
+    @Override
+    protected void resetUI()
+    {
+        setViewEnabled("DeleteButton", getSelectedBreakpoint() != null);
+
+        setViewItems("BreakpointList", getBreakpoints());
     }
 
     /**

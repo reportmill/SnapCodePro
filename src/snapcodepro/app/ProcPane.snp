@@ -1,33 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<VBox PrefWidth="200" PrefHeight="180" Padding="0,0,2,0" FillWidth="true">
-  <HBox>
+<ColView PrefWidth="200" PrefHeight="180" Padding="0,0,2,0" FillWidth="true">
+  <RowView>
     <font name="Arial Bold" size="12" />
     <Label name="ProcessesLabel" text=" Processes" PrefWidth="160" />
     <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" image="Debug.gif" ShowBorder="false" />
-  </HBox>
-  <HBox Padding="0,0,2,8" Spacing="4">
-    <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" image="Resume.gif" ShowBorder="false">
-      <binding aspect="Enabled" key="Paused" />
-    </Button>
-    <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" image="Suspend.gif" ShowBorder="false">
-      <binding aspect="Enabled" key="Pausable" />
-    </Button>
-    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false">
-      <binding aspect="Enabled" key="!Terminated" />
-    </Button>
+  </RowView>
+  <RowView Padding="0,0,2,8" Spacing="4">
+    <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" image="Resume.gif" ShowBorder="false" />
+    <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" image="Suspend.gif" ShowBorder="false" />
+    <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false" />
     <Separator PrefWidth="8" PrefHeight="24" Vertical="true" />
-    <Button Name="StepIntoButton" PrefWidth="24" PrefHeight="24" image="StepInto.gif" ShowBorder="false">
-      <binding aspect="Enabled" key="Paused" />
-    </Button>
-    <Button Name="StepOverButton" PrefWidth="24" PrefHeight="24" image="StepOver.gif" ShowBorder="false">
-      <binding aspect="Enabled" key="Paused" />
-    </Button>
-    <Button Name="StepReturnButton" PrefWidth="24" PrefHeight="24" image="StepReturn.gif" ShowBorder="false">
-      <binding aspect="Enabled" key="Paused" />
-    </Button>
-    <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" image="RunToLine.png" ShowBorder="false">
-      <binding aspect="Enabled" key="Paused" />
-    </Button>
-  </HBox>
+    <Button Name="StepIntoButton" PrefWidth="24" PrefHeight="24" image="StepInto.gif" ShowBorder="false" />
+    <Button Name="StepOverButton" PrefWidth="24" PrefHeight="24" image="StepOver.gif" ShowBorder="false" />
+    <Button Name="StepReturnButton" PrefWidth="24" PrefHeight="24" image="StepReturn.gif" ShowBorder="false" />
+    <Button Name="RunToLineButton" PrefWidth="24" PrefHeight="24" image="RunToLine.png" ShowBorder="false" />
+  </RowView>
   <TreeView Name="ProcTree" GrowHeight="true" />
-</VBox>
+</ColView>

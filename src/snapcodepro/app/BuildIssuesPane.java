@@ -3,14 +3,13 @@ import javakit.ide.BuildIssue;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
 import snap.view.*;
-import snap.viewx.BindingViewOwner;
 import snapcodepro.project.Project;
 import snap.web.WebFile;
 
 /**
  * A pane/panel to show current build issues.
  */
-public class BuildIssuesPane extends BindingViewOwner {
+public class BuildIssuesPane extends ViewOwner {
 
     // The AppPane
     AppPane _appPane;
@@ -81,6 +80,18 @@ public class BuildIssuesPane extends BindingViewOwner {
         ListView<BuildIssue> errorsList = getView("ErrorsList", ListView.class);
         errorsList.setCellConfigure(this::configureErrorsCell);
         errorsList.setRowHeight(24);
+    }
+
+    /**
+     * Reset UI.
+     */
+    @Override
+    protected void resetUI()
+    {
+        setViewText("BuildStatusLabel", getBuildStatusText());
+
+        setViewItems("ErrorsList", getIssues());
+        setViewSelItem("ErrorsList", getSelectedIssue());
     }
 
     /**

@@ -4,12 +4,8 @@
     <font name="Arial" size="12" />
   </Label>
   <Button Name="SearchButton" x="482" y="4" width="75" height="22" LeanX="RIGHT" text="Search" />
-  <Button Name="ClearButton" x="561" y="4" width="75" height="22" LeanX="RIGHT" text="Clear">
-    <binding aspect="Enabled" key="Search" />
-  </Button>
+  <Button Name="ClearButton" x="561" y="4" width="75" height="22" LeanX="RIGHT" text="Clear" />
   <ListView Name="ResultsList" x="2" y="30" width="636" height="448" GrowWidth="true" GrowHeight="true">
     <font name="Arial" size="12" />
-    <binding aspect="Items" key="Results" />
-    <binding aspect="SelItem" key="SelectedResult" />
   </ListView>
 </SpringView>
