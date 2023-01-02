@@ -70,7 +70,7 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
         // Add child UI
         if (isBlock()) {
             ColView vbox = getVBox();
-            for (JNodeView child : getJNodeViews())
+            for (JNodeView<?> child : getJNodeViews())
                 vbox.addChild(child);
             vbox.setMinHeight(vbox.getChildCount() == 0 ? 30 : -1);
         }
@@ -92,13 +92,13 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
      */
     public boolean isBlock()
     {
-        return getJNode().isBlock();
+        return getJNode() instanceof WithBlockStmt;
     }
 
     /**
      * Returns the parent.
      */
-    public JNodeView getJNodeViewParent()
+    public JNodeView<?> getJNodeViewParent()
     {
         return getParent(JNodeView.class);
     }
@@ -114,7 +114,7 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     /**
      * Returns the individual child.
      */
-    public JNodeView getJNodeView(int anIndex)
+    public JNodeView<?> getJNodeView(int anIndex)
     {
         return _jnodeViews.get(anIndex);
     }
@@ -122,7 +122,7 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
     /**
      * Returns the individual child.
      */
-    public JNodeView getJNodeViewLast()
+    public JNodeView<?> getJNodeViewLast()
     {
         int cc = getJNodeViewCount();
         return cc > 0 ? _jnodeViews.get(cc - 1) : null;
@@ -141,15 +141,24 @@ public class JNodeView<JNODE extends JNode> extends JNodeViewBase {
      */
     protected List<JNodeView> createJNodeViews()
     {
-        if (!isBlock()) return Collections.EMPTY_LIST;
+        JNode jnode = getJNode();
+        JStmtBlock blockStmt = jnode instanceof WithBlockStmt ? ((WithBlockStmt) jnode).getBlock() : null;
+        if (blockStmt == null)
+            return Collections.EMPTY_LIST;
 
-        List<JNodeView> children = new ArrayList();
-        JNode node = getJNode();
-        if (node.getBlock() != null) for (JStmt stmt : node.getBlock().getStatements()) {
-            JNodeView mcnp = createView(stmt);
-            if (mcnp == null) continue;
-            children.add(mcnp);
+        // Get statements
+        List<JStmt> statements = blockStmt.getStatements();
+        List<JNodeView> children = new ArrayList<>();
+
+        // Iterate over statements and create views
+        for (JStmt stmt : statements) {
+            JNodeView stmtView = createView(stmt);
+            if (stmtView == null)
+                continue;
+            children.add(stmtView);
         }
+
+        // Return children
         return children;
     }
 
