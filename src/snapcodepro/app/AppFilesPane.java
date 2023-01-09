@@ -820,7 +820,7 @@ public class AppFilesPane extends ViewOwner {
      */
     protected void windowFocusChanged()
     {
-        if (getWindow().isFocused()) {
+        if (_appPane.getWindow().isFocused()) {
             for (AppFile file : getRootFiles())
                 checkForExternalMods(file.getFile());
         }
