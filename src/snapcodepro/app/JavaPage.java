@@ -1,15 +1,10 @@
 package snapcodepro.app;
 
+import javakit.ide.*;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
-import javakit.ide.NodeMatcher;
-import javakit.ide.Breakpoints;
-import javakit.ide.BuildIssue;
-import javakit.ide.BuildIssues;
 import javakit.parse.JavaTextDoc;
-import javakit.ide.JavaTextArea;
-import javakit.ide.JavaTextPane;
 import javakit.resolver.Resolver;
 import snapcodepro.project.JavaData;
 import snapcodepro.project.Project;
@@ -361,7 +356,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * A JavaTextPane for a JavaPage to implement symbol features and such.
      */
-    public class JPJavaTextPane extends JavaTextPane {
+    public class JPJavaTextPane extends JavaTextPaneX {
 
         /**
          * Override to set selection using browser.
