@@ -1,6 +1,6 @@
 package snapcodepro.app;
 
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.FileUtils;
@@ -219,9 +219,9 @@ public class AppPane extends ViewOwner {
         if (_sites.contains(aSite)) return;
 
         // Create project for site
-        Project proj = Project.getProjectForSite(aSite);
+        ProjectX proj = ProjectX.getProjectForSite(aSite);
         if (proj == null)
-            proj = new Project(aSite);
+            proj = new ProjectX(aSite);
 
         // Add site
         _sites.add(getSiteCount(), aSite);  // Add site
@@ -229,7 +229,7 @@ public class AppPane extends ViewOwner {
         aSite.addFileChangeListener(_siteFileLsnr);
 
         // Add dependent sites
-        for (Project p : proj.getProjects())
+        for (ProjectX p : proj.getProjects())
             addSite(p.getSite());
 
         // Clear root files and Reset UI
@@ -360,7 +360,7 @@ public class AppPane extends ViewOwner {
     public WebFile getBuildDir()
     {
         WebSite site = getSelectedSite();
-        Project proj = site != null ? Project.getProjectForSite(site) : null;
+        ProjectX proj = site != null ? ProjectX.getProjectForSite(site) : null;
         return proj != null ? proj.getBuildDir() : null;
     }
 

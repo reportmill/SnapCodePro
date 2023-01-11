@@ -1,6 +1,6 @@
 package snapcodepro.app;
 
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.util.FilePathUtils;
 import snap.web.WebURL;
 
@@ -154,7 +154,7 @@ public class JarBuilder {
     /**
      * Builds a Jar file for given project.
      */
-    public static void build(Project aProj) throws IOException
+    public static void build(ProjectX aProj) throws IOException
     {
         // Get build path and jar path
         String buildPath = aProj.getProjectConfig().getBuildPathAbsolute();

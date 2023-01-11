@@ -3,7 +3,7 @@ package snapcodepro.app;
 import javakit.ide.Breakpoint;
 import snapcodepro.debug.DebugApp;
 import snapcodepro.debug.RunApp;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.util.FilePathUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
@@ -27,7 +27,7 @@ public class AppLauncher {
     WebURL _url;
 
     // The Project
-    Project _proj;
+    ProjectX _proj;
 
     // The last executed file
     static WebFile _lastRunFile;
@@ -76,7 +76,7 @@ public class AppLauncher {
         WebFile runFile = aFile;
 
         // Try to replace file with project file
-        _proj = Project.getProjectForFile(runFile);
+        _proj = ProjectX.getProjectForFile(runFile);
         if (_proj == null) {
             System.err.println("AppLauncher: not project file: " + runFile);
             return;

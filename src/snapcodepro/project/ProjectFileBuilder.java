@@ -46,7 +46,7 @@ public interface ProjectFileBuilder {
     class DefaultBuilder implements ProjectFileBuilder {
 
         // The site we work for
-        Project _proj;
+        ProjectX _proj;
 
         // A list of files to be built
         List<WebFile> _buildFiles = new ArrayList();
@@ -54,7 +54,7 @@ public interface ProjectFileBuilder {
         /**
          * Creates a new DefaultFileBuilder for given Project.
          */
-        public DefaultBuilder(Project aProject)
+        public DefaultBuilder(ProjectX aProject)
         {
             _proj = aProject;
         }

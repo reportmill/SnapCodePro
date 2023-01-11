@@ -21,7 +21,7 @@ public class JavaData {
     private WebFile  _file;
 
     // The Project that owns this file
-    private Project  _proj;
+    private ProjectX _proj;
 
     // The set of declarations in this JavaFile
     private Set<JavaDecl>  _decls = new HashSet<>();
@@ -49,13 +49,13 @@ public class JavaData {
     /**
      * Returns the project for this JavaFile.
      */
-    public Project getProject()
+    public ProjectX getProject()
     {
         // If already set, just return
         if (_proj != null) return _proj;
 
         // Get, set, return
-        Project proj = Project.getProjectForFile(_file);
+        ProjectX proj = ProjectX.getProjectForFile(_file);
         return _proj = proj;
     }
 
@@ -64,7 +64,7 @@ public class JavaData {
      */
     public WebFile[] getClassFiles()
     {
-        Project proj = getProject();
+        ProjectX proj = getProject();
         WebFile[] classFiles = proj.getClassFilesForJavaFile(_file);
         return classFiles;
     }
@@ -78,7 +78,7 @@ public class JavaData {
         if (_decls.size() > 0) return _decls;
 
         // Get Resolver
-        Project proj = getProject();
+        ProjectX proj = getProject();
         Resolver resolver = proj.getResolver();
 
         // Iterate over JavaFile.Class files
@@ -141,7 +141,7 @@ public class JavaData {
         // Get Java file, project, RootProject, ProjectSet and class files
 
         // Get Project and Resolver
-        Project proj = getProject();
+        ProjectX proj = getProject();
         Resolver resolver = proj.getResolver();
 
         // Cache JFile
@@ -208,7 +208,7 @@ public class JavaData {
         _refs = nrefs;
 
         // Iterate over added refs and add dependencies
-        Project rootProj = proj.getRootProject();
+        ProjectX rootProj = proj.getRootProject();
         ProjectSet projSet = rootProj.getProjectSet();
         for (JavaDecl ref : refsAdded) {
 
@@ -286,7 +286,7 @@ public class JavaData {
 
         // Set SourceFile and Resolver
         jfile.setSourceFile(_file);
-        Project proj = getProject();
+        ProjectX proj = getProject();
         Resolver resolver = proj.getResolver();
         jfile.setResolver(resolver);
 
@@ -320,7 +320,7 @@ public class JavaData {
         // Get JFile
         JFile jfile = node.getCustomNode(JFile.class);
         jfile.setSourceFile(_file);
-        Project proj = getProject();
+        ProjectX proj = getProject();
         Resolver resolver = proj.getResolver();
         jfile.setResolver(resolver);
 

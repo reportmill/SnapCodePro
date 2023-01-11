@@ -4,7 +4,7 @@ import snap.geom.Polygon;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Image;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
@@ -684,7 +684,7 @@ public class AppFilesPane extends ViewOwner {
         if (sfile.getSite() != site) sfile = site.getRootDir();
         WebFile sdir = sfile.isDir() ? sfile : sfile.getParent();
         if (extension.equals(".java") && sdir == site.getRootDir())
-            sdir = Project.getProjectForSite(site).getSourceDir();
+            sdir = ProjectX.getProjectForSite(site).getSourceDir();
 
         // Get suggested "Untitled.xxx" path for AppPane.SelectedFile and extension
         String path = sdir.getDirPath() + "Untitled" + extension;

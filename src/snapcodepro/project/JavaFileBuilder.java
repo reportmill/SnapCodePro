@@ -16,7 +16,7 @@ import java.util.*;
 public class JavaFileBuilder implements ProjectFileBuilder {
 
     // The project we work for
-    Project _proj;
+    ProjectX _proj;
 
     // A list of files to be compiled
     Set<WebFile> _buildFiles = Collections.synchronizedSet(new HashSet());
@@ -33,7 +33,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
     /**
      * Creates a new JavaFileBuilder for given Project.
      */
-    public JavaFileBuilder(Project aProject)
+    public JavaFileBuilder(ProjectX aProject)
     {
         _proj = aProject;
     }
@@ -170,7 +170,7 @@ public class JavaFileBuilder implements ProjectFileBuilder {
                 // Iterate over Java files dependent on loop JavaFile and mark for update
                 Set<WebFile> updateFiles = jdata.getDependents();
                 for (WebFile ufile : updateFiles) {
-                    Project proj = Project.getProjectForFile(ufile);
+                    ProjectX proj = ProjectX.getProjectForFile(ufile);
                     if (proj == _proj) {
                         if (!compiledFiles.contains(ufile) && !ListUtils.containsId(files, ufile))
                             files.add(ufile);

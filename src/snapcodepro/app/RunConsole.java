@@ -3,7 +3,7 @@ import snap.view.ViewOwner;
 import snapcodepro.debug.RunApp;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.text.TextLink;
 import snap.text.TextStyle;
 import snap.util.SnapUtils;
@@ -155,7 +155,7 @@ public class RunConsole extends ViewOwner {
             return "http://reportmill.com/jars/8u05/src.zip!" + aPath;
         if (aPath.startsWith("/javafx/"))
             return "http://reportmill.com/jars/8u05/javafx-src.zip!" + aPath;
-        Project proj = Project.getProjectForSite(_appPane.getRootSite());
+        ProjectX proj = ProjectX.getProjectForSite(_appPane.getRootSite());
         if (proj == null) return aPath;
         WebFile file = proj.getProjectSet().getSourceFile(aPath);
         return file != null ? file.getURL().getString() : aPath;

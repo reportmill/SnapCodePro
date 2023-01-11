@@ -23,7 +23,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     SnapCompiler _compiler;
 
     // The project
-    Project _proj;
+    ProjectX _proj;
 
     // A map of previously accessed SnapFileObjects for paths
     Map<String, SnapFileJFO> _jfos = new HashMap();

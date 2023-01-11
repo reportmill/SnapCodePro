@@ -18,7 +18,7 @@ import java.util.*;
 public class SnapCompiler implements DiagnosticListener {
 
     // The Project
-    Project _proj;
+    ProjectX _proj;
 
     // The shared compiler
     JavaCompiler _compiler;
@@ -41,7 +41,7 @@ public class SnapCompiler implements DiagnosticListener {
     /**
      * Creates a new compiler for given site.
      */
-    public SnapCompiler(Project aProject)
+    public SnapCompiler(ProjectX aProject)
     {
         _proj = aProject;
     }
@@ -49,7 +49,7 @@ public class SnapCompiler implements DiagnosticListener {
     /**
      * Returns the Project.
      */
-    public Project getProject()
+    public ProjectX getProject()
     {
         return _proj;
     }

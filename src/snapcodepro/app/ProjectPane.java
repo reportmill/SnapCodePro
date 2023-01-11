@@ -7,7 +7,7 @@ import javakit.ide.Breakpoints;
 import javakit.ide.BuildIssue;
 import snapcodepro.debug.RunApp;
 import snapcodepro.project.JavaData;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snapcodepro.project.ProjectSet;
 import snapcodepro.project.VersionControl;
 import snap.util.ClientUtils;
@@ -37,7 +37,7 @@ public class ProjectPane extends BindingViewOwner {
     WebSite _site;
 
     // The project
-    Project _proj;
+    ProjectX _proj;
 
     // The project set
     ProjectSet _projSet;
@@ -66,9 +66,9 @@ public class ProjectPane extends BindingViewOwner {
     public ProjectPane(WebSite aSite)
     {
         _site = aSite;
-        _proj = Project.getProjectForSite(_site);
+        _proj = ProjectX.getProjectForSite(_site);
         if (_proj == null)
-            _proj = new Project(_site);
+            _proj = new ProjectX(_site);
         _projSet = _proj.getProjectSet();
     }
 
@@ -126,7 +126,7 @@ public class ProjectPane extends BindingViewOwner {
     /**
      * Returns the project.
      */
-    public Project getProject()
+    public ProjectX getProject()
     {
         return _proj;
     }
@@ -252,7 +252,7 @@ public class ProjectPane extends BindingViewOwner {
 
                 // Add new project site to app pane and build
                 _appPane.addSite(site);
-                Project proj = Project.getProjectForSite(site);
+                ProjectX proj = ProjectX.getProjectForSite(site);
                 proj.addBuildFilesAll();
                 buildProjectLater(false);
             }
@@ -279,7 +279,7 @@ public class ProjectPane extends BindingViewOwner {
         }
 
         // Get named project
-        Project proj = _proj.getProjectSet().getProject(aName);
+        ProjectX proj = _proj.getProjectSet().getProject(aName);
         if (proj == null) {
             View view = isUISet() && getUI().isShowing() ? getUI() : getAppPane().getUI();
             DialogBox.showWarningDialog(view, "Error Removing Project", "Project not found");
@@ -313,7 +313,7 @@ public class ProjectPane extends BindingViewOwner {
     public void buildProjectLater(boolean doAddFiles)
     {
         // If not root ProjectPane, forward on to it
-        Project rootProj = _proj.getRootProject();
+        ProjectX rootProj = _proj.getRootProject();
         ProjectPane rootProjPane = _proj != rootProj ? ProjectPane.get(rootProj.getSite()) : this;
         if (this != rootProjPane) {
             rootProjPane.buildProjectLater(doAddFiles);
@@ -640,13 +640,13 @@ public class ProjectPane extends BindingViewOwner {
         int total = 0;
 
         // Get projects
-        Project proj = getProject();
-        List<Project> projs = new ArrayList();
+        ProjectX proj = getProject();
+        List<ProjectX> projs = new ArrayList();
         projs.add(proj);
         Collections.addAll(projs, proj.getProjects());
 
         // Iterate over projects and add: ProjName: xxx
-        for (Project prj : projs) {
+        for (ProjectX prj : projs) {
             int loc = getLinesOfCode(prj.getSourceDir());
             total += loc;
             sb.append(prj.getName()).append(": ").append(fmt.format(loc)).append('\n');

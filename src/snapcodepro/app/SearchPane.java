@@ -10,7 +10,7 @@ import javakit.ide.NodeMatcher;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
 import snapcodepro.project.JavaData;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
@@ -45,9 +45,9 @@ public class SearchPane extends ViewOwner {
     /**
      * Returns the root project.
      */
-    public Project getRootProject()
+    public ProjectX getRootProject()
     {
-        return Project.getProjectForSite(_appPane.getRootSite());
+        return ProjectX.getProjectForSite(_appPane.getRootSite());
     }
 
     /**

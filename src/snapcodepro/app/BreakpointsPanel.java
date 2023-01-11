@@ -2,7 +2,7 @@ package snapcodepro.app;
 import javakit.ide.Breakpoint;
 import javakit.ide.Breakpoints;
 import snap.view.ViewOwner;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.view.ListView;
 import snap.view.ViewEvent;
 
@@ -15,7 +15,7 @@ public class BreakpointsPanel extends ViewOwner {
     AppPane _appPane;
 
     // The Project
-    Project _proj;
+    ProjectX _proj;
 
     // The breakpoints list
     ListView<Breakpoint> _bpList;
@@ -39,9 +39,9 @@ public class BreakpointsPanel extends ViewOwner {
     /**
      * Returns the project.
      */
-    public Project getProject()
+    public ProjectX getProject()
     {
-        return _proj != null ? _proj : (_proj = Project.getProjectForSite(_appPane.getRootSite()));
+        return _proj != null ? _proj : (_proj = ProjectX.getProjectForSite(_appPane.getRootSite()));
     }
 
     /**

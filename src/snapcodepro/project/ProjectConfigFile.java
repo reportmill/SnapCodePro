@@ -14,7 +14,7 @@ import java.util.List;
 public class ProjectConfigFile {
 
     // The Project
-    private Project  _proj;
+    private ProjectX _proj;
 
     // The ProjectConfig
     private ProjectConfig  _projConfig;
@@ -28,7 +28,7 @@ public class ProjectConfigFile {
     /**
      * Constructor.
      */
-    public ProjectConfigFile(Project aProject)
+    public ProjectConfigFile(ProjectX aProject)
     {
         _proj = aProject;
 
@@ -362,7 +362,7 @@ public class ProjectConfigFile {
     /**
      * Creates the ClassPath file for given project.
      */
-    public static WebFile createFile(Project aProj)
+    public static WebFile createFile(ProjectX aProj)
     {
         // Get default text
         StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");

@@ -3,7 +3,7 @@ import javakit.ide.BuildIssue;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
 import snap.view.*;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.web.WebFile;
 
 /**
@@ -15,7 +15,7 @@ public class BuildIssuesPane extends ViewOwner {
     AppPane _appPane;
 
     // The project
-    Project _proj;
+    ProjectX _proj;
 
     // The selected issue
     BuildIssue _selectedIssue;
@@ -31,9 +31,9 @@ public class BuildIssuesPane extends ViewOwner {
     /**
      * Returns the selected project.
      */
-    public Project getProject()
+    public ProjectX getProject()
     {
-        return _proj != null ? _proj : (_proj = Project.getProjectForSite(_appPane.getRootSite()));
+        return _proj != null ? _proj : (_proj = ProjectX.getProjectForSite(_appPane.getRootSite()));
     }
 
     /**
@@ -65,7 +65,7 @@ public class BuildIssuesPane extends ViewOwner {
      */
     public String getBuildStatusText()
     {
-        Project proj = getProject();
+        ProjectX proj = getProject();
         int ec = proj.getBuildIssues().getErrorCount(), wc = proj.getBuildIssues().getWarningCount();
         String error = ec == 1 ? "error" : "errors", warning = wc == 1 ? "warning" : "warnings";
         return String.format("%d %s, %d %s", ec, error, wc, warning);

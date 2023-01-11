@@ -20,7 +20,7 @@ public class ClassData {
     private WebFile  _file;
 
     // The project
-    private Project  _proj;
+    private ProjectX _proj;
 
     // The Resolver
     private Resolver  _resolver;
@@ -34,7 +34,7 @@ public class ClassData {
     public ClassData(WebFile aFile)
     {
         _file = aFile;
-        _proj = Project.getProjectForFile(_file);
+        _proj = ProjectX.getProjectForFile(_file);
         _resolver = _proj.getResolver();
     }
 

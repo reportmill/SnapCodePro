@@ -7,7 +7,7 @@ import javakit.resolver.JavaMember;
 import javakit.parse.JavaTextDoc;
 import javakit.resolver.Resolver;
 import snapcodepro.project.JavaData;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snap.text.TextBoxLine;
 import snap.text.TextDoc;
 import snap.util.SnapUtils;
@@ -80,7 +80,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         JavaTextDoc javaTextDoc = JavaTextDoc.newFromSource(javaFile);
 
         // Get/set Resolver
-        Project proj = Project.getProjectForFile(javaFile);
+        ProjectX proj = ProjectX.getProjectForFile(javaFile);
         Resolver resolver = proj.getResolver();
         javaTextDoc.setResolver(resolver);
 
@@ -102,7 +102,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         JavaTextDoc javaTextDoc = JavaTextDoc.newFromSource(javaFile);
 
         // Get/set Resolver
-        Project proj = Project.getProjectForFile(javaFile);
+        ProjectX proj = ProjectX.getProjectForFile(javaFile);
         Resolver resolver = proj.getResolver();
         javaTextDoc.setResolver(resolver);
 
@@ -197,7 +197,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         WebFile file = super.createNewFile(aPath);
 
         // Get project
-        Project proj = Project.getProjectForFile(file);
+        ProjectX proj = ProjectX.getProjectForFile(file);
 
         // Append package declaration
         StringBuffer sb = new StringBuffer();
@@ -266,7 +266,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         }
 
         // Get project
-        Project proj = Project.getProjectForSite(getSite());
+        ProjectX proj = ProjectX.getProjectForSite(getSite());
         if (proj == null) return;
 
         // Get source file
@@ -446,11 +446,11 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         /**
          * Returns the project.
          */
-        public Project getProject()
+        public ProjectX getProject()
         {
             TextDoc textDoc = getTextDoc();
             WebFile file = textDoc.getSourceFile();
-            return file != null ? Project.getProjectForFile(file) : null;
+            return file != null ? ProjectX.getProjectForFile(file) : null;
         }
 
         /**
@@ -461,9 +461,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
             TextDoc textDoc = getTextDoc();
             WebFile file = textDoc.getSourceFile();
             if (file == null) return new BuildIssue[0];
-            Project proj = getProject();
+            ProjectX proj = getProject();
             if (proj == null) return new BuildIssue[0];
-            Project rootProj = proj.getRootProject();
+            ProjectX rootProj = proj.getRootProject();
             BuildIssues buildIssues = rootProj.getBuildIssues();
             BuildIssue[] buildIssueArray = buildIssues.getIssues(file);
             return buildIssueArray; // Was getRootProject().getBuildIssues().getIssues(getSourceFile()) JK
@@ -474,9 +474,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
          */
         private Breakpoints getProjBreakpoints()
         {
-            Project proj = getProject();
+            ProjectX proj = getProject();
             if (proj == null) return null;
-            Project rootProj = proj.getRootProject();
+            ProjectX rootProj = proj.getRootProject();
             Breakpoints breakpoints = rootProj.getBreakpoints();
             return breakpoints; // Was getRootProject().getBreakPoints() JK
         }

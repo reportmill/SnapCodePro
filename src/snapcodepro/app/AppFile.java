@@ -3,7 +3,7 @@ import javakit.ide.BuildIssue;
 import javakit.ide.JavaTextUtils;
 import snap.geom.Pos;
 import snap.gfx.Image;
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snapcodepro.project.VersionControl;
 import snap.view.*;
 import snap.web.WebFile;
@@ -29,7 +29,7 @@ public class AppFile implements Comparable<AppFile> {
     FileType _type = FileType.PLAIN;
 
     // The project
-    Project _proj;
+    ProjectX _proj;
 
     // The WebFile ProjectFileInfo
     VersionControl _vc;
@@ -52,7 +52,7 @@ public class AppFile implements Comparable<AppFile> {
     {
         _parent = aPar;
         _file = aFile;
-        _proj = Project.getProjectForSite(aFile.getSite());
+        _proj = ProjectX.getProjectForSite(aFile.getSite());
         _vc = VersionControl.get(_file.getSite());
     }
 

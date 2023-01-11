@@ -1,6 +1,6 @@
 package snapcodepro.app;
 
-import snapcodepro.project.Project;
+import snapcodepro.project.ProjectX;
 import snapcodepro.project.VersionControl;
 import snap.util.ClientUtils;
 import snap.util.TaskMonitor;
@@ -254,7 +254,7 @@ public class VcsPane extends ViewOwner {
     protected void checkoutSuccess(boolean oldAutoBuildEnabled)
     {
         getSite().getRootDir().reload();
-        Project proj = Project.getProjectForSite(getSite());
+        ProjectX proj = ProjectX.getProjectForSite(getSite());
         if (proj != null) proj.readSettings();
         _appPane.resetLater(); // Reset UI
         _sitePane.setAutoBuildEnabled(oldAutoBuildEnabled);

@@ -18,10 +18,10 @@ import java.util.Date;
 /**
  * A class to manage build attributes and behavior for a WebSite.
  */
-public class Project extends javakit.ide.Project {
+public class ProjectX extends javakit.ide.Project {
 
     // The project that loaded us
-    protected Project  _parent;
+    protected ProjectX _parent;
 
     // The set of projects this project depends on
     private ProjectSet  _projSet = new ProjectSet(this);
@@ -47,7 +47,7 @@ public class Project extends javakit.ide.Project {
     /**
      * Creates a new Project for WebSite.
      */
-    public Project(WebSite aSite)
+    public ProjectX(WebSite aSite)
     {
         super(aSite);
 
@@ -58,7 +58,7 @@ public class Project extends javakit.ide.Project {
     /**
      * Returns the parent project for this project.
      */
-    public Project getParent()
+    public ProjectX getParent()
     {
         return _parent;
     }
@@ -66,7 +66,7 @@ public class Project extends javakit.ide.Project {
     /**
      * Returns the top most project.
      */
-    public Project getRootProject()
+    public ProjectX getRootProject()
     {
         return _parent != null ? _parent.getRootProject() : this;
     }
@@ -74,7 +74,7 @@ public class Project extends javakit.ide.Project {
     /**
      * Returns the list of projects this project depends on.
      */
-    public Project[] getProjects()
+    public ProjectX[] getProjects()
     {
         return _projSet.getProjects();
     }
@@ -93,7 +93,7 @@ public class Project extends javakit.ide.Project {
     protected ClassLoader createClassLoader()
     {
         // If RootProject, return RootProject.ClassLoader
-        Project rproj = getRootProject();
+        ProjectX rproj = getRootProject();
         if (rproj != this)
             return rproj.createClassLoader();
 
@@ -194,7 +194,7 @@ public class Project extends javakit.ide.Project {
         _resolver = null;
 
         // If parent, forward on
-        Project parent = getParent();
+        ProjectX parent = getParent();
         if (parent != null)
             parent.clearClassLoader();
     }
@@ -451,7 +451,7 @@ public class Project extends javakit.ide.Project {
         removeBuildFile(aFile);
 
         // Remove BuildIssues for file
-        Project rootProj = getRootProject();
+        ProjectX rootProj = getRootProject();
         BuildIssues buildIssues = rootProj.getBuildIssues();
         buildIssues.remove(aFile);
     }
@@ -503,7 +503,7 @@ public class Project extends javakit.ide.Project {
     /**
      * Returns the project for a given site.
      */
-    public static Project getProjectForFile(WebFile aFile)
+    public static ProjectX getProjectForFile(WebFile aFile)
     {
         WebSite fileSite = aFile.getSite();
         return getProjectForSite(fileSite);
@@ -512,9 +512,9 @@ public class Project extends javakit.ide.Project {
     /**
      * Returns the project for a given site.
      */
-    public static synchronized Project getProjectForSite(WebSite aSite)
+    public static synchronized ProjectX getProjectForSite(WebSite aSite)
     {
-        Project proj = (Project) aSite.getProp(Project.class.getSimpleName());
+        ProjectX proj = (ProjectX) aSite.getProp(ProjectX.class.getSimpleName());
         return proj;
     }
 }

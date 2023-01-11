@@ -17,10 +17,10 @@ import java.util.List;
 public class ProjectSet {
 
     // The master project
-    Project _proj;
+    ProjectX _proj;
 
     // The list of projects this project depends on
-    Project[] _projects;
+    ProjectX[] _projects;
 
     // The array of class paths and library paths
     String[] _cpaths, _lpaths;
@@ -28,7 +28,7 @@ public class ProjectSet {
     /**
      * Creates a new ProjectSet for given Project.
      */
-    public ProjectSet(Project aProj)
+    public ProjectSet(ProjectX aProj)
     {
         _proj = aProj;
     }
@@ -36,7 +36,7 @@ public class ProjectSet {
     /**
      * Returns the project.
      */
-    public Project getProject()
+    public ProjectX getProject()
     {
         return _proj;
     }
@@ -44,7 +44,7 @@ public class ProjectSet {
     /**
      * Returns the list of projects this project depends on.
      */
-    public Project[] getProjects()
+    public ProjectX[] getProjects()
     {
         // If already set, just return
         if (_projects != null) return _projects;
@@ -52,7 +52,7 @@ public class ProjectSet {
         // Create list of projects from ClassPath.ProjectPaths
         ProjectConfig projConfig = _proj.getProjectConfig();
         String[] projPaths = projConfig.getProjectPaths();
-        List<Project> projs = new ArrayList<>();
+        List<ProjectX> projs = new ArrayList<>();
 
         // Get parent site
         WebSite projectSite = _proj.getSite();
@@ -66,20 +66,20 @@ public class ProjectSet {
             WebSite projSite = projURL.getAsSite();
 
             // Get Project
-            Project proj = Project.getProjectForSite(projSite);
+            ProjectX proj = ProjectX.getProjectForSite(projSite);
             if (proj == null)
-                proj = new Project(projSite);
+                proj = new ProjectX(projSite);
             proj._parent = _proj;
 
             // Add to list
             ProjectSet childProjectSet = proj.getProjectSet();
-            Project[] childProjects = childProjectSet.getProjects();
+            ProjectX[] childProjects = childProjectSet.getProjects();
             ListUtils.addAllUnique(projs, childProjects);
             ListUtils.addUnique(projs, proj);
         }
 
         // Return list
-        return _projects = projs.toArray(new Project[0]);
+        return _projects = projs.toArray(new ProjectX[0]);
     }
 
     /**
@@ -117,11 +117,11 @@ public class ProjectSet {
     /**
      * Returns the child project with given name.
      */
-    public Project getProject(String aName)
+    public ProjectX getProject(String aName)
     {
         String name = aName;
         if (name.startsWith("/")) name = name.substring(1);
-        for (Project proj : getProjects())
+        for (ProjectX proj : getProjects())
             if (proj.getName().equals(name))
                 return proj;
         return null;
@@ -134,7 +134,7 @@ public class ProjectSet {
     {
         WebFile file = _proj.getFile(aPath);
         if (file != null) return file;
-        for (Project p : getProjects()) {
+        for (ProjectX p : getProjects()) {
             file = p.getFile(aPath);
             if (file != null) return file;
         }
@@ -149,7 +149,7 @@ public class ProjectSet {
         // Look for file in root project, then dependent projects
         WebFile file = _proj.getSourceFile(aPath, false, false);
         if (file == null)
-            for (Project proj : getProjects())
+            for (ProjectX proj : getProjects())
                 if ((file = proj.getSourceFile(aPath, false, false)) != null) break;
         return file;
     }
@@ -162,7 +162,7 @@ public class ProjectSet {
         // Look for file in root project, then dependent projects
         WebFile file = _proj.getBuildFile(aPath, false, false);
         if (file == null)
-            for (Project proj : getProjects())
+            for (ProjectX proj : getProjects())
                 if ((file = proj.getBuildFile(aPath, false, false)) != null) break;
         return file;
     }
@@ -179,7 +179,7 @@ public class ProjectSet {
         String[] classPaths = _proj.getClassPaths();
 
         // Get dependent projects
-        Project[] projs = getProjects();
+        ProjectX[] projs = getProjects();
         if (projs.length == 0)
             return _cpaths = classPaths;
 
@@ -188,7 +188,7 @@ public class ProjectSet {
         Collections.addAll(classPathsList, classPaths);
 
         // Iterate over projects and add Project.ClassPaths for each
-        for (Project proj : projs) {
+        for (ProjectX proj : projs) {
             String[] projClassPaths = proj.getClassPaths();
             ListUtils.addAllUnique(classPathsList, projClassPaths);
         }
@@ -210,7 +210,7 @@ public class ProjectSet {
         String[] libPaths = projConfig.getLibPathsAbsolute();
 
         // Get dependent projects (if none, just return LibPaths)
-        Project[] projs = getProjects();
+        ProjectX[] projs = getProjects();
         if (projs.length == 0)
             return _lpaths = libPaths;
 
@@ -219,7 +219,7 @@ public class ProjectSet {
         Collections.addAll(libPathsList, libPaths);
 
         // Iterate over projects and add Project.ClassPaths for each
-        for (Project proj : projs) {
+        for (ProjectX proj : projs) {
             String[] projClassPaths = proj.getClassPaths();
             ListUtils.addAllUnique(libPathsList, projClassPaths);
         }
@@ -234,7 +234,7 @@ public class ProjectSet {
     public void addBuildFilesAll()
     {
         _proj.addBuildFilesAll();
-        for (Project p : getProjects())
+        for (ProjectX p : getProjects())
             p.addBuildFilesAll();
     }
 
@@ -244,7 +244,7 @@ public class ProjectSet {
     public boolean buildProjects(TaskMonitor aTM)
     {
         boolean success = true;
-        for (Project p : getProjects())
+        for (ProjectX p : getProjects())
             if (!p.buildProject(aTM)) {
                 success = false;
                 break;
@@ -254,7 +254,7 @@ public class ProjectSet {
 
         // Find unused imports
         _proj.findUnusedImports();
-        for (Project p : getProjects()) p.findUnusedImports();
+        for (ProjectX p : getProjects()) p.findUnusedImports();
         return success;
     }
 
@@ -265,7 +265,7 @@ public class ProjectSet {
     {
         WebFile file = _proj.getJavaFileForClassName(aClassName);
         if (file != null) return file;
-        for (Project p : getProjects()) {
+        for (ProjectX p : getProjects()) {
             file = p.getJavaFileForClassName(aClassName);
             if (file != null) return file;
         }
