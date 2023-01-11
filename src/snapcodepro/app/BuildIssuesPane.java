@@ -41,7 +41,7 @@ public class BuildIssuesPane extends ViewOwner {
      */
     public BuildIssue[] getIssues()
     {
-        return getProject().getBuildIssues().getArray();
+        return getProject().getBuildIssues().getIssues();
     }
 
     /**

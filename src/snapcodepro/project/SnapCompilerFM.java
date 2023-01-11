@@ -269,7 +269,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
         {
             if (_str != null) return _str;
             _str = _file.getText();
-            _proj.getRootProject().getBuildIssues().remove(_file);
+            _proj.getRootProject().getBuildIssues().removeIssuesForFile(_file);
             return _str;
         }
 

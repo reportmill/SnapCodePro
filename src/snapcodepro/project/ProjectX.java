@@ -35,9 +35,6 @@ public class ProjectX extends javakit.ide.Project {
     // The default file builder
     private ProjectFileBuilder _defaultFileBuilder = new ProjectFileBuilder.DefaultBuilder(this);
 
-    // A list of build issues
-    private BuildIssues  _bissues;
-
     // The last build date
     private Date  _buildDate;
 
@@ -423,16 +420,6 @@ public class ProjectX extends javakit.ide.Project {
     }
 
     /**
-     * The breakpoint list property.
-     */
-    public BuildIssues getBuildIssues()
-    {
-        if (_bissues != null) return _bissues;
-        BuildIssues buildIssues = new BuildIssues(this);
-        return _bissues = buildIssues;
-    }
-
-    /**
      * Called when file added.
      */
     public void fileAdded(WebFile aFile)
@@ -453,7 +440,7 @@ public class ProjectX extends javakit.ide.Project {
         // Remove BuildIssues for file
         ProjectX rootProj = getRootProject();
         BuildIssues buildIssues = rootProj.getBuildIssues();
-        buildIssues.remove(aFile);
+        buildIssues.removeIssuesForFile(aFile);
     }
 
     /**

@@ -465,7 +465,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
             if (proj == null) return new BuildIssue[0];
             ProjectX rootProj = proj.getRootProject();
             BuildIssues buildIssues = rootProj.getBuildIssues();
-            BuildIssue[] buildIssueArray = buildIssues.getIssues(file);
+            BuildIssue[] buildIssueArray = buildIssues.getIssuesForFile(file);
             return buildIssueArray; // Was getRootProject().getBuildIssues().getIssues(getSourceFile()) JK
         }
 
