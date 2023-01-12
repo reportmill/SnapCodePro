@@ -4,7 +4,6 @@
 package snapcodepro.project;
 import javakit.ide.Project;
 import javakit.resolver.Resolver;
-import javakit.ide.Breakpoints;
 import javakit.ide.BuildIssues;
 import javakit.ide.ProjectConfig;
 import snap.util.FilePathUtils;
@@ -38,9 +37,6 @@ public class ProjectX extends javakit.ide.Project {
 
     // The last build date
     private Date  _buildDate;
-
-    // The list of Breakpoints
-    private Breakpoints  _bpoints;
 
     /**
      * Creates a new Project for WebSite.
@@ -200,24 +196,11 @@ public class ProjectX extends javakit.ide.Project {
     /**
      * Returns the class for given file.
      */
-    public Class getClassForFile(WebFile aFile)
+    public Class<?> getClassForFile(WebFile aFile)
     {
         String className = getClassNameForFile(aFile);
         Resolver resolver = getResolver();
         return resolver.getClassForName(className);
-    }
-
-    /**
-     * Returns the breakpoints.
-     */
-    public Breakpoints getBreakpoints()
-    {
-        // If already set, just return
-        if (_bpoints != null) return _bpoints;
-
-        // Create, set, return
-        Breakpoints bpoints = new Breakpoints(this);
-        return _bpoints = bpoints;
     }
 
     /**
