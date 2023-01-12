@@ -1,16 +1,15 @@
 package snapcodepro.app;
-
 import javakit.ide.*;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
 import javakit.parse.JavaTextDoc;
 import javakit.resolver.Resolver;
+import snap.util.Convert;
+import snap.util.ListUtils;
 import snapcodepro.project.JavaData;
 import snapcodepro.project.ProjectX;
 import snap.text.TextBoxLine;
-import snap.text.TextDoc;
-import snap.util.SnapUtils;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snap.viewx.WebBrowser;
@@ -18,6 +17,8 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebResponse;
 import snap.web.WebURL;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A JavaPage subclass to view/edit Java files.
@@ -25,10 +26,10 @@ import snap.web.WebURL;
 public class JavaPage extends WebPage implements WebFile.Updater {
 
     // The JavaTextPane
-    JavaTextPane _jtextPane = new JPJavaTextPane();
+    private JavaTextPane<?>  _javaTextPane = new JPJavaTextPane();
 
     /**
-     * Creates a new JavaPage.
+     * Constructor.
      */
     public JavaPage()
     {
@@ -40,31 +41,26 @@ public class JavaPage extends WebPage implements WebFile.Updater {
      */
     AppPane getAppPane()
     {
-        return getBrowser() instanceof AppBrowser ? ((AppBrowser) getBrowser()).getAppPane() : null;
+        WebBrowser browser = getBrowser();
+        return browser instanceof AppBrowser ? ((AppBrowser) browser).getAppPane() : null;
     }
 
     /**
      * Returns the JavaTextArea.
      */
-    public JavaTextPane getTextPane()
-    {
-        return _jtextPane;
-    }
+    public JavaTextPane<?> getTextPane()  { return _javaTextPane; }
 
     /**
      * Returns the JavaTextArea.
      */
-    public JavaTextArea getTextArea()
-    {
-        return getTextPane().getTextArea();
-    }
+    public JavaTextArea getTextArea()  { return _javaTextPane.getTextArea(); }
 
     /**
      * Creates UI panel.
      */
     protected View createUI()
     {
-        return _jtextPane.getUI();
+        return _javaTextPane.getUI();
     }
 
     /**
@@ -114,6 +110,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     /**
      * Override to set parameters.
      */
+    @Override
     public void setResponse(WebResponse aResp)
     {
         // Do normal version
@@ -126,51 +123,78 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         // Load UI
         getUI();
 
+        // Set selection
+        WebURL url = aResp.getURL();
+        setTextSelectionForUrlParams(url);
+    }
+
+    /**
+     * Sets selection of text based on URL params.
+     */
+    private void setTextSelectionForUrlParams(WebURL aURL)
+    {
         // Look for LineNumber
-        WebURL aURL = aResp.getURL();
         String lineNumberString = aURL.getRefValue("LineNumber");
+        JavaTextArea textArea = getTextArea();
         if (lineNumberString != null) {
-            int lineNumber = SnapUtils.intValue(lineNumberString);
-            getTextArea().selectLine(lineNumber - 1);
+            int lineNumber = Convert.intValue(lineNumberString);
+            textArea.selectLine(lineNumber - 1);
         }
 
         // Look for Sel (selection)
         String sel = aURL.getRefValue("Sel");
         if (sel != null) {
-            int start = SnapUtils.intValue(sel);
+            int start = Convert.intValue(sel);
             sel = sel.substring(sel.indexOf('-') + 1);
-            int end = SnapUtils.intValue(sel);
-            if (end < start) end = start;
-            getTextArea().setSel(start, end);
+            int end = Convert.intValue(sel);
+            if (end < start)
+                end = start;
+            textArea.setSel(start, end);
         }
 
         // Look for SelLine (select line)
         String selLine = aURL.getRefValue("SelLine");
         if (selLine != null) {
-            int lineNum = SnapUtils.intValue(selLine) - 1;
-            TextBoxLine tline = lineNum >= 0 && lineNum < getTextArea().getLineCount() ? getTextArea().getLine(lineNum) : null;
-            if (tline != null) getTextArea().setSel(tline.getStartCharIndex());
+            int lineNum = Convert.intValue(selLine) - 1;
+            TextBoxLine textLine = lineNum >= 0 && lineNum < textArea.getLineCount() ? textArea.getLine(lineNum) : null;
+            if (textLine != null)
+                textArea.setSel(textLine.getStartCharIndex());
         }
 
         // Look for Find
         String findString = aURL.getRefValue("Find");
-        if (findString != null)
-            getTextPane().find(findString, true, true);
+        if (findString != null) {
+            JavaTextPane<?> textPane = getTextPane();
+            textPane.find(findString, true, true);
+        }
 
         // Look for Member selection request
         String memberName = aURL.getRefValue("Member");
         if (memberName != null) {
+
+            // Get ClassDecl
             JFile jfile = JavaData.getJavaDataForFile(getFile()).getJFile();
-            JClassDecl cd = jfile.getClassDecl();
+            JClassDecl classDecl = jfile.getClassDecl();
+
+            // Handle ClassDecl name
             JExprId id = null;
-            if (cd.getName().equals(memberName)) id = cd.getId();
-            else for (JMemberDecl md : cd.getMemberDecls())
-                if (md.getName() != null && md.getName().equals(memberName)) {
-                    id = md.getId();
-                    break;
-                }
-            if (id != null)
-                getTextArea().setSel(id.getStartCharIndex(), id.getEndCharIndex());
+            if (classDecl.getName().equals(memberName))
+                id = classDecl.getId();
+
+            // Look for member matching name
+            else {
+                List<JMemberDecl> memberDecls = classDecl.getMemberDecls();
+                JMemberDecl match = ListUtils.findMatch(memberDecls, md -> Objects.equals(memberName, md.getName()));
+                if (match != null)
+                    id = match.getId();
+            }
+
+            // If member found, select it
+            if (id != null) {
+                int start = id.getStartCharIndex();
+                int end = id.getEndCharIndex();
+                textArea.setSel(start, end);
+            }
         }
     }
 
@@ -200,7 +224,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         ProjectX proj = ProjectX.getProjectForFile(file);
 
         // Append package declaration
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         WebFile fileDir = file.getParent();
         String pkgName = proj != null ? proj.getClassNameForFile(fileDir) : file.getSimpleName();
         if (pkgName.length() > 0)
@@ -299,9 +323,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         String javaPath = '/' + className.replace('.', '/') + ".java";
 
         // Get URL
-        WebURL javaURL = WebURL.getURL("http://reportmill.com/jars/8u05/src.zip!" + javaPath);
-        if (className.startsWith("javafx."))
-            javaURL = WebURL.getURL("http://reportmill.com/jars/8u05/javafx-src.zip!" + javaPath);
+        WebURL javaURL = WebURL.getURL("https://reportmill.com/jars/8u05/src.zip!" + javaPath);
         String urlString = javaURL.getString() + "#Member=" + aDecl.getSimpleName();
 
         // Open URL
@@ -428,58 +450,5 @@ public class JavaPage extends WebPage implements WebFile.Updater {
                 // Do normal version
             else super.respondUI(anEvent);
         }
-
-        /**
-         * Creates the JavaTextArea.
-         */
-        protected JavaTextArea createTextArea()
-        {
-            return new JPJavaTextArea();
-        }
-    }
-
-    /**
-     * Override.
-     */
-    public class JPJavaTextArea extends JavaTextArea {
-
-        /**
-         * Returns the project.
-         */
-        public ProjectX getProject()
-        {
-            TextDoc textDoc = getTextDoc();
-            WebFile file = textDoc.getSourceFile();
-            return file != null ? ProjectX.getProjectForFile(file) : null;
-        }
-
-        /**
-         * Returns BuildIssues from ProjectFile.
-         */
-        public BuildIssue[] getBuildIssues()
-        {
-            TextDoc textDoc = getTextDoc();
-            WebFile file = textDoc.getSourceFile();
-            if (file == null) return new BuildIssue[0];
-            ProjectX proj = getProject();
-            if (proj == null) return new BuildIssue[0];
-            ProjectX rootProj = proj.getRootProject();
-            BuildIssues buildIssues = rootProj.getBuildIssues();
-            BuildIssue[] buildIssueArray = buildIssues.getIssuesForFile(file);
-            return buildIssueArray; // Was getRootProject().getBuildIssues().getIssues(getSourceFile()) JK
-        }
-
-        /**
-         * Returns the project breakpoints.
-         */
-        private Breakpoints getProjBreakpoints()
-        {
-            ProjectX proj = getProject();
-            if (proj == null) return null;
-            ProjectX rootProj = proj.getRootProject();
-            Breakpoints breakpoints = rootProj.getBreakpoints();
-            return breakpoints; // Was getRootProject().getBreakPoints() JK
-        }
-
     }
 }
