@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.project;
+import javakit.ide.Project;
 import javakit.resolver.Resolver;
 import javakit.ide.Breakpoints;
 import javakit.ide.BuildIssues;
@@ -501,7 +502,7 @@ public class ProjectX extends javakit.ide.Project {
      */
     public static synchronized ProjectX getProjectForSite(WebSite aSite)
     {
-        ProjectX proj = (ProjectX) aSite.getProp(ProjectX.class.getSimpleName());
-        return proj;
+        Project proj = Project.getProjectForSite(aSite);
+        return (ProjectX) proj;
     }
 }
