@@ -1,5 +1,4 @@
 package snapcodepro.app;
-
 import snapcodepro.project.ProjectX;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
@@ -11,7 +10,6 @@ import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,105 +19,94 @@ import java.util.List;
 public class AppPane extends ViewOwner {
 
     // The list of sites
-    List<WebSite> _sites = new ArrayList();
+    private List<WebSite>  _sites = new ArrayList<>();
 
     // The AppPaneToolBar
-    AppPaneToolBar _toolBar = new AppPaneToolBar(this);
+    protected AppPaneToolBar  _toolBar = new AppPaneToolBar(this);
 
     // The main SplitView that holds sidebar and browser
-    SplitView _mainSplit;
+    private SplitView  _mainSplit;
 
     // The SplitView that holds FilesPane and ProcPane
-    SplitView _sideBarSplit;
+    private SplitView  _sideBarSplit;
 
     // The FilesPane
-    AppFilesPane _filesPane = new AppFilesPane(this);
+    protected AppFilesPane  _filesPane = new AppFilesPane(this);
 
     // The ProcPane manages run/debug processes
-    ProcPane _procPane = new ProcPane(this);
+    private ProcPane  _procPane = new ProcPane(this);
 
     // The AppBroswer for displaying editors
-    AppBrowser _browser;
+    private AppBrowser _browser;
 
     // The pane that the browser sits in
-    SplitView _browserBox;
+    private SplitView _browserBox;
 
     // The SupportTray
-    SupportTray _supportTray = new SupportTray(this);
+    private SupportTray  _supportTray = new SupportTray(this);
 
     // The Problems pane
-    BuildIssuesPane _problemsPane = new BuildIssuesPane(this);
+    private BuildIssuesPane  _problemsPane = new BuildIssuesPane(this);
 
     // The RunConsole
-    RunConsole _runConsole = new RunConsole(this);
+    private RunConsole  _runConsole = new RunConsole(this);
 
     // The DebugVarsPane
-    DebugVarsPane _debugVarsPane = new DebugVarsPane(this);
+    private DebugVarsPane  _debugVarsPane = new DebugVarsPane(this);
 
     // The DebugExprsPane
-    DebugExprsPane _debugExprsPane = new DebugExprsPane(this);
+    private DebugExprsPane  _debugExprsPane = new DebugExprsPane(this);
 
     // The BreakpointsPanel
-    BreakpointsPanel _breakpointsPanel = new BreakpointsPanel(this);
+    private BreakpointsPanel  _breakpointsPanel = new BreakpointsPanel(this);
 
     // The SearchPane
-    SearchPane _searchPane = new SearchPane(this);
+    private SearchPane  _searchPane = new SearchPane(this);
+
+    // The currently selected file
+    private WebFile  _selFile;
+
+    // Whether to show side bar
+    private boolean  _showSideBar = true;
+
+    // The menu bar
+    private MenuBar  _menuBar;
 
     // The currently open AppPane
-    static AppPane _openAppPane;
+    private static AppPane  _openAppPane;
 
     // A PropChangeListener to watch for site file changes
-    PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
+    private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
 
     /**
      * Returns the browser.
      */
-    public AppBrowser getBrowser()
-    {
-        return _browser;
-    }
+    public AppBrowser getBrowser()  { return _browser; }
 
     /**
      * Returns the browser box.
      */
-    public SplitView getBrowserBox()
-    {
-        return _browserBox;
-    }
+    public SplitView getBrowserBox()  { return _browserBox; }
 
     /**
      * Returns the toolbar.
      */
-    public AppPaneToolBar getToolBar()
-    {
-        return _toolBar;
-    }
+    public AppPaneToolBar getToolBar()  { return _toolBar; }
 
     /**
      * Returns the files pane.
      */
-    public AppFilesPane getFilesPane()
-    {
-        return _filesPane;
-    }
+    public AppFilesPane getFilesPane()  { return _filesPane; }
 
     /**
      * Returns the processes pane.
      */
-    public ProcPane getProcPane()
-    {
-        return _procPane;
-    }
+    public ProcPane getProcPane()  { return _procPane; }
 
     /**
      * Returns whether is showing SideBar (holds FilesPane and ProcPane).
      */
-    public boolean isShowSideBar()
-    {
-        return _showSideBar;
-    }
-
-    boolean _showSideBar = true;
+    public boolean isShowSideBar()  { return _showSideBar; }
 
     /**
      * Sets whether to show SideBar (holds FilesPane and ProcPane).
@@ -154,7 +141,8 @@ public class AppPane extends ViewOwner {
         SplitView spane = getBrowserBox();
 
         // Add/remove SupportTrayUI with animator
-        if (aValue) spane.addItemWithAnim(supTrayUI, 240);
+        if (aValue)
+            spane.addItemWithAnim(supTrayUI, 240);
         else spane.removeItemWithAnim(supTrayUI);
 
         // Update ShowTrayButton
@@ -181,34 +169,22 @@ public class AppPane extends ViewOwner {
     /**
      * Returns the top level site.
      */
-    public WebSite getRootSite()
-    {
-        return _sites.get(0);
-    }
+    public WebSite getRootSite()  { return _sites.get(0); }
 
     /**
      * Returns the number of sites.
      */
-    public int getSiteCount()
-    {
-        return _sites.size();
-    }
+    public int getSiteCount()  { return _sites.size(); }
 
     /**
      * Returns the individual site at the given index.
      */
-    public WebSite getSite(int anIndex)
-    {
-        return _sites.get(anIndex);
-    }
+    public WebSite getSite(int anIndex)  { return _sites.get(anIndex); }
 
     /**
      * Returns the list of sites.
      */
-    public List<WebSite> getSites()
-    {
-        return _sites;
-    }
+    public List<WebSite> getSites()  { return _sites; }
 
     /**
      * Adds a site to sites list.
@@ -287,10 +263,7 @@ public class AppPane extends ViewOwner {
     /**
      * Returns the current open AppPane.
      */
-    public static AppPane getOpenAppPane()
-    {
-        return _openAppPane;
-    }
+    public static AppPane getOpenAppPane()  { return _openAppPane; }
 
     /**
      * Shows the home page.
@@ -312,12 +285,7 @@ public class AppPane extends ViewOwner {
     /**
      * Returns the selected file.
      */
-    public WebFile getSelectedFile()
-    {
-        return _sf;
-    }
-
-    WebFile _sf;
+    public WebFile getSelectedFile()  { return _selFile; }
 
     /**
      * Sets the selected site file.
@@ -326,11 +294,11 @@ public class AppPane extends ViewOwner {
     {
         // If file already set, just return
         if (aFile == null || aFile == getSelectedFile()) return;
-        _sf = aFile;
+        _selFile = aFile;
 
         // Set selected file and update tree
-        if (_sf != null && _sf.isFile() || _sf.isRoot())
-            getBrowser().setFile(_sf);
+        if (_selFile != null && _selFile.isFile() || _selFile.isRoot())
+            getBrowser().setFile(_selFile);
         _filesPane.resetLater();
     }
 
@@ -448,14 +416,15 @@ public class AppPane extends ViewOwner {
         setViewText("StatusText", getBrowser().getStatus());
 
         // Update ProgressBar
-        ProgressBar pb = getView("ProgressBar", ProgressBar.class);
+        ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
         boolean loading = getBrowser().isLoading();
-        if (loading && !pb.isVisible()) {
-            pb.setVisible(true);
-            pb.setProgress(-1);
-        } else if (!loading && pb.isVisible()) {
-            pb.setProgress(0);
-            pb.setVisible(false);
+        if (loading && !progressBar.isVisible()) {
+            progressBar.setVisible(true);
+            progressBar.setProgress(-1);
+        }
+        else if (!loading && progressBar.isVisible()) {
+            progressBar.setProgress(0);
+            progressBar.setVisible(false);
         }
 
         // Reset FilesPane and SupportTray
@@ -525,131 +494,97 @@ public class AppPane extends ViewOwner {
      */
     public MenuBar getMenuBar()
     {
-        return _mbar != null ? _mbar : (_mbar = createMenuBar());
+        if (_menuBar != null) return _menuBar;
+        return _menuBar = createMenuBar();
     }
-
-    MenuBar _mbar;
 
     /**
      * Creates the MenuBar.
      */
     protected MenuBar createMenuBar()
     {
-        MenuBar mbar = new MenuBar();
-        Menu fileMenu = createMenu("FileMenu", "File");
-        mbar.addMenu(fileMenu);
-        fileMenu.addItem(createMenuItem("NewMenuItem", "New", "Shortcut+N"));
-        fileMenu.addItem(new MenuItem()); //SeparatorMenuItem
-        fileMenu.addItem(createMenuItem("OpenMenuItem", "Open", "Shortcut+O"));
-        fileMenu.addItem(createMenuItem("CloseMenuItem", "Close", "Shortcut+W"));
-        fileMenu.addItem(createMenuItem("SaveMenuItem", "Save", "Shortcut+S"));
-        fileMenu.addItem(createMenuItem("SaveAsMenuItem", "Save As...", "Shortcut+Shift+S"));
-        fileMenu.addItem(createMenuItem("RevertMenuItem", "Revert to Saved", "Shortcut+U"));
-        fileMenu.addItem(createMenuItem("QuitMenuItem", "Quit", "Shortcut+Q"));
-        Menu editMenu = createMenu("EditMenu", "Edit");
-        mbar.addMenu(editMenu);
-        editMenu.addItem(createMenuItem("UndoMenuItem", "Undo", "Shortcut+Z"));
-        editMenu.addItem(createMenuItem("RedoMenuItem", "Redo", "Shortcut+Shift+Z"));
-        editMenu.addItem(new MenuItem()); //SeparatorMenuItem
-        editMenu.addItem(createMenuItem("CutMenuItem", "Cut", "Shortcut+X"));
-        editMenu.addItem(createMenuItem("CopyMenuItem", "Copy", "Shortcut+C"));
-        editMenu.addItem(createMenuItem("PasteMenuItem", "Paste", "Shortcut+V"));
-        editMenu.addItem(createMenuItem("SelectAllMenuItem", "Select All", "Shortcut+A"));
-        Menu helpMenu = createMenu("HelpMenu", "Help");
-        mbar.addMenu(helpMenu);
-        helpMenu.addItem(createMenuItem("SupportPageMenuItem", "Support Page", null));
-        helpMenu.addItem(createMenuItem("JavaDocMenuItem", "Tutorial", null));
-        helpMenu.addItem(createMenuItem("ShowJavaHomeMenuItem", "Show Java Home", null));
-        mbar.setOwner(this);
-        return mbar;
-    }
+        ViewBuilder<MenuItem> mib = new ViewBuilder<>(MenuItem.class);
 
-    /**
-     * Creates a JMenu for name and text.
-     */
-    Menu createMenu(String aName, String theText)
-    {
-        Menu m = new Menu();
-        m.setText(theText);
-        m.setName(aName);
-        //m.setStyle(new Style().setFontSize(14).setPadding(2,5,3,5).toString());
-        return m;
-    }
+        // Create FileMenu and menu items
+        mib.name("NewMenuItem").text("New").save().setShortcut("Shortcut+N");
+        mib.save(); //SeparatorMenuItem
+        mib.name("OpenMenuItem").text("Open").save().setShortcut("Shortcut+O");
+        mib.name("CloseMenuItem").text("Close").save().setShortcut("Shortcut+W");
+        mib.name("SaveMenuItem").text("Save").save().setShortcut("Shortcut+S");
+        mib.name("SaveAsMenuItem").text("Save As...").save().setShortcut("Shortcut+Shift+S");
+        mib.name("RevertMenuItem").text("Revert to Saved").save().setShortcut("Shortcut+U");
+        mib.name("QuitMenuItem").text("Quit").save().setShortcut("Shortcut+Q");
+        Menu fileMenu = mib.buildMenu("FileMenu", "File");
 
-    /**
-     * Creates a JMenuItem for name and text and key accelerator description.
-     */
-    MenuItem createMenuItem(String aName, String theText, String aKey)
-    {
-        MenuItem mi = new MenuItem();
-        mi.setText(theText);
-        mi.setName(aName);
-        if (aKey != null) mi.setShortcut(aKey);
-        return mi;
+        // Create EditMenu menu items
+        mib.name("UndoMenuItem").text("Undo").save().setShortcut("Shortcut+Z");
+        mib.name("RedoMenuItem").text("Redo").save().setShortcut("Shortcut+Shift+Z");
+        mib.save(); //SeparatorMenuItem
+        mib.name("CutMenuItem").text("Cut").save().setShortcut("Shortcut+X");
+        mib.name("CopyMenuItem").text("Copy").save().setShortcut("Shortcut+C");
+        mib.name("PasteMenuItem").text("Paste").save().setShortcut("Shortcut+V");
+        mib.name("SelectAllMenuItem").text("Select All").save().setShortcut("Shortcut+A");
+        Menu editMenu = mib.buildMenu("EditMenu", "Edit");
+
+        // Create HelpMenu and menu items
+        mib.name("SupportPageMenuItem").text("Support Page").save();
+        mib.name("JavaDocMenuItem").text("Tutorial").save();
+        mib.name("ShowJavaHomeMenuItem").text("Show Java Home").save();
+        Menu helpMenu = mib.buildMenu("HelpMenu", "Help");
+
+        // Create MenuBar
+        MenuBar menuBar = new MenuBar();
+        menuBar.addMenu(fileMenu);
+        menuBar.addMenu(editMenu);
+        menuBar.addMenu(helpMenu);
+        menuBar.setOwner(this);
+
+        // Return
+        return menuBar;
     }
 
     /**
      * Returns the support tray.
      */
-    public SupportTray getSupportTray()
-    {
-        return _supportTray;
-    }
+    public SupportTray getSupportTray()  { return _supportTray; }
 
     /**
      * Returns the problems pane.
      */
-    public BuildIssuesPane getProblemsPane()
-    {
-        return _problemsPane;
-    }
+    public BuildIssuesPane getProblemsPane()  { return _problemsPane; }
 
     /**
      * Returns the RunConsole.
      */
-    public RunConsole getRunConsole()
-    {
-        return _runConsole;
-    }
+    public RunConsole getRunConsole()  { return _runConsole; }
 
     /**
      * Returns the DebugVarsPane.
      */
-    public DebugVarsPane getDebugVarsPane()
-    {
-        return _debugVarsPane;
-    }
+    public DebugVarsPane getDebugVarsPane()  { return _debugVarsPane; }
 
     /**
      * Returns the DebugExprsPane.
      */
-    public DebugExprsPane getDebugExprsPane()
-    {
-        return _debugExprsPane;
-    }
+    public DebugExprsPane getDebugExprsPane()  { return _debugExprsPane; }
 
     /**
      * Returns the BreakpointsPanel.
      */
-    public BreakpointsPanel getBreakpointsPanel()
-    {
-        return _breakpointsPanel;
-    }
+    public BreakpointsPanel getBreakpointsPanel()  { return _breakpointsPanel; }
 
     /**
      * Returns the SearchPane.
      */
-    public SearchPane getSearchPane()
-    {
-        return _searchPane;
-    }
+    public SearchPane getSearchPane()  { return _searchPane; }
 
     /**
      * Saves any unsaved files.
      */
     public int saveFiles()
     {
-        return _filesPane.saveFiles(getSelectedSite().getRootDir(), true);
+        WebFile rootDir = getSelectedSite().getRootDir();
+        return _filesPane.saveFiles(rootDir, true);
     }
 
     /**
@@ -659,5 +594,4 @@ public class AppPane extends ViewOwner {
     {
         _filesPane.showNewFilePanel();
     }
-
 }
