@@ -1,4 +1,9 @@
 package snapcodepro.app;
+import javakit.ide.Breakpoint;
+import javakit.ide.Breakpoints;
+import javakit.ide.BuildIssue;
+import javakit.ide.JavaTextPane;
+import snapcodepro.debug.RunApp;
 import snapcodepro.project.ProjectX;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
@@ -199,9 +204,14 @@ public class AppPane extends ViewOwner {
         if (proj == null)
             proj = new ProjectX(aSite);
 
+        // Add listener to update ProcPane and JavaPage.TextArea(s) when Breakpoint/BuildIssue added/removed
+        proj.getBreakpoints().addPropChangeListener(pc -> projBreakpointsDidChange(pc));
+        proj.getBuildIssues().addPropChangeListener(pc -> projBuildIssuesDidChange(pc));
+
         // Add site
-        _sites.add(getSiteCount(), aSite);  // Add site
-        SitePane.get(aSite, true).setAppPane(this);
+        _sites.add(aSite);
+        SitePane sitePane = SitePane.get(aSite, true);
+        sitePane.setAppPane(this);
         aSite.addFileChangeListener(_siteFileLsnr);
 
         // Add dependent sites
@@ -297,7 +307,7 @@ public class AppPane extends ViewOwner {
         _selFile = aFile;
 
         // Set selected file and update tree
-        if (_selFile != null && _selFile.isFile() || _selFile.isRoot())
+        if (_selFile.isFile() || _selFile.isRoot())
             getBrowser().setFile(_selFile);
         _filesPane.resetLater();
     }
@@ -593,5 +603,78 @@ public class AppPane extends ViewOwner {
     public void showNewFilePanel()
     {
         _filesPane.showNewFilePanel();
+    }
+
+    /**
+     * Called when Project.BreakPoints change.
+     */
+    private void projBreakpointsDidChange(PropChange pc)
+    {
+        if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
+
+        // Handle Breakpoint added
+        Breakpoint nval = (Breakpoint) pc.getNewValue();
+        if (nval != null) {
+
+            // Tell active processes about breakpoint change
+            for (RunApp rp : getProcPane().getProcs())
+                rp.addBreakpoint(nval);
+        }
+
+        // Handle Breakpoint removed
+        else {
+
+            Breakpoint oval = (Breakpoint) pc.getOldValue();
+
+            // Make current JavaPage.TextArea resetLater
+            WebPage page = getBrowser().getPage(oval.getFile().getURL());
+            if (page instanceof JavaPage)
+                ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
+
+            // Tell active processes about breakpoint change
+            for (RunApp rp : getProcPane().getProcs())
+                rp.removeBreakpoint(oval);
+        }
+    }
+
+    /**
+     * Called when Project.BuildIssues change.
+     */
+    private void projBuildIssuesDidChange(PropChange pc)
+    {
+        if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
+
+        // Handle BuildIssue added
+        BuildIssue issueAdded = (BuildIssue) pc.getNewValue();
+        if (issueAdded != null) {
+
+            // Make current JavaPage.TextArea resetLater
+            WebFile issueFile = issueAdded.getFile();
+            WebPage page = getBrowser().getPage(issueFile.getURL());
+            if (page instanceof JavaPage) {
+                JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
+                javaTextPane.buildIssueOrBreakPointMarkerChanged();
+            }
+
+            // Update FilesPane.FilesTree
+            getFilesPane().updateFile(issueFile);
+        }
+
+        // Handle BuildIssue removed
+        else {
+
+            BuildIssue issueRemoved = (BuildIssue) pc.getOldValue();
+            WebFile issueFile = issueRemoved.getFile();
+
+            // Make current JavaPage.TextArea resetLater
+            WebPage page = getBrowser().getPage(issueFile.getURL());
+            if (page instanceof JavaPage) {
+                JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
+                javaTextPane.buildIssueOrBreakPointMarkerChanged();
+            }
+
+            // Update FilesPane.FilesTree
+            getFilesPane().updateFile(issueFile);
+        }
     }
 }

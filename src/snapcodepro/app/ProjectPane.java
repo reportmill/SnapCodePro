@@ -2,10 +2,6 @@ package snapcodepro.app;
 import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.ide.NodeMatcher;
-import javakit.ide.Breakpoint;
-import javakit.ide.Breakpoints;
-import javakit.ide.BuildIssue;
-import snapcodepro.debug.RunApp;
 import snapcodepro.project.JavaData;
 import snapcodepro.project.ProjectX;
 import snapcodepro.project.ProjectSet;
@@ -28,40 +24,40 @@ import java.util.List;
 public class ProjectPane extends BindingViewOwner {
 
     // The AppPane
-    AppPane _appPane;
+    private AppPane  _appPane;
 
     // The SitePane
-    SitePane _sitePane;
+    private SitePane  _sitePane;
 
     // The WebSite
-    WebSite _site;
+    private WebSite  _site;
 
     // The project
-    ProjectX _proj;
+    private ProjectX  _proj;
 
     // The project set
-    ProjectSet _projSet;
+    private ProjectSet  _projSet;
 
     // Whether to auto build project when files change
-    boolean _autoBuild = true;
+    private boolean  _autoBuild = true;
 
     // Whether to auto build project feature is enabled
-    boolean _autoBuildEnabled = true;
+    private boolean  _autoBuildEnabled = true;
 
     // The runner to build files
-    BuildFilesRunner _buildFilesRunner;
+    private BuildFilesRunner  _buildFilesRunner;
 
     // The selected JarPath
-    String _jarPath;
+    private String  _jarPath;
 
     // The selected ProjectPath
-    String _projPath;
+    private String  _projPath;
 
     // Runnable for build later
-    Runnable _buildLaterRun;
+    private Runnable  _buildLaterRun;
 
     /**
-     * Creates a new ProjectPane for given project.
+     * Constructor for given project.
      */
     public ProjectPane(WebSite aSite)
     {
@@ -85,10 +81,7 @@ public class ProjectPane extends BindingViewOwner {
     /**
      * Returns the AppPane.
      */
-    public AppPane getAppPane()
-    {
-        return _appPane;
-    }
+    public AppPane getAppPane()  { return _appPane; }
 
     /**
      * Sets the AppPane.
@@ -96,64 +89,32 @@ public class ProjectPane extends BindingViewOwner {
     protected void setAppPane(AppPane anAP)
     {
         _appPane = anAP;
-
-        // Add listener to update ProcPane and JavaPage.TextArea(s) when Breakpoint added/removed
-        _proj.getBreakpoints().addPropChangeListener(pc -> {
-            System.out.println("Breakpoints.change: " + pc);
-            if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
-            Breakpoint oval = (Breakpoint) pc.getOldValue(), nval = (Breakpoint) pc.getNewValue();
-            if (nval != null) notifyBreakpointAdded(nval);
-            else notifyBreakpointRemoved(oval);
-        });
-
-        // Add listener to update SupportTray and JavaPage.TextArea(s) when BuildIssue added/removed
-        _proj.getBuildIssues().addPropChangeListener(pc -> {
-            if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
-            BuildIssue oval = (BuildIssue) pc.getOldValue(), nval = (BuildIssue) pc.getNewValue();
-            if (nval != null) notifyBuildIssueAdded(nval);
-            else notifyBuildIssueRemoved(oval);
-        });
     }
 
     /**
      * Returns the SitePane.
      */
-    public SitePane getSitePane()
-    {
-        return _sitePane;
-    }
+    public SitePane getSitePane()  { return _sitePane; }
 
     /**
      * Returns the project.
      */
-    public ProjectX getProject()
-    {
-        return _proj;
-    }
+    public ProjectX getProject()  { return _proj; }
 
     /**
      * Returns whether to automatically build files when changes are detected.
      */
-    public boolean isAutoBuild()
-    {
-        return _autoBuild;
-    }
+    public boolean isAutoBuild()  { return _autoBuild; }
 
     /**
      * Sets whether to automatically build files when changes are detected.
      */
-    public void setAutoBuild(boolean aValue)
-    {
-        _autoBuild = aValue;
-    }
+    public void setAutoBuild(boolean aValue)  { _autoBuild = aValue; }
 
     /**
      * Returns whether to project AutoBuild has been disabled (possibly for batch processing).
      */
-    public boolean isAutoBuildEnabled()
-    {
-        return isAutoBuild() && _autoBuildEnabled;
-    }
+    public boolean isAutoBuildEnabled()  { return isAutoBuild() && _autoBuildEnabled; }
 
     /**
      * Sets whether to project AutoBuild has been disabled (possibly for batch processing).
@@ -236,8 +197,10 @@ public class ProjectPane extends BindingViewOwner {
     public void checkout(View aView, VersionControl aVC)
     {
         WebSite site = aVC.getSite();
+        String title = "Checkout from " + aVC.getRemoteURLString();
 
-        TaskRunner runner = new TaskRunnerPanel(_appPane.getUI(), "Checkout from " + aVC.getRemoteURLString()) {
+        TaskRunner<Object> runner = new TaskRunnerPanel<Object>(_appPane.getUI(), title) {
+
             public Object run() throws Exception
             {
                 aVC.checkout(this);
@@ -259,8 +222,10 @@ public class ProjectPane extends BindingViewOwner {
 
             public void failure(Exception e)
             {
-                if (ClientUtils.setAccess(aVC.getRemoteSite())) checkout(aView, aVC);
-                else if (new LoginPage().showPanel(_appPane.getUI(), aVC.getRemoteSite())) checkout(aView, aVC);
+                if (ClientUtils.setAccess(aVC.getRemoteSite()))
+                    checkout(aView, aVC);
+                else if (new LoginPage().showPanel(_appPane.getUI(), aVC.getRemoteSite()))
+                    checkout(aView, aVC);
                 else super.failure(e);
             }
         };
@@ -314,7 +279,7 @@ public class ProjectPane extends BindingViewOwner {
     {
         // If not root ProjectPane, forward on to it
         ProjectX rootProj = _proj.getRootProject();
-        ProjectPane rootProjPane = _proj != rootProj ? ProjectPane.get(rootProj.getSite()) : this;
+        ProjectPane rootProjPane = _proj != rootProj ? ProjectPane.getProjectPane(rootProj.getSite()) : this;
         if (this != rootProjPane) {
             rootProjPane.buildProjectLater(doAddFiles);
             return;
@@ -337,30 +302,26 @@ public class ProjectPane extends BindingViewOwner {
     /**
      * Returns the build files runner.
      */
-    private synchronized BuildFilesRunner getBuildFilesRunner(boolean addBuildFiles)
+    private synchronized void getBuildFilesRunner(boolean addBuildFiles)
     {
-        BuildFilesRunner bfr = _buildFilesRunner;
-        if (bfr != null && addBuildFiles) {
-            bfr._addFiles = addBuildFiles;
-            bfr = _buildFilesRunner;
-        }
-        if (bfr != null) {
-            bfr._runAgain = true;
+        if (_buildFilesRunner != null) {
+            if (addBuildFiles)
+                _buildFilesRunner._addFiles = addBuildFiles;
+            _buildFilesRunner._runAgain = true;
             _proj.interruptBuild();
-            bfr = _buildFilesRunner;
         }
-        if (bfr == null) {
-            bfr = _buildFilesRunner = new BuildFilesRunner();
+
+        else {
+            _buildFilesRunner = new BuildFilesRunner();
             _buildFilesRunner._addFiles = addBuildFiles;
             _buildFilesRunner.start();
         }
-        return bfr;
     }
 
     /**
      * An Runner subclass to build project files in the background.
      */
-    public class BuildFilesRunner extends TaskRunner {
+    public class BuildFilesRunner extends TaskRunner<Object> {
 
         // Whether to add files and run again
         boolean _addFiles, _runAgain;
@@ -423,7 +384,8 @@ public class ProjectPane extends BindingViewOwner {
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileAdded(aFile);
-        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled()) buildProjectLater(false);
+        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled())
+            buildProjectLater(false);
     }
 
     /**
@@ -433,7 +395,8 @@ public class ProjectPane extends BindingViewOwner {
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileRemoved(aFile);
-        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled()) buildProjectLater(false);
+        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled())
+            buildProjectLater(false);
     }
 
     /**
@@ -443,7 +406,8 @@ public class ProjectPane extends BindingViewOwner {
     {
         if (_proj.getBuildDir().contains(aFile)) return;
         _proj.fileSaved(aFile);
-        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled()) buildProjectLater(false);
+        if (_sitePane.isAutoBuild() && _sitePane.isAutoBuildEnabled())
+            buildProjectLater(false);
     }
 
     /**
@@ -459,7 +423,8 @@ public class ProjectPane extends BindingViewOwner {
      */
     public String getSelectedJarPath()
     {
-        if (_jarPath == null && getJarPaths().length > 0) _jarPath = getJarPaths()[0];
+        if (_jarPath == null && getJarPaths().length > 0)
+            _jarPath = getJarPaths()[0];
         return _jarPath;
     }
 
@@ -484,7 +449,8 @@ public class ProjectPane extends BindingViewOwner {
      */
     public String getSelectedProjectPath()
     {
-        if (_projPath == null && getProjectPaths().length > 0) _projPath = getProjectPaths()[0];
+        if (_projPath == null && getProjectPaths().length > 0)
+            _projPath = getProjectPaths()[0];
         return _projPath;
     }
 
@@ -497,68 +463,15 @@ public class ProjectPane extends BindingViewOwner {
     }
 
     /**
-     * Called when project breakpoint added.
-     */
-    protected void notifyBreakpointAdded(Breakpoint aBP)
-    {
-        // Tell active processes about breakpoint change
-        for (RunApp rp : getAppPane().getProcPane().getProcs())
-            rp.addBreakpoint(aBP);
-    }
-
-    /**
-     * Called when project breakpoint removed.
-     */
-    protected void notifyBreakpointRemoved(Breakpoint aBP)
-    {
-        // Make current JavaPage.TextArea resetLater
-        WebPage page = getAppPane().getBrowser().getPage(aBP.getFile().getURL());
-        if (page instanceof JavaPage)
-            ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
-
-        // Tell active processes about breakpoint change
-        for (RunApp rp : getAppPane().getProcPane().getProcs())
-            rp.removeBreakpoint(aBP);
-    }
-
-    /**
-     * Called when project BuildIssue added.
-     */
-    protected void notifyBuildIssueAdded(BuildIssue aBI)
-    {
-        // Make current JavaPage.TextArea resetLater
-        WebPage page = getAppPane().getBrowser().getPage(aBI.getFile().getURL());
-        if (page instanceof JavaPage)
-            ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
-
-        // Update FilesPane.FilesTree
-        getAppPane().getFilesPane().updateFile(aBI.getFile());
-    }
-
-    /**
-     * Called when project BuildIssue removed.
-     */
-    protected void notifyBuildIssueRemoved(BuildIssue aBI)
-    {
-        // Make current JavaPage.TextArea resetLater
-        WebPage page = getAppPane().getBrowser().getPage(aBI.getFile().getURL());
-        if (page instanceof JavaPage)
-            ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
-
-        // Update FilesPane.FilesTree
-        getAppPane().getFilesPane().updateFile(aBI.getFile());
-    }
-
-    /**
      * Called when a build is completed.
      */
     protected void handleBuildCompleted()
     {
         // Get final error count and see if problems pane should show or hide
-        int ecount = _proj.getRootProject().getBuildIssues().getErrorCount();
-        if (ecount > 0 && getAppPane().getSupportTrayIndex() != 0)
+        int errorCount = _proj.getRootProject().getBuildIssues().getErrorCount();
+        if (errorCount > 0 && getAppPane().getSupportTrayIndex() != 0)
             getAppPane().setSupportTrayIndex(0);
-        if (ecount == 0 && _appPane.getSupportTrayIndex() == SupportTray.PROBLEMS_PANE)
+        if (errorCount == 0 && _appPane.getSupportTrayIndex() == SupportTray.PROBLEMS_PANE)
             _appPane.setSupportTrayVisible(false);
     }
 
@@ -635,18 +548,18 @@ public class ProjectPane extends BindingViewOwner {
     private String getLinesOfCodeText()
     {
         // Declare loop variables
-        StringBuffer sb = new StringBuffer("Lines of Code:\n\n");
+        StringBuilder sb = new StringBuilder("Lines of Code:\n\n");
         DecimalFormat fmt = new DecimalFormat("#,##0");
         int total = 0;
 
         // Get projects
         ProjectX proj = getProject();
-        List<ProjectX> projs = new ArrayList();
-        projs.add(proj);
-        Collections.addAll(projs, proj.getProjects());
+        List<ProjectX> projects = new ArrayList<>();
+        projects.add(proj);
+        Collections.addAll(projects, proj.getProjects());
 
         // Iterate over projects and add: ProjName: xxx
-        for (ProjectX prj : projs) {
+        for (ProjectX prj : projects) {
             int loc = getLinesOfCode(prj.getSourceDir());
             total += loc;
             sb.append(prj.getName()).append(": ").append(fmt.format(loc)).append('\n');
@@ -667,8 +580,10 @@ public class ProjectPane extends BindingViewOwner {
         if (aFile.isFile() && (aFile.getType().equals("java") || aFile.getType().equals("snp"))) {
             String text = aFile.getText();
             for (int i = text.indexOf('\n'); i >= 0; i = text.indexOf('\n', i + 1)) loc++;
-        } else if (aFile.isDir()) {
-            for (WebFile child : aFile.getFiles()) loc += getLinesOfCode(child);
+        }
+        else if (aFile.isDir()) {
+            for (WebFile child : aFile.getFiles())
+                loc += getLinesOfCode(child);
         }
 
         return loc;
@@ -734,18 +649,17 @@ public class ProjectPane extends BindingViewOwner {
     private void showSymText(String aStr)
     {
         runLater(() -> _symText.replaceChars(aStr, null, _symText.length(), _symText.length(), false));
-        try {
-            Thread.sleep(80);
-        } catch (Exception e) {
-        }
+
+        // Sleep
+        try { Thread.sleep(80); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
      * Returns the ProjectPane for a site.
      */
-    public synchronized static ProjectPane get(WebSite aSite)
+    public synchronized static ProjectPane getProjectPane(WebSite aSite)
     {
         return (ProjectPane) aSite.getProp(ProjectPane.class.getName());
     }
-
 }
