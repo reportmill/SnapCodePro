@@ -105,7 +105,7 @@ public class HomePage extends WebPage {
 
         // Handle NewSnapScene
         if (anEvent.equals("NewSnapScene") && anEvent.isMouseRelease()) {
-            ProjectPane ppane = ProjectPane.get(getRootSite());
+            ProjectPane ppane = ProjectPane.getProjectPane(getRootSite());
             ppane.addProject("SnapKit", "https://github.com/reportmill/SnapKit.git");
             addSceneFiles(getRootSite(), "Scene1");
         }
@@ -120,13 +120,13 @@ public class HomePage extends WebPage {
 
         // Handle AddSnapKit
         if (anEvent.equals("AddSnapKit") && anEvent.isMouseRelease()) {
-            ProjectPane ppane = ProjectPane.get(getRootSite());
+            ProjectPane ppane = ProjectPane.getProjectPane(getRootSite());
             ppane.addProject("SnapKit", "https://github.com/reportmill/SnapKit.git");
         }
 
         // Handle AddSnapTea
         if (anEvent.equals("AddSnapTea") && anEvent.isMouseRelease()) {
-            ProjectPane ppane = ProjectPane.get(getRootSite());
+            ProjectPane ppane = ProjectPane.getProjectPane(getRootSite());
             if (ppane.getProject().getProjectSet().getProject("SnapKit") == null)
                 ppane.addProject("SnapKit", "https://github.com/reportmill/SnapKit.git");
             if (ppane.getProject().getProjectSet().getProject("CJDom") == null)
