@@ -3,7 +3,8 @@
  */
 package snapcodepro.project;
 import javakit.ide.BuildIssue;
-import javakit.ide.Project;
+import javakit.ide.JavaFileBuilder;
+import javakit.ide.ProjectBuilder;
 import javakit.ide.ProjectFiles;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
@@ -30,10 +31,10 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
     /**
      * Creates a new JavaFileBuilder for given Project.
      */
-    public JavaFileBuilderImpl(Project aProject)
+    public JavaFileBuilderImpl(ProjectX aProject)
     {
         super(aProject);
-        _projX = (ProjectX) aProject;
+        _projX = aProject;
     }
 
     /**

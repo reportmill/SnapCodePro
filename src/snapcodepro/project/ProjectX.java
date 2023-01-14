@@ -2,10 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.project;
-import javakit.ide.Project;
+import javakit.ide.*;
 import javakit.resolver.Resolver;
-import javakit.ide.BuildIssues;
-import javakit.ide.ProjectConfig;
 import snap.util.FilePathUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
@@ -28,9 +26,6 @@ public class ProjectX extends javakit.ide.Project {
     // A class to read .classpath file
     private ProjectConfigFile  _projConfigFile;
 
-    // The ProjectBuilder
-    private ProjectBuilder  _projBuilder;
-
     /**
      * Creates a new Project for WebSite.
      */
@@ -38,9 +33,9 @@ public class ProjectX extends javakit.ide.Project {
     {
         super(aSite);
 
-        // Create/set ProjectBuilder
-        _projBuilder = new ProjectBuilder(this);
-        _projBuilder._javaFileBuilder = new JavaFileBuilderImpl(this);
+        // Create/set ProjectBuilder.JavaFileBuilderImpl
+        JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(ProjectX.this);
+        _projBuilder.setJavaFileBuilder(javaFileBuilder);
 
         // Load dependent projects
         getProjects();
@@ -57,6 +52,7 @@ public class ProjectX extends javakit.ide.Project {
     /**
      * Returns the top most project.
      */
+    @Override
     public ProjectX getRootProject()
     {
         return _parent != null ? _parent.getRootProject() : this;
@@ -81,6 +77,7 @@ public class ProjectX extends javakit.ide.Project {
     /**
      * Returns the project class loader.
      */
+    @Override
     protected ClassLoader createClassLoader()
     {
         // If RootProject, return RootProject.ClassLoader
@@ -210,43 +207,6 @@ public class ProjectX extends javakit.ide.Project {
     public void readSettings()
     {
         _projConfigFile.readFile();
-    }
-
-    /**
-     * Returns the ProjectBuilder.
-     */
-    public ProjectBuilder getProjectBuilder()  { return _projBuilder; }
-
-    /**
-     * Builds the project.
-     */
-    public boolean buildProject(TaskMonitor aTM)
-    {
-        return _projBuilder.buildProject(aTM);
-    }
-
-    /**
-     * Interrupts build.
-     */
-    public void interruptBuild()
-    {
-        _projBuilder.interruptBuild();
-    }
-
-    /**
-     * Removes all build files from project.
-     */
-    public void cleanProject()
-    {
-        _projBuilder.cleanProject();
-    }
-
-    /**
-     * Adds a build file.
-     */
-    public void addBuildFilesAll()
-    {
-        _projBuilder.addBuildFilesAll();
     }
 
     /**
