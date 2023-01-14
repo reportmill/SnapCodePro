@@ -1,5 +1,6 @@
 package snapcodepro.project;
 
+import javakit.ide.ProjectFiles;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
@@ -65,7 +66,8 @@ public class JavaData {
     public WebFile[] getClassFiles()
     {
         ProjectX proj = getProject();
-        WebFile[] classFiles = proj.getClassFilesForJavaFile(_file);
+        ProjectFiles projectFiles = proj.getProjectFiles();
+        WebFile[] classFiles = projectFiles.getClassFilesForJavaFile(_file);
         return classFiles;
     }
 

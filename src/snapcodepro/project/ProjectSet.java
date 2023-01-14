@@ -1,6 +1,7 @@
 package snapcodepro.project;
 
 import javakit.ide.ProjectConfig;
+import javakit.ide.ProjectFiles;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
@@ -155,19 +156,6 @@ public class ProjectSet {
     }
 
     /**
-     * Returns the build file for given path.
-     */
-    public WebFile getBuildFile(String aPath)
-    {
-        // Look for file in root project, then dependent projects
-        WebFile file = _proj.getBuildFile(aPath, false, false);
-        if (file == null)
-            for (ProjectX proj : getProjects())
-                if ((file = proj.getBuildFile(aPath, false, false)) != null) break;
-        return file;
-    }
-
-    /**
      * Returns the paths needed to compile/run project.
      */
     public String[] getClassPaths()
@@ -241,21 +229,21 @@ public class ProjectSet {
     /**
      * Builds the project.
      */
-    public boolean buildProjects(TaskMonitor aTM)
+    public void buildProjects(TaskMonitor aTM)
     {
         boolean success = true;
-        for (ProjectX p : getProjects())
-            if (!p.buildProject(aTM)) {
+
+        // Build child projects
+        for (ProjectX proj : getProjects()) {
+            if (!proj.buildProject(aTM)) {
                 success = false;
                 break;
             }
-        if (success)
-            success = _proj.buildProject(aTM);
+        }
 
-        // Find unused imports
-        _proj.findUnusedImports();
-        for (ProjectX p : getProjects()) p.findUnusedImports();
-        return success;
+        // Build main project
+        if (success)
+            _proj.buildProject(aTM);
     }
 
     /**
@@ -263,13 +251,20 @@ public class ProjectSet {
      */
     public WebFile getJavaFile(String aClassName)
     {
-        WebFile file = _proj.getJavaFileForClassName(aClassName);
-        if (file != null) return file;
-        for (ProjectX p : getProjects()) {
-            file = p.getJavaFileForClassName(aClassName);
-            if (file != null) return file;
+        // Check main project
+        ProjectFiles projFiles = _proj.getProjectFiles();
+        WebFile file = projFiles.getJavaFileForClassName(aClassName);
+        if (file != null)
+            return file;
+
+        // Check subprojects
+        for (ProjectX proj : getProjects()) {
+            projFiles = proj.getProjectFiles();
+            file = projFiles.getJavaFileForClassName(aClassName);
+            if (file != null)
+                return file;
         }
+
         return null;
     }
-
 }
