@@ -16,7 +16,7 @@ public class ProjectBuilder {
     private Project  _proj;
 
     // The JavaFileBuilder
-    private JavaFileBuilder  _javaFileBuilder;
+    protected JavaFileBuilder  _javaFileBuilder;
 
     // The default file builder
     private ProjectFileBuilder  _defaultFileBuilder;
@@ -70,7 +70,7 @@ public class ProjectBuilder {
      */
     public void interruptBuild()
     {
-        _javaFileBuilder._interrupt = true;
+        _javaFileBuilder.interruptBuild();
     }
 
     /**

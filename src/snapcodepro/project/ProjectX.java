@@ -40,6 +40,7 @@ public class ProjectX extends javakit.ide.Project {
 
         // Create/set ProjectBuilder
         _projBuilder = new ProjectBuilder(this);
+        _projBuilder._javaFileBuilder = new JavaFileBuilderImpl(this);
 
         // Load dependent projects
         getProjects();
