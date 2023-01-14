@@ -1,6 +1,7 @@
 package snapcodepro.app;
 
 import javakit.ide.Breakpoint;
+import javakit.ide.ProjectFiles;
 import snapcodepro.debug.DebugApp;
 import snapcodepro.debug.RunApp;
 import snapcodepro.project.ProjectX;
@@ -84,11 +85,16 @@ public class AppLauncher {
 
         // Get class file for given file (should be JavaFile)
         WebFile classFile;
-        if (runFile.getType().equals("java"))
-            classFile = _proj.getClassFileForJavaFile(runFile);
+        if (runFile.getType().equals("java")) {
+            ProjectFiles projectFiles = _proj.getProjectFiles();
+            classFile = projectFiles.getClassFileForJavaFile(runFile);
+        }
 
         // Try generic way to get class file
-        else classFile = _proj.getBuildFile(runFile.getPath(), false, runFile.isDir());
+        else {
+            ProjectFiles projectFiles = _proj.getProjectFiles();
+            classFile = projectFiles.getBuildFile(runFile.getPath(), false, runFile.isDir());
+        }
 
         // If ClassFile found, set run file
         if (classFile != null)

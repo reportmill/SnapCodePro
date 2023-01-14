@@ -2,16 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.project;
-
+import javakit.ide.ProjectFiles;
 import snap.web.WebFile;
 
 import javax.tools.*;
 import javax.tools.JavaFileObject.Kind;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
 import java.util.*;
 
 /**
@@ -20,19 +16,19 @@ import java.util.*;
 public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
 
     // The SnapCompiler
-    SnapCompiler _compiler;
+    protected SnapCompiler  _compiler;
 
     // The project
-    ProjectX _proj;
+    private ProjectX _proj;
 
     // A map of previously accessed SnapFileObjects for paths
-    Map<String, SnapFileJFO> _jfos = new HashMap();
+    private Map<String, SnapCompilerJFO>  _jfos = new HashMap<>();
 
     // The class loader to find project lib classes
-    ClassLoader _cldr;
+    private ClassLoader _cldr;
 
     // Whether compile includes SnapKit
-    boolean _excludeSnapKit;
+    protected boolean  _excludeSnapKit;
 
     /**
      * Construct a new FileManager which forwards to the <var>fileManager</var>
@@ -82,11 +78,12 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      */
     public JavaFileObject getJavaFileForOutput(Location aLoc, String aClassName, Kind kind, FileObject aSblg)
     {
-        WebFile jfile = ((SnapFileJFO) aSblg).getFile();
-        String cpath = "/" + aClassName.replace('.', '/') + ".class";
-        WebFile cfile = _proj.getBuildFile(cpath, true, false);
-        SnapFileJFO jfo = getJFO(cfile.getPath(), cfile);
-        jfo._sourceFile = jfile;
+        WebFile javaFile = ((SnapCompilerJFO) aSblg).getFile();
+        String classPath = "/" + aClassName.replace('.', '/') + ".class";
+        ProjectFiles projectFiles = _proj.getProjectFiles();
+        WebFile classFile = projectFiles.getBuildFile(classPath, true, false);
+        SnapCompilerJFO jfo = getJFO(classFile.getPath(), classFile);
+        jfo._sourceFile = javaFile;
         return jfo;
     }
 
@@ -104,7 +101,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
      */
     public String inferBinaryName(Location aLoc, JavaFileObject aFile)
     {
-        if (aFile instanceof SnapFileJFO) return ((SnapFileJFO) aFile).getBinaryName();
+        if (aFile instanceof SnapCompilerJFO) return ((SnapCompilerJFO) aFile).getBinaryName();
         return super.inferBinaryName(aLoc, aFile);
     }
 
@@ -114,7 +111,7 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     public boolean isSameFile(FileObject a, FileObject b)
     {
         if (a == b) return true;
-        if (a instanceof SnapFileJFO || b instanceof SnapFileJFO) return false;
+        if (a instanceof SnapCompilerJFO || b instanceof SnapCompilerJFO) return false;
         return super.isSameFile(a, b);
     }
 
@@ -144,12 +141,13 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
             return iterable;
 
         // Add Class files
-        List files = new ArrayList();
+        List<JavaFileObject> files = new ArrayList<>();
         if (kinds.contains(Kind.CLASS)) {
             WebFile pkgDir = getBuildDir(aPkgName);
             if (pkgDir != null)
                 for (WebFile file : pkgDir.getFiles()) {
-                    if (file.getType().equals("class")) files.add(getJFO(file.getPath(), file));
+                    if (file.getType().equals("class"))
+                        files.add(getJFO(file.getPath(), file));
                 }
         }
 
@@ -158,7 +156,8 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
             WebFile pkgDir = getSourceDir(aPkgName);
             if (pkgDir != null)
                 for (WebFile file : pkgDir.getFiles()) {
-                    if (isJavaFile(file)) files.add(getJFO(file.getPath(), file));
+                    if (isJavaFile(file))
+                        files.add(getJFO(file.getPath(), file));
                 }
         }
 
@@ -180,9 +179,14 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     private WebFile getBuildDir(String aPackageName)
     {
         WebFile buildDir = _proj.getBuildDir();
-        if (aPackageName.length() == 0) return buildDir;
+        if (aPackageName.length() == 0)
+            return buildDir;
+
         String dirname = aPackageName.replace('.', '/');
-        WebFile file = _proj.getBuildFile('/' + dirname, false, true); //buildDir.getFile(dirname);
+        ProjectFiles projectFiles = _proj.getProjectFiles();
+        WebFile file = projectFiles.getBuildFile('/' + dirname, false, true); //buildDir.getFile(dirname);
+
+        // Return
         return file;
     }
 
@@ -192,7 +196,9 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     private WebFile getSourceDir(String aPackageName)
     {
         WebFile sourceDir = _proj.getSourceDir();
-        if (aPackageName.length() == 0) return sourceDir;
+        if (aPackageName.length() == 0)
+            return sourceDir;
+
         String dirname = aPackageName.replace('.', '/');
         return _proj.getSourceFile('/' + dirname, false, true); //sourceDir.getFile(dirname);
     }
@@ -200,129 +206,17 @@ public class SnapCompilerFM extends ForwardingJavaFileManager<JavaFileManager> {
     /**
      * Returns a JavaFleObject for given path (with option to provide file for efficiency).
      */
-    public synchronized SnapFileJFO getJFO(String aPath, WebFile aFile)
+    public synchronized SnapCompilerJFO getJFO(String aPath, WebFile aFile)
     {
-        SnapFileJFO jfo = _jfos.get(aPath);
+        SnapCompilerJFO jfo = _jfos.get(aPath);
         if (jfo == null) {
             WebFile dfile = aFile != null ? aFile : _proj.getFile(aPath);
             if (dfile != null)
-                _jfos.put(aPath, jfo = new SnapFileJFO(dfile));
+                _jfos.put(aPath, jfo = new SnapCompilerJFO(_proj, dfile, _compiler));
         }
+
+        // Return
         return jfo;
-    }
-
-    /**
-     * A Java File Object for a WebFile.
-     */
-    class SnapFileJFO extends SimpleJavaFileObject {
-
-        // The SnapCompiler and JavaFile (if available)
-        WebFile _file;
-        WebFile _sourceFile;
-        String _bname, _str;
-
-        /**
-         * Creates a new SnapFileJFO with WebFile, SnapCompiler and (optional) source file.
-         */
-        protected SnapFileJFO(WebFile aFile)
-        {
-            super(URI.create(aFile.getPath()), isJavaFile(aFile) ? Kind.SOURCE : Kind.CLASS);
-            _file = aFile;
-
-            // If Class file, Get SourceFile
-            if (_file.getType().equals("class"))
-                _sourceFile = _proj.getJavaFileForClassFile(_file);
-        }
-
-        /**
-         * Returns the file.
-         */
-        public WebFile getFile()
-        {
-            return _file;
-        }
-
-        /**
-         * Returns ModifiedTime of WebFile.
-         */
-        public long getLastModified()
-        {
-            return _file.getLastModTime();
-        }
-
-        /**
-         * Returns the "binary name" for the CompilerFileManager inferBinaryName method.
-         */
-        public String getBinaryName()
-        {
-            if (_bname != null) return _bname;
-            String path = _file.getPath();
-            int index = path.lastIndexOf('.');
-            String name = path.substring(1, index).replace('/', '.');
-            return _bname = name;
-        }
-
-        /**
-         * Returns the char content of file (for source file).
-         */
-        public CharSequence getCharContent(boolean ignoreEncodingErrors)
-        {
-            if (_str != null) return _str;
-            _str = _file.getText();
-            _proj.getRootProject().getBuildIssues().removeIssuesForFile(_file);
-            return _str;
-        }
-
-        /**
-         * Returns input stream for source/class bytes.
-         */
-        public InputStream openInputStream()
-        {
-            return _file.getInputStream();
-        }
-
-        /**
-         * Returns output stream for byte code.
-         */
-        public OutputStream openOutputStream()
-        {
-            return new ByteArrayOutputStream() {
-                public void close() throws IOException
-                {
-
-                    // Do normal close and add SourceFile to Compiler.CompiledFiles
-                    super.close();
-                    _compiler._compJFs.add(_sourceFile);
-
-                    // Get bytes and whether class file is modified
-                    byte[] bytes = toByteArray();
-                    boolean modified = !Arrays.equals(bytes, _file.getBytes());
-
-                    // If modified, set File.Bytes and add ClassFile to ModifiedFiles and SourceFile to ModifiedSources
-                    if (modified) {
-                        _file.setBytes(bytes);
-                        _compiler._modJFs.add(_sourceFile);
-                    }
-
-                    // If file was modified or a real compile file, save
-                    if (modified || _file.getLastModTime() < _sourceFile.getLastModTime()) {
-                        try {
-                            _file.save();
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-            };
-        }
-
-        /**
-         * This is weird, but if I don't override this, backtraces show: "MyClass from JavaCompilerFO:22"
-         */
-        public String toString()
-        {
-            return uri.toString();
-        }
     }
 
 }

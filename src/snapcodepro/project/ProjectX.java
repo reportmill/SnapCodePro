@@ -34,7 +34,7 @@ public class ProjectX extends javakit.ide.Project {
         super(aSite);
 
         // Create/set ProjectBuilder.JavaFileBuilderImpl
-        JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(ProjectX.this);
+        JavaFileBuilder javaFileBuilder = new JavaFileBuilderImpl(this);
         _projBuilder.setJavaFileBuilder(javaFileBuilder);
 
         // Load dependent projects
@@ -44,10 +44,7 @@ public class ProjectX extends javakit.ide.Project {
     /**
      * Returns the parent project for this project.
      */
-    public ProjectX getParent()
-    {
-        return _parent;
-    }
+    public ProjectX getParent()  { return _parent; }
 
     /**
      * Returns the top most project.
@@ -69,10 +66,7 @@ public class ProjectX extends javakit.ide.Project {
     /**
      * Returns the set of projects this project depends on.
      */
-    public ProjectSet getProjectSet()
-    {
-        return _projSet;
-    }
+    public ProjectSet getProjectSet()  { return _projSet; }
 
     /**
      * Returns the project class loader.
@@ -98,30 +92,6 @@ public class ProjectX extends javakit.ide.Project {
 
         // Return
         return urlClassLoader;
-    }
-
-    /**
-     * Returns the build file for given path.
-     */
-    public WebFile getBuildFile(String aPath, boolean doCreate, boolean isDir)
-    {
-        return _projFiles.getBuildFile(aPath, doCreate, isDir);
-    }
-
-    /**
-     * Returns the Java for a class file, if it can be found.
-     */
-    public WebFile getJavaFileForClassFile(WebFile aClassFile)
-    {
-        return _projFiles.getJavaFileForClassFile(aClassFile);
-    }
-
-    /**
-     * Returns the class file for a given Java file.
-     */
-    public WebFile getClassFileForJavaFile(WebFile aJavaFile)
-    {
-        return _projFiles.getClassFileForJavaFile(aJavaFile);
     }
 
     /**
@@ -216,6 +186,8 @@ public class ProjectX extends javakit.ide.Project {
     {
         if (isConfigFile(aFile))
             readSettings();
+
+        // Add build file
         _projBuilder.addBuildFile(aFile, false);
     }
 

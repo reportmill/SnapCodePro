@@ -165,13 +165,13 @@ public class SnapCompiler implements DiagnosticListener {
      */
     protected BuildIssue createBuildIssue(Diagnostic aDiagnostic)
     {
-        if (!(aDiagnostic.getSource() instanceof SnapCompilerFM.SnapFileJFO)) {
+        if (!(aDiagnostic.getSource() instanceof SnapCompilerJFO)) {
             /*System.err.println("SnapCompiler: Unknown Issue: " + aDiagnostic); */
             return null;
         }
 
         // Get File
-        SnapCompilerFM.SnapFileJFO snapFileJFO = (SnapCompilerFM.SnapFileJFO) aDiagnostic.getSource();
+        SnapCompilerJFO snapFileJFO = (SnapCompilerJFO) aDiagnostic.getSource();
         WebFile file = snapFileJFO.getFile();
 
         // Get Kind
