@@ -1,5 +1,5 @@
 package snapcodepro.app;
-import javakit.ide.BuildIssue;
+import javakit.project.BuildIssue;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
 import snap.view.*;

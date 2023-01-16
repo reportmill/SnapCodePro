@@ -3,7 +3,7 @@
  */
 package snapcodepro.project;
 
-import javakit.ide.BuildIssue;
+import javakit.project.BuildIssue;
 import snap.util.FilePathUtils;
 import snap.web.WebFile;
 

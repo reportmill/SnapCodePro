@@ -1,11 +1,11 @@
 package snapcodepro.project;
 
-import javakit.ide.ProjectFiles;
+import javakit.project.ProjectFiles;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
-import javakit.ide.BuildIssue;
+import javakit.project.BuildIssue;
 import snap.parse.ParseException;
 import snap.parse.ParseNode;
 import snap.parse.Parser;

@@ -1,5 +1,5 @@
 package snapcodepro.project;
-import javakit.ide.ProjectConfig;
+import javakit.project.ProjectConfig;
 import snap.props.PropChange;
 import snap.util.XMLElement;
 import snap.web.WebFile;

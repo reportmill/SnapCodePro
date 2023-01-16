@@ -2,7 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.project;
-import javakit.ide.*;
+import javakit.project.BuildIssues;
+import javakit.project.JavaFileBuilder;
+import javakit.project.Project;
+import javakit.project.ProjectConfig;
 import javakit.resolver.Resolver;
 import snap.util.FilePathUtils;
 import snap.util.TaskMonitor;
@@ -15,7 +18,7 @@ import java.net.URLClassLoader;
 /**
  * A class to manage build attributes and behavior for a WebSite.
  */
-public class ProjectX extends javakit.ide.Project {
+public class ProjectX extends Project {
 
     // The project that loaded us
     protected ProjectX  _parent;

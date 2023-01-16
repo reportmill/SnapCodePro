@@ -1,6 +1,6 @@
 package snapcodepro.debug;
 
-import javakit.ide.Breakpoint;
+import javakit.project.Breakpoint;
 import snap.util.StringUtils;
 import snap.web.WebURL;
 

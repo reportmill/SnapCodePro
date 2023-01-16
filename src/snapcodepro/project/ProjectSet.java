@@ -1,7 +1,7 @@
 package snapcodepro.project;
 
-import javakit.ide.ProjectConfig;
-import javakit.ide.ProjectFiles;
+import javakit.project.ProjectConfig;
+import javakit.project.ProjectFiles;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;

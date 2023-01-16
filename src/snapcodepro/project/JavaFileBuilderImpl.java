@@ -2,10 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.project;
-import javakit.ide.BuildIssue;
-import javakit.ide.JavaFileBuilder;
-import javakit.ide.ProjectBuilder;
-import javakit.ide.ProjectFiles;
+import javakit.project.BuildIssue;
+import javakit.project.JavaFileBuilder;
+import javakit.project.ProjectBuilder;
+import javakit.project.ProjectFiles;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;

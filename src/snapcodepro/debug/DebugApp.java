@@ -4,7 +4,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.request.*;
-import javakit.ide.Breakpoint;
+import javakit.project.Breakpoint;
 import snapcodepro.debug.Exceptions.NoSessionException;
 import snapcodepro.debug.Exceptions.VMLaunchFailureException;
 import snap.util.ArrayUtils;

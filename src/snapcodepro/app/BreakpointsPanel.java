@@ -1,6 +1,6 @@
 package snapcodepro.app;
-import javakit.ide.Breakpoint;
-import javakit.ide.Breakpoints;
+import javakit.project.Breakpoint;
+import javakit.project.Breakpoints;
 import snap.view.ViewOwner;
 import snapcodepro.project.ProjectX;
 import snap.view.ListView;

@@ -1,7 +1,7 @@
 package snapcodepro.app;
-import javakit.ide.Breakpoint;
-import javakit.ide.Breakpoints;
-import javakit.ide.BuildIssue;
+import javakit.project.Breakpoint;
+import javakit.project.Breakpoints;
+import javakit.project.BuildIssue;
 import javakit.ide.JavaTextPane;
 import snapcodepro.debug.RunApp;
 import snapcodepro.project.ProjectX;

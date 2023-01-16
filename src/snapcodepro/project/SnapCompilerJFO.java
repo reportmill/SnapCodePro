@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.project;
-import javakit.ide.Project;
-import javakit.ide.ProjectFiles;
+import javakit.project.Project;
+import javakit.project.ProjectFiles;
 import snap.web.WebFile;
 
 import javax.tools.SimpleJavaFileObject;
