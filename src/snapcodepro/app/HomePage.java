@@ -92,7 +92,7 @@ public class HomePage extends WebPage {
 
         // Handle NewJavaFile
         if (anEvent.equals("JavaPlayground") && anEvent.isMouseRelease()) {
-            WebFile file = getRootSite().createFile("/Playground.pgd", false);
+            WebFile file = getRootSite().createFileForPath("/Playground.pgd", false);
             WebPage page = getBrowser().createPage(file);
             //file = page.showNewFilePanel(getBrowser());
             if (file != null) try {
@@ -188,7 +188,7 @@ public class HomePage extends WebPage {
         String str = new ViewArchiver().writeToXML(scene).getString();
 
         // Create file, set content, save and return
-        sfile = aSite.createFile(path, false);
+        sfile = aSite.createFileForPath(path, false);
         sfile.setText(str);
         try {
             sfile.save();
@@ -229,7 +229,7 @@ public class HomePage extends WebPage {
         sb.append("}");
 
         // Create file, set content, save and return
-        jfile = aSite.createFile(path, false);
+        jfile = aSite.createFileForPath(path, false);
         jfile.setText(sb.toString());
         try {
             jfile.save();

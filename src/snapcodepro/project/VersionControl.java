@@ -72,7 +72,7 @@ public class VersionControl {
     protected WebFile getCloneDir()
     {
         WebFile cloneDir = getSite().getSandbox().getFileForPath("Remote.clone");
-        if (cloneDir == null) cloneDir = getSite().getSandbox().createFile("Remote.clone", true);
+        if (cloneDir == null) cloneDir = getSite().getSandbox().createFileForPath("Remote.clone", true);
         return cloneDir;
     }
 
@@ -139,7 +139,7 @@ public class VersionControl {
     {
         if (aSite == null) return null;
         WebFile file = aSite.getFileForPath(aPath);
-        if (file == null && doCreate) file = aSite.createFile(aPath, isDir);
+        if (file == null && doCreate) file = aSite.createFileForPath(aPath, isDir);
         return file;
     }
 
@@ -323,7 +323,7 @@ public class VersionControl {
             WebFile cfile = getCloneFile(aFile.getPath(), false, false);
             if (cfile != null) for (WebFile file : cfile.getFiles()) {
                 if (fsite.getFileForPath(file.getPath()) == null)
-                    getChangedFiles(fsite.createFile(file.getPath(), file.isDir()), theFiles);
+                    getChangedFiles(fsite.createFileForPath(file.getPath(), file.isDir()), theFiles);
             }
         }
 
@@ -568,7 +568,7 @@ public class VersionControl {
     {
         if (SnapUtils.equals(aURLS, getRemoteURLString(aSite))) return;
         WebFile file = aSite.getSandbox().getFileForPath("/settings/remote");
-        if (file == null) file = aSite.getSandbox().createFile("/settings/remote", false);
+        if (file == null) file = aSite.getSandbox().createFileForPath("/settings/remote", false);
         try {
             if (aURLS == null || aURLS.length() == 0) {
                 if (file.getExists()) file.delete();

@@ -374,7 +374,7 @@ public class ProjectConfigFile {
 
         // Create .classpath file
         WebSite site = aProj.getSite();
-        WebFile file = site.createFile(".classpath", false);
+        WebFile file = site.createFileForPath(".classpath", false);
 
         // Set default text and save
         file.setText(sb.toString());

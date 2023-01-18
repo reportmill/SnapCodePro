@@ -115,7 +115,7 @@ public class RunConfigs {
     protected WebFile getFile()
     {
         WebFile file = _site.getSandbox().getFileForPath("/settings/run_configs");
-        if (file == null) file = _site.getSandbox().createFile("/settings/run_configs", false);
+        if (file == null) file = _site.getSandbox().createFileForPath("/settings/run_configs", false);
         return file;
     }
 

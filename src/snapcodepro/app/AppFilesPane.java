@@ -441,7 +441,7 @@ public class AppFilesPane extends ViewOwner {
         if (aFile.isDirectory()) {
 
             // Create new directory
-            WebFile directory = site.createFile(aDirectory.getDirPath() + aFile.getName(), true);
+            WebFile directory = site.createFileForPath(aDirectory.getDirPath() + aFile.getName(), true);
             for (File file : aFile.listFiles())
                 addFile(directory, file);
         }
@@ -488,7 +488,7 @@ public class AppFilesPane extends ViewOwner {
             }
 
             // Get file (force this time), set bytes, save and select file
-            siteFile = site.createFile(aDirectory.getDirPath() + name, false);
+            siteFile = site.createFileForPath(aDirectory.getDirPath() + name, false);
             siteFile.setBytes(FileUtils.getBytes(aFile));
             try {
                 siteFile.save();
@@ -626,7 +626,7 @@ public class AppFilesPane extends ViewOwner {
         }
 
         // Set bytes and save
-        WebFile newFile = aFile.getSite().createFile(path, aFile.isDir());
+        WebFile newFile = aFile.getSite().createFileForPath(path, aFile.isDir());
         newFile.setBytes(aFile.getBytes());
         try {
             newFile.save();
@@ -690,7 +690,7 @@ public class AppFilesPane extends ViewOwner {
         String path = sdir.getDirPath() + "Untitled" + extension;
 
         // Create suggested file and page
-        WebFile file = site.createFile(path, isDir);
+        WebFile file = site.createFileForPath(path, isDir);
         WebPage page = _appPane.getBrowser().createPage(file);
 
         // ShowNewFilePanel and save returned file
@@ -767,7 +767,7 @@ public class AppFilesPane extends ViewOwner {
 
         // Get file
         WebFile file = aFile;
-        if (file == null && config != null) file = site.createFile(config.getMainFilePath(), false);
+        if (file == null && config != null) file = site.createFileForPath(config.getMainFilePath(), false);
         if (file == null) file = AppLauncher.getLastRunFile();
         if (file == null) file = getSelectedFile();
 

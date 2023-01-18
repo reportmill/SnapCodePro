@@ -41,7 +41,7 @@ public class DiffPage extends WebPage {
     public DiffPage(WebFile aFile)
     {
         _localFile = aFile; //WebURL url = WebURL.getURL(aFile.getURL().getString() + ".diff"); setURL(url);
-        WebFile cmpFile = aFile.getSite().createFile(aFile.getPath() + ".diff", false);
+        WebFile cmpFile = aFile.getSite().createFileForPath(aFile.getPath() + ".diff", false);
         setFile(cmpFile);
     }
 
