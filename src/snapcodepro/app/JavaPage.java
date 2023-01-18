@@ -4,7 +4,6 @@ import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
 import javakit.parse.JavaTextDoc;
-import javakit.resolver.Resolver;
 import snap.util.Convert;
 import snap.util.ListUtils;
 import snapcodepro.project.JavaData;
@@ -73,12 +72,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
 
         // Create JavaTextDoc
         WebFile javaFile = getFile();
-        JavaTextDoc javaTextDoc = JavaTextDoc.newFromSource(javaFile);
-
-        // Get/set Resolver
-        ProjectX proj = ProjectX.getProjectForFile(javaFile);
-        Resolver resolver = proj.getResolver();
-        javaTextDoc.setResolver(resolver);
+        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(javaFile);
 
         // Set TextArea.TextDoc and FirstFocus
         JavaTextArea javaTextArea = getTextArea();
@@ -95,12 +89,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
 
         // Create JavaTextDoc
         WebFile javaFile = getFile();
-        JavaTextDoc javaTextDoc = JavaTextDoc.newFromSource(javaFile);
-
-        // Get/set Resolver
-        ProjectX proj = ProjectX.getProjectForFile(javaFile);
-        Resolver resolver = proj.getResolver();
-        javaTextDoc.setResolver(resolver);
+        JavaTextDoc javaTextDoc = JavaTextDoc.getJavaTextDocForSource(javaFile);
 
         // Set TextArea.TextDoc
         JavaTextArea javaTextArea = getTextArea();
