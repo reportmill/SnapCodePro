@@ -1,16 +1,10 @@
 package snapcodepro.project;
-
 import javakit.project.ProjectFiles;
 import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
-import javakit.project.BuildIssue;
-import snap.parse.ParseException;
-import snap.parse.ParseNode;
-import snap.parse.Parser;
 import snap.web.WebFile;
-
 import java.util.*;
 
 /**
@@ -294,76 +288,6 @@ public class JavaData {
 
         // Return
         return jfile;
-    }
-
-    /**
-     * Returns a set of unused imports.
-     */
-    public List<BuildIssue> getUnusedImports()
-    {
-        String string = _file.getText();
-        Parser importsParser = JavaParser.getShared().getImportsParser();
-
-        // Get parse node
-        ParseNode node = null;
-        try {
-            if (string != null && string.length() > 0)
-                node = importsParser.parse(string);
-        }
-        catch (ParseException e) {
-            System.err.println("JavaData.getUnusedImports Parse Exception");
-            e.printStackTrace();
-        }
-
-        // If no node, just return
-        if (node == null)
-            return Collections.EMPTY_LIST;
-
-        // Get JFile
-        JFile jfile = node.getCustomNode(JFile.class);
-        jfile.setSourceFile(_file);
-        ProjectX proj = getProject();
-        Resolver resolver = proj.getResolver();
-        jfile.setResolver(resolver);
-
-        // Get importDecls
-        List<JImportDecl> imports = jfile.getImportDecls();
-        if (imports.size() == 0)
-            return Collections.EMPTY_LIST;
-
-        // Iterate over class references and remove used ones
-        Set<JavaDecl> refs = getRefs();
-        Set<JImportDecl> importsSet = new HashSet<>(imports);
-        for (JavaDecl ref : refs) {
-            if (!(ref instanceof JavaClass)) continue;
-            String simpleName = ref.getSimpleName();
-            JImportDecl implDecl = jfile.getImport(simpleName);
-            if (implDecl != null) {
-                importsSet.remove(implDecl);
-                if (importsSet.size() == 0)
-                    return Collections.EMPTY_LIST;
-            }
-        }
-
-        // Iterate over references and remove used ones
-    /*for(JavaDecl ref : refs) { if(ref.isClass() || ref.isConstructor()) continue;
-        String sname = ref.getEvalType().getSimpleName(); JImportDecl idecl = jfile.getImport(sname);
-        if(idecl!=null) { iset.remove(idecl); if(iset.size()==0) return Collections.EMPTY_LIST; } }*/
-
-        // Do full parse and eval
-        importsSet = getJFile().getUnusedImports();
-        if (importsSet.size() == 0)
-            return Collections.EMPTY_LIST;
-
-        // Create BuildIssues
-        List<BuildIssue> issues = new ArrayList<>();
-        for (JImportDecl idecl : importsSet)
-            issues.add(new BuildIssue().init(_file, BuildIssue.Kind.Warning,
-                    "The import " + idecl.getName() + " is never used",
-                    idecl.getLineIndex(), 0, idecl.getStartCharIndex(), idecl.getEndCharIndex()));
-
-        // Return
-        return issues;
     }
 
     /**

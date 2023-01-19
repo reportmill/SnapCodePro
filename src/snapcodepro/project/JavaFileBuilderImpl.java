@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.project;
-import javakit.project.BuildIssue;
-import javakit.project.JavaFileBuilder;
-import javakit.project.ProjectBuilder;
-import javakit.project.ProjectFiles;
+import javakit.project.*;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
@@ -215,15 +212,14 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         if (_compiler == null) return;
 
         // Iterate over compiled files
-        for (WebFile classFile : _compiledFiles) {
+        for (WebFile javaFile : _compiledFiles) {
 
-            // Get JavaData for ClassFile - just continue if contains errors
-            JavaData javaData = JavaData.getJavaDataForFile(classFile);
-            if (_errorFiles.contains(classFile))
+            // Just continue if file contains errors
+            if (_errorFiles.contains(javaFile))
                 continue;
 
             // Iterate over build issues
-            List<BuildIssue> unusedImportIssues = javaData.getUnusedImports();
+            BuildIssue[] unusedImportIssues = getUnusedImportBuildIssuesForFile(javaFile);
             for (BuildIssue buildIssue : unusedImportIssues)
                 _compiler.report(buildIssue);
         }
