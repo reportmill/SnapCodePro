@@ -26,6 +26,9 @@ public class AppPane extends ViewOwner {
     // The list of sites
     private List<WebSite>  _sites = new ArrayList<>();
 
+    // The ProjectFilesPane
+    private ProjectFilesPane  _projFilesPane;
+
     // The AppPaneToolBar
     protected AppPaneToolBar  _toolBar = new AppPaneToolBar(this);
 
@@ -40,9 +43,6 @@ public class AppPane extends ViewOwner {
 
     // The ProcPane manages run/debug processes
     private ProcPane  _procPane = new ProcPane(this);
-
-    // The AppBroswer for displaying editors
-    private AppBrowser _browser;
 
     // The pane that the browser sits in
     private SplitView _browserBox;
@@ -68,9 +68,6 @@ public class AppPane extends ViewOwner {
     // The SearchPane
     private SearchPane  _searchPane = new SearchPane(this);
 
-    // The currently selected file
-    private WebFile  _selFile;
-
     // Whether to show side bar
     private boolean  _showSideBar = true;
 
@@ -84,14 +81,24 @@ public class AppPane extends ViewOwner {
     private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
 
     /**
-     * Returns the browser.
+     * Constructor.
      */
-    public AppBrowser getBrowser()  { return _browser; }
+    public AppPane()
+    {
+        super();
+
+        _projFilesPane = new ProjectFilesPane(this);
+    }
 
     /**
-     * Returns the browser box.
+     * Returns the FilesPane.
      */
-    public SplitView getBrowserBox()  { return _browserBox; }
+    public ProjectFilesPane getProjFilesPane()  { return _projFilesPane; }
+
+    /**
+     * Returns the browser.
+     */
+    public AppBrowser getBrowser()  { return _projFilesPane.getBrowser(); }
 
     /**
      * Returns the toolbar.
@@ -130,7 +137,7 @@ public class AppPane extends ViewOwner {
      */
     public boolean isSupportTrayVisible()
     {
-        return getBrowserBox().getItemCount() > 1;
+        return _browserBox.getItemCount() > 1;
     }
 
     /**
@@ -143,12 +150,11 @@ public class AppPane extends ViewOwner {
 
         // Get SupportTray UI and SplitView
         View supTrayUI = _supportTray.getUI();
-        SplitView spane = getBrowserBox();
 
         // Add/remove SupportTrayUI with animator
         if (aValue)
-            spane.addItemWithAnim(supTrayUI, 240);
-        else spane.removeItemWithAnim(supTrayUI);
+            _browserBox.addItemWithAnim(supTrayUI, 240);
+        else _browserBox.removeItemWithAnim(supTrayUI);
 
         // Update ShowTrayButton
         setViewText("ShowTrayButton", aValue ? "Hide Tray" : "Show Tray");
@@ -295,30 +301,14 @@ public class AppPane extends ViewOwner {
     /**
      * Returns the selected file.
      */
-    public WebFile getSelectedFile()  { return _selFile; }
+    public WebFile getSelectedFile()  { return _projFilesPane.getSelectedFile(); }
 
     /**
      * Sets the selected site file.
      */
     public void setSelectedFile(WebFile aFile)
     {
-        // If file already set, just return
-        if (aFile == null || aFile == getSelectedFile()) return;
-        _selFile = aFile;
-
-        // Set selected file and update tree
-        if (_selFile.isFile() || _selFile.isRoot())
-            getBrowser().setFile(_selFile);
-        _filesPane.resetLater();
-    }
-
-    /**
-     * Returns the selected directory.
-     */
-    public WebFile getSelectedDir()
-    {
-        WebFile sf = getSelectedFile();
-        return sf.isDir() ? sf : sf.getParent();
+        _projFilesPane.setSelectedFile(aFile);
     }
 
     /**
@@ -328,7 +318,8 @@ public class AppPane extends ViewOwner {
     {
         WebFile file = getSelectedFile();
         WebSite site = file != null ? file.getSite() : null;
-        if (!ListUtils.containsId(getSites(), site)) site = getSite(0);
+        if (!ListUtils.containsId(getSites(), site))
+            site = getSite(0);
         return site;
     }
 
@@ -376,12 +367,10 @@ public class AppPane extends ViewOwner {
      */
     protected void initUI()
     {
-        // Get AppBrowser
-        _browser = getView("Browser", AppBrowser.class);
-        _browser.setAppPane(this);
-
-        // Listen to Browser PropChanges, to update ActivityText, ProgressBar, Window.Title
-        _browser.addPropChangeListener(pc -> resetLater());
+        // Get ProjectFilesPane
+        View projectFilesUI = _projFilesPane.getUI();
+        ColView colView = getView("BrowserAndStatusBar", ColView.class);
+        colView.addChild(projectFilesUI, 0);
 
         // Get SideBarSplit and add FilesPane, ProcPane
         _sideBarSplit = getView("SideBarSplitView", SplitView.class);
