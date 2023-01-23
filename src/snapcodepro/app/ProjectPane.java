@@ -2,7 +2,7 @@ package snapcodepro.app;
 import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.ide.NodeMatcher;
-import snapcodepro.project.JavaData;
+import javakit.project.JavaAgent;
 import snapcodepro.project.ProjectX;
 import snapcodepro.project.ProjectSet;
 import snapcodepro.project.VersionControl;
@@ -615,10 +615,12 @@ public class ProjectPane extends BindingViewOwner {
     private void findUndefines(WebFile aFile)
     {
         if (aFile.isFile() && aFile.getType().equals("java")) {
-            JavaData jdata = JavaData.getJavaDataForFile(aFile);
-            JNode jfile = jdata.getJFile();
+            JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
+            JNode jfile = javaAgent.getJFile();
             findUndefines(jfile);
-        } else if (aFile.isDir())
+        }
+
+        else if (aFile.isDir())
             for (WebFile child : aFile.getFiles())
                 findUndefines(child);
     }
@@ -629,19 +631,25 @@ public class ProjectPane extends BindingViewOwner {
     private void findUndefines(JNode aNode)
     {
         if (_undefCount > 49) return;
+
         if (aNode.getDecl() == null && NodeMatcher.isDeclExpected(aNode)) {
             aNode.getDecl();
             _undefCount++;
+
             if (aNode.getFile() != _symFile) {
                 _symFile = aNode.getFile();
                 showSymText("\n" + aNode.getFile().getSourceFile().getName() + ":\n\n");
             }
             try {
                 showSymText("    " + _undefCount + ". " + aNode + '\n');
-            } catch (Exception e) {
+            }
+
+            catch (Exception e) {
                 showSymText(e.toString());
             }
-        } else if (aNode.getChildCount() > 0)
+        }
+
+        else if (aNode.getChildCount() > 0)
             for (JNode child : aNode.getChildren())
                 findUndefines(child);
     }

@@ -45,11 +45,13 @@ public class JavaFileBuilderImpl extends JavaFileBuilder {
         boolean needsBuild = !classFile.getExists() || classFile.getLastModTime() < aFile.getLastModTime();
 
         // If not out of date, updateDependencies, compatibilities
-        if (!needsBuild && !JavaData.getJavaDataForFile(aFile).isDependenciesSet()) {
+        if (!needsBuild) {
             JavaData javaData = JavaData.getJavaDataForFile(aFile);
-            javaData.updateDependencies();
-            needsBuild = true;
-            //int c = updateCompatability(aFile); if(c<0) needsBuild=true; if(c!=-2) jdata.updateDependencies();
+            if (!javaData.isDependenciesSet()) {
+                javaData.updateDependencies();
+                needsBuild = true;
+                //int c = updateCompatability(aFile); if(c<0) needsBuild=true; if(c!=-2) jdata.updateDependencies();
+            }
         }
 
         // Return NeedsBuild

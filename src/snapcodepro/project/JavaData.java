@@ -1,6 +1,5 @@
 package snapcodepro.project;
 import javakit.project.ProjectFiles;
-import javakit.parse.*;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaClass;
 import javakit.resolver.Resolver;
@@ -13,10 +12,10 @@ import java.util.*;
 public class JavaData {
 
     // The java file
-    private WebFile  _file;
+    private WebFile  _javaFile;
 
     // The Project that owns this file
-    private ProjectX _proj;
+    private ProjectX  _proj;
 
     // The set of declarations in this JavaFile
     private Set<JavaDecl>  _decls = new HashSet<>();
@@ -30,15 +29,15 @@ public class JavaData {
     // The set of files that depend on our file
     private Set<WebFile>  _dependents = new HashSet<>();
 
-    // The parsed version of this JavaFile
-    private JFile _jfile;
+    // Whether Dependencies have been set - should  maybe change to NeedsDependenciesUpdate
+    private boolean  _isDependenciesSet;
 
     /**
      * Creates a new JavaData for given file.
      */
     public JavaData(WebFile aFile)
     {
-        _file = aFile;
+        _javaFile = aFile;
     }
 
     /**
@@ -50,7 +49,7 @@ public class JavaData {
         if (_proj != null) return _proj;
 
         // Get, set, return
-        ProjectX proj = ProjectX.getProjectForFile(_file);
+        ProjectX proj = ProjectX.getProjectForFile(_javaFile);
         return _proj = proj;
     }
 
@@ -61,7 +60,7 @@ public class JavaData {
     {
         ProjectX proj = getProject();
         ProjectFiles projectFiles = proj.getProjectFiles();
-        WebFile[] classFiles = projectFiles.getClassFilesForJavaFile(_file);
+        WebFile[] classFiles = projectFiles.getClassFilesForJavaFile(_javaFile);
         return classFiles;
     }
 
@@ -96,36 +95,17 @@ public class JavaData {
     /**
      * Returns the references in this JavaFile.
      */
-    public Set<JavaDecl> getRefs()
-    {
-        return _refs;
-    }
-
-    /**
-     * Returns the set of files that our file depends on.
-     */
-    public Set<WebFile> getDependencies()
-    {
-        return _dependencies;
-    }
+    public Set<JavaDecl> getRefs()  { return _refs; }
 
     /**
      * Returns the set of files that depend on our file.
      */
-    public Set<WebFile> getDependents()
-    {
-        return _dependents;
-    }
+    public Set<WebFile> getDependents()  { return _dependents; }
 
     /**
      * Returns whether dependencies are set.
      */
-    public boolean isDependenciesSet()
-    {
-        return _dset;
-    }
-
-    boolean _dset;
+    public boolean isDependenciesSet()  { return _isDependenciesSet; }
 
     /**
      * Updates dependencies for a given file and list of new/old dependencies.
@@ -134,14 +114,9 @@ public class JavaData {
      */
     public synchronized boolean updateDependencies()
     {
-        // Get Java file, project, RootProject, ProjectSet and class files
-
         // Get Project and Resolver
         ProjectX proj = getProject();
         Resolver resolver = proj.getResolver();
-
-        // Cache JFile
-        WebFile jfile = _file;
 
         // Get Class files
         WebFile[] classFiles = getClassFiles();
@@ -172,17 +147,16 @@ public class JavaData {
         if (declsChanged)
             _decls.clear();
 
-        // Cache JFile and clear
-        _jfile = null;
+        // Set isDependenciesSet
+        _isDependenciesSet = true;
 
         // Get new refs
-        Set<JavaDecl> nrefs = new HashSet<>();
-        _dset = true;
+        Set<JavaDecl> newRefs = new HashSet<>();
         if (classFiles != null) {
             for (WebFile classFile : classFiles) {
                 ClassData classData = ClassData.getClassDataForFile(classFile);
                 try {
-                    classData.getRefs(nrefs);
+                    classData.getRefs(newRefs);
                 }
 
                 catch (Throwable t) {
@@ -192,37 +166,40 @@ public class JavaData {
         }
 
         // If references haven't changed, just return
-        if (nrefs.equals(_refs))
+        if (newRefs.equals(_refs))
             return declsChanged;
 
         // Get set of added/removed refs
         Set<JavaDecl> refsAdded = new HashSet<>(_refs);
-        refsAdded.addAll(nrefs);
+        refsAdded.addAll(newRefs);
         Set<JavaDecl> refsRemoved = new HashSet<>(refsAdded);
-        refsRemoved.removeAll(nrefs);
+        refsRemoved.removeAll(newRefs);
         refsAdded.removeAll(_refs);
-        _refs = nrefs;
+        _refs = newRefs;
 
-        // Iterate over added refs and add dependencies
+        // Get project
         ProjectX rootProj = proj.getRootProject();
         ProjectSet projSet = rootProj.getProjectSet();
+
+        // Iterate over added refs and add dependencies
         for (JavaDecl ref : refsAdded) {
 
             // Get Class ref
             JavaClass javaClass = ref instanceof JavaClass ? (JavaClass) ref : null;
-            if (javaClass == null) continue;
+            if (javaClass == null)
+                continue;
 
             // Skip system classes
             String className = javaClass.getRootClassName();
-            if (className.startsWith("java") && (className.startsWith("java.") || className.startsWith("javax.") ||
-                    className.startsWith("javafx")))
+            if (className.startsWith("java") && (className.startsWith("java.") || className.startsWith("javax.")))
                 continue;
 
             //
             WebFile file = projSet.getJavaFile(className);
-            if (file != null && file != jfile && !_dependencies.contains(file)) {
+            if (file != null && file != _javaFile && !_dependencies.contains(file)) {
                 _dependencies.add(file);
-                JavaData.getJavaDataForFile(file)._dependents.add(jfile);
+                JavaData javaData = JavaData.getJavaDataForFile(file);
+                javaData._dependents.add(_javaFile);
             }
         }
 
@@ -237,7 +214,8 @@ public class JavaData {
             WebFile file = projSet.getJavaFile(className);
             if (file != null && _dependencies.contains(file)) {
                 _dependencies.remove(file);
-                JavaData.getJavaDataForFile(file)._dependents.remove(jfile);
+                JavaData javaData = JavaData.getJavaDataForFile(file);
+                javaData._dependents.remove(_javaFile);
             }
         }
 
@@ -250,41 +228,15 @@ public class JavaData {
      */
     public void removeDependencies()
     {
-        for (WebFile dep : _dependencies) JavaData.getJavaDataForFile(dep)._dependents.remove(_file);
+        for (WebFile depFile : _dependencies) {
+            JavaData javaData = JavaData.getJavaDataForFile(depFile);
+            javaData._dependents.remove(_javaFile);
+        }
+
         _dependencies.clear();
         _decls.clear();
         _refs.clear();
-        _dset = false;
-    }
-
-    /**
-     * Returns the parsed Java file.
-     */
-    public JFile getJFile()
-    {
-        // If already set, just return
-        if (_jfile != null) return _jfile;
-
-        // Create, set, return
-        JFile jfile = createJFile();
-        return _jfile = jfile;
-    }
-
-    /**
-     * Returns the parsed Java file.
-     */
-    protected JFile createJFile()
-    {
-        // Get Java string and parser and generate JavaFile
-        String string = _file.getText();
-        JavaParser javaParser = JavaParser.getShared();
-        JFile jfile = javaParser.getJavaFile(string);
-
-        // Set SourceFile and Resolver
-        jfile.setSourceFile(_file);
-
-        // Return
-        return jfile;
+        _isDependenciesSet = false;
     }
 
     /**

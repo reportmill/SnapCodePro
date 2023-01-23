@@ -2,7 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.app;
+import javakit.parse.JFile;
 import javakit.parse.JNode;
+import javakit.project.JavaAgent;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMethod;
 import javakit.resolver.JavaParameterizedType;
@@ -228,24 +230,33 @@ public class SearchPane extends ViewOwner {
     public void searchReference(WebFile aFile, List<Result> theResults, JavaDecl aDecl)
     {
         // If hidden file, just return
-        SitePane spane = SitePane.get(aFile.getSite());
-        if (spane.isHiddenFile(aFile)) return;
+        SitePane sitePane = SitePane.get(aFile.getSite());
+        if (sitePane.isHiddenFile(aFile))
+            return;
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _appPane.getBuildDir()) return;
-            for (WebFile file : aFile.getFiles())
+            if (aFile == _appPane.getBuildDir())
+                return;
+            WebFile[] dirFiles = aFile.getFiles();
+            for (WebFile file : dirFiles)
                 searchReference(file, theResults, aDecl);
         }
 
         // Handle JavaFile
         else if (aFile.getType().equals("java")) {
-            JavaData jdata = JavaData.getJavaDataForFile(aFile);
-            Set<JavaDecl> refs = jdata.getRefs();
+
+            // Get JavaAgent, JavaData and references
+            JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
+            JavaData javaData = JavaData.getJavaDataForFile(aFile);
+            Set<JavaDecl> refs = javaData.getRefs();
+
+            // Iterate over references
             for (JavaDecl decl : refs) {
                 if (aDecl.matches(decl)) {
-                    List<JNode> nodes = new ArrayList();
-                    NodeMatcher.getRefMatches(jdata.getJFile(), aDecl, nodes);
+                    JFile jfile = javaAgent.getJFile();
+                    List<JNode> nodes = new ArrayList<>();
+                    NodeMatcher.getRefMatches(jfile, aDecl, nodes);
                     for (JNode node : nodes)
                         theResults.add(new Result(node));
                     return;
@@ -293,27 +304,39 @@ public class SearchPane extends ViewOwner {
     public void searchDeclaration(WebFile aFile, List<Result> theResults, JavaDecl aDecl)
     {
         // If hidden file, just return
-        SitePane spane = SitePane.get(aFile.getSite());
-        if (spane.isHiddenFile(aFile)) return;
+        SitePane sitePane = SitePane.get(aFile.getSite());
+        if (sitePane.isHiddenFile(aFile))
+            return;
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _appPane.getBuildDir()) return;
-            for (WebFile file : aFile.getFiles())
+            if (aFile == _appPane.getBuildDir())
+                return;
+
+            WebFile[] dirFiles = aFile.getFiles();
+            for (WebFile file : dirFiles)
                 searchDeclaration(file, theResults, aDecl);
         }
 
         // Handle JavaFile
         else if (aFile.getType().equals("java")) {
-            JavaData jdata = JavaData.getJavaDataForFile(aFile);
-            for (JavaDecl decl : jdata.getDecls())
+
+            // Get JavaAgent, JavaData, and declarations
+            JavaAgent javaAgent = JavaAgent.getAgentForFile(aFile);
+            JavaData javaData = JavaData.getJavaDataForFile(aFile);
+            Set<JavaDecl> decls = javaData.getDecls();
+
+            // Iterate over decls
+            for (JavaDecl decl : decls) {
                 if (aDecl.matches(decl)) {
-                    List<JNode> nodes = new ArrayList();
-                    NodeMatcher.getDeclMatches(jdata.getJFile(), aDecl, nodes);
+                    JFile jfile = javaAgent.getJFile();
+                    List<JNode> nodes = new ArrayList<>();
+                    NodeMatcher.getDeclMatches(jfile, aDecl, nodes);
                     for (JNode node : nodes)
                         theResults.add(new Result(node));
                     return;
                 }
+            }
         }
     }
 
@@ -329,7 +352,7 @@ public class SearchPane extends ViewOwner {
         Kind _kind = Kind.Text;
 
         // The results
-        List<Result> _results = new ArrayList();
+        List<Result> _results = new ArrayList<>();
 
         // Constants for kind
         public enum Kind {Text, Reference, Declaration}
@@ -414,5 +437,4 @@ public class SearchPane extends ViewOwner {
         aCell.setImage(result.getImage());
         aCell.getGraphic().setPadding(2, 4, 2, 4);
     }
-
 }
