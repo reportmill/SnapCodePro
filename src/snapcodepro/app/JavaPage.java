@@ -1,12 +1,12 @@
 package snapcodepro.app;
 import javakit.ide.*;
 import javakit.parse.*;
+import javakit.project.JavaAgent;
 import javakit.resolver.JavaDecl;
 import javakit.resolver.JavaMember;
 import javakit.parse.JavaTextDoc;
 import snap.util.Convert;
 import snap.util.ListUtils;
-import snapcodepro.project.JavaData;
 import snapcodepro.project.ProjectX;
 import snap.text.TextBoxLine;
 import snap.view.View;
@@ -162,12 +162,15 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         if (memberName != null) {
 
             // Get ClassDecl
-            JFile jfile = JavaData.getJavaDataForFile(getFile()).getJFile();
+            WebFile javaFile = getFile();
+            JavaAgent javaAgent = JavaAgent.getAgentForFile(javaFile);
+            JFile jfile = javaAgent.getJFile();
             JClassDecl classDecl = jfile.getClassDecl();
+            String className = classDecl.getName();
 
             // Handle ClassDecl name
             JExprId id = null;
-            if (classDecl.getName().equals(memberName))
+            if (className.equals(memberName))
                 id = classDecl.getId();
 
             // Look for member matching name
@@ -273,7 +276,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
             return;
 
         // Open System class
-        if (className.startsWith("java.") || className.startsWith("javax.") || className.startsWith("javafx.")) {
+        if (className.startsWith("java.") || className.startsWith("javax.")) {
             openJavaDecl(aDecl);
             return;
         }
@@ -287,8 +290,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         if (file == null) return;
 
         // Get matching node
-        JavaData jdata = JavaData.getJavaDataForFile(file);
-        JNode node = NodeMatcher.getDeclMatch(jdata.getJFile(), aDecl);
+        JavaAgent javaAgent = JavaAgent.getAgentForFile(file);
+        JFile jfile = javaAgent.getJFile();
+        JNode node = NodeMatcher.getDeclMatch(jfile, aDecl);
 
         // Get URL
         String urls = file.getURL().getString();

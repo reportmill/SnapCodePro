@@ -282,9 +282,6 @@ public class JavaData {
 
         // Set SourceFile and Resolver
         jfile.setSourceFile(_file);
-        ProjectX proj = getProject();
-        Resolver resolver = proj.getResolver();
-        jfile.setResolver(resolver);
 
         // Return
         return jfile;
