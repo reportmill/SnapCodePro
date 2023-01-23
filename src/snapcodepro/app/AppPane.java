@@ -30,7 +30,7 @@ public class AppPane extends ViewOwner {
     private ProjectFilesPane  _projFilesPane;
 
     // The AppPaneToolBar
-    protected AppPaneToolBar  _toolBar = new AppPaneToolBar(this);
+    protected AppPaneToolBar  _toolBar;
 
     // The main SplitView that holds sidebar and browser
     private SplitView  _mainSplit;
@@ -39,7 +39,7 @@ public class AppPane extends ViewOwner {
     private SplitView  _sideBarSplit;
 
     // The FilesPane
-    protected AppFilesPane  _filesPane = new AppFilesPane(this);
+    protected AppFilesPane  _filesPane;
 
     // The ProcPane manages run/debug processes
     private ProcPane  _procPane = new ProcPane(this);
@@ -88,6 +88,8 @@ public class AppPane extends ViewOwner {
         super();
 
         _projFilesPane = new ProjectFilesPane(this);
+        _toolBar = new AppPaneToolBar(this);
+        _filesPane = new AppFilesPane(this);
     }
 
     /**
@@ -457,7 +459,7 @@ public class AppPane extends ViewOwner {
 
         // Handle CloseMenuItem, CloseFileAction
         if (anEvent.equals("CloseMenuItem") || anEvent.equals("CloseFileAction")) {
-            getToolBar().removeOpenFile(getSelectedFile());
+            getProjFilesPane().removeOpenFile(getSelectedFile());
             anEvent.consume();
         }
 

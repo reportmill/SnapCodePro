@@ -3,17 +3,13 @@ import snap.geom.HPos;
 import snap.geom.Polygon;
 import snap.geom.VPos;
 import snap.gfx.*;
-import snap.util.ListUtils;
 import snap.util.StringUtils;
 import snap.view.*;
 import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * ToolBar.
@@ -21,30 +17,26 @@ import java.util.List;
 public class AppPaneToolBar extends ViewOwner {
 
     // The AppPane
-    AppPane _appPane;
+    private AppPane  _appPane;
+
+    // The AppPane
+    private ProjectFilesPane  _projFilesPane;
 
     // The file tabs box
-    BoxView _fileTabsBox;
-
-    // A list of open files
-    List<WebFile> _openFiles = new ArrayList();
-
-    // The currently selected file
-    WebFile _selectedFile;
+    private BoxView  _fileTabsBox;
 
     // The view for the currently selected view
-    View _selectedView;
+    private FileTab  _selTab;
 
     // A placeholder for fill from toolbar button under mouse
-    Paint _tempFill;
+    private Paint  _tempFill;
 
     // RunConfigsPage
-    RunConfigsPage _runConfigsPage;
+    private RunConfigsPage  _runConfigsPage;
 
     // Constant for file tab attributes
     static Font TAB_FONT = new Font("Arial Bold", 12);
     static Color TAB_COLOR = new Color(.5, .65, .8, .8);
-    static Color TAB_COLOR_OVER = new Color(.9, .95, 1.0, .8);
     static Color TAB_BORDER_COLOR = new Color(.33, .33, .33, .66);
     static Border TAB_BORDER = Border.createLineBorder(TAB_BORDER_COLOR, 1);
     static Border TAB_CLOSE_BORDER1 = Border.createLineBorder(Color.BLACK, .5);
@@ -60,118 +52,23 @@ public class AppPaneToolBar extends ViewOwner {
     public AppPaneToolBar(AppPane anAppPane)
     {
         _appPane = anAppPane;
+        _projFilesPane = _appPane.getProjFilesPane();
     }
 
     /**
      * Returns the AppPane.
      */
-    public AppPane getAppPane()
-    {
-        return _appPane;
-    }
+    public AppPane getAppPane()  { return _appPane; }
 
     /**
      * Returns the AppPane AppBrowser.
      */
-    public AppBrowser getAppBrowser()
-    {
-        return getAppPane().getBrowser();
-    }
+    public AppBrowser getAppBrowser()  { return _appPane.getBrowser(); }
 
     /**
      * Returns the RootSite.
      */
-    public WebSite getRootSite()
-    {
-        return getAppPane().getRootSite();
-    }
-
-    /**
-     * Notification that a file was opened/selected by AppPane.
-     */
-    public void setSelectedFile(WebFile aFile)
-    {
-        // Set selected file
-        if (aFile == _selectedFile) return;
-        _selectedFile = aFile;
-
-        // Add to OpenFiles
-        addOpenFile(_selectedFile);
-        buildFileTabs();
-    }
-
-    /**
-     * Returns whether a file is an "OpenFile" (whether it needs a File Bookmark).
-     */
-    protected boolean isOpenFile(WebFile aFile)
-    {
-        if (aFile.isDir()) return false; // No directories
-        return getAppPane().getSites().contains(aFile.getSite()) || aFile.getType().equals("java");
-    }
-
-    /**
-     * Adds a file to OpenFiles list.
-     */
-    public void addOpenFile(WebFile aFile)
-    {
-        if (aFile == null || !isOpenFile(aFile)) return;
-        if (ListUtils.containsId(_openFiles, aFile)) return;
-        _openFiles.add(aFile);
-    }
-
-    /**
-     * Removes a file from OpenFiles list.
-     */
-    public int removeOpenFile(WebFile aFile)
-    {
-        // Remove file from list (just return if not available)
-        int index = ListUtils.indexOfId(_openFiles, aFile);
-        if (index < 0) return index;
-        _openFiles.remove(index);
-
-        // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
-        if (aFile == _selectedFile) {
-            WebURL url = getFallbackURL();
-            if (!url.equals(getAppPane().getHomePageURL()))
-                getAppBrowser().setTransition(WebBrowser.Instant);
-            getAppBrowser().setURL(url);
-        }
-
-        // Rebuild file tabs and return
-        buildFileTabs();
-        return index;
-    }
-
-    /**
-     * Removes a file from OpenFiles list.
-     */
-    public void removeAllOpenFilesExcept(WebFile aFile)
-    {
-        for (WebFile file : _openFiles.toArray(new WebFile[0]))
-            if (file != aFile) removeOpenFile(file);
-    }
-
-    /**
-     * Returns the URL to fallback on when open file is closed.
-     */
-    private WebURL getFallbackURL()
-    {
-        // Return the most recently opened of the remaining OpenFiles, or the Project.HomePageURL
-        AppBrowser browser = getAppBrowser();
-        WebURL[] urls = browser.getHistory().getNextURLs();
-        for (WebURL url : urls) {
-            WebFile file = url.getFile();
-            if (_openFiles.contains(file))
-                return url.getFileURL();
-        }
-        urls = browser.getHistory().getLastURLs();
-        for (WebURL url : urls) {
-            WebFile file = url.getFile();
-            if (_openFiles.contains(file))
-                return url.getFileURL();
-        }
-        return getAppPane().getHomePageURL();
-    }
+    public WebSite getRootSite()  { return _appPane.getRootSite(); }
 
     /**
      * Selects the search text.
@@ -190,17 +87,17 @@ public class AppPaneToolBar extends ViewOwner {
         SpringView uin = (SpringView) super.createUI();
 
         // Add MenuButton
-        MenuButton mbtn = new MenuButton();
-        mbtn.setName("RunMenuButton");
-        mbtn.setBounds(207, 29, 15, 14);
-        mbtn.setItems(getRunMenuButtonItems());
-        mbtn.getGraphicAfter().setPadding(0, 0, 0, 0);
-        uin.addChild(mbtn);
+        MenuButton menuButton = new MenuButton();
+        menuButton.setName("RunMenuButton");
+        menuButton.setBounds(207, 29, 15, 14);
+        menuButton.setItems(Arrays.asList(getRunMenuButtonItems()));
+        menuButton.getGraphicAfter().setPadding(0, 0, 0, 0);
+        uin.addChild(menuButton);
 
         // Add FileTabsPane pane
         _fileTabsBox = new ScaleBox();
         _fileTabsBox.setPadding(4, 0, 0, 4);
-        _fileTabsBox.setAlign(HPos.LEFT);
+        _fileTabsBox.setAlignX(HPos.LEFT);
         _fileTabsBox.setBounds(0, 45, uin.getWidth() - 10, 24);
         _fileTabsBox.setGrowWidth(true);
         _fileTabsBox.setLeanY(VPos.BOTTOM);
@@ -208,14 +105,14 @@ public class AppPaneToolBar extends ViewOwner {
         buildFileTabs();
 
         // Add Expand button
-        Button ebtn = new Button();
-        ebtn.setName("ExpandButton");
-        ebtn.setImage(SIDEBAR_EXPAND);
-        ebtn.setShowArea(false);
-        ebtn.setBounds(uin.getWidth() - 20, uin.getHeight() - 20, 16, 16);
-        ebtn.setLeanX(HPos.RIGHT);
-        ebtn.setLeanY(VPos.BOTTOM);
-        uin.addChild(ebtn);
+        Button expandButton = new Button();
+        expandButton.setName("ExpandButton");
+        expandButton.setImage(SIDEBAR_EXPAND);
+        expandButton.setShowArea(false);
+        expandButton.setBounds(uin.getWidth() - 20, uin.getHeight() - 20, 16, 16);
+        expandButton.setLeanX(HPos.RIGHT);
+        expandButton.setLeanY(VPos.BOTTOM);
+        uin.addChild(expandButton);
 
         // Set min height and return
         uin.setMinHeight(uin.getHeight());
@@ -234,7 +131,7 @@ public class AppPaneToolBar extends ViewOwner {
         searchComboBox.setPrefixFunction(s -> getFilesForPrefix(s));
 
         // Get/configure SearchComboBox.PopupList
-        PopupList searchPopup = searchComboBox.getPopupList();
+        PopupList<?> searchPopup = searchComboBox.getPopupList();
         searchPopup.setRowHeight(22);
         searchPopup.setPrefWidth(300);
         searchPopup.setMaxRowCount(15);
@@ -271,13 +168,13 @@ public class AppPaneToolBar extends ViewOwner {
         AppBrowser appBrowser = getAppBrowser();
 
         // Make buttons glow
-        if (anEvent.isMouseEnter() && anEvent.getView() != _selectedView) {
+        if (anEvent.isMouseEnter() && anEvent.getView() != _selTab) {
             View view = anEvent.getView();
             _tempFill = view.getFill();
             view.setFill(Color.WHITE);
             return;
         }
-        if (anEvent.isMouseExit() && anEvent.getView() != _selectedView) {
+        if (anEvent.isMouseExit() && anEvent.getView() != _selTab) {
             View view = anEvent.getView();
             view.setFill(_tempFill);
             return;
@@ -303,13 +200,13 @@ public class AppPaneToolBar extends ViewOwner {
         // Handle RunConfigMenuItems
         if (anEvent.getName().endsWith("RunConfigMenuItem")) {
             String name = anEvent.getName().replace("RunConfigMenuItem", "");
-            RunConfigs rconfs = RunConfigs.get(getRootSite());
-            RunConfig rconf = rconfs.getRunConfig(name);
-            if (rconf != null) {
-                rconfs.getRunConfigs().remove(rconf);
-                rconfs.getRunConfigs().add(0, rconf);
-                rconfs.writeFile();
-                appPane.getToolBar().setRunMenuButtonItems();
+            RunConfigs runConfigs = RunConfigs.get(getRootSite());
+            RunConfig runConfig = runConfigs.getRunConfig(name);
+            if (runConfig != null) {
+                runConfigs.getRunConfigs().remove(runConfig);
+                runConfigs.getRunConfigs().add(0, runConfig);
+                runConfigs.writeFile();
+                setRunMenuButtonItems();
                 appPane._filesPane.run();
             }
         }
@@ -320,7 +217,7 @@ public class AppPaneToolBar extends ViewOwner {
 
         // Show history
         if (anEvent.equals("ShowHistoryMenuItem"))
-            showHistory();
+            _projFilesPane.showHistory();
 
         // Handle FileTab
         if (anEvent.equals("FileTab") && anEvent.isMouseRelease())
@@ -334,9 +231,6 @@ public class AppPaneToolBar extends ViewOwner {
         if (anEvent.equals("ExpandButton")) {
             boolean showSideBar = !appPane.isShowSideBar();
             appPane.setShowSideBar(showSideBar);
-            WebPage page = appBrowser.getPage();
-            if (page != null)
-                page.getUI().setProp("HideSideBar", !showSideBar);
         }
     }
 
@@ -414,35 +308,27 @@ public class AppPaneToolBar extends ViewOwner {
     /**
      * Creates a pop-up menu for preview edit button (currently with look and feel options).
      */
-    private List<MenuItem> getRunMenuButtonItems()
+    private MenuItem[] getRunMenuButtonItems()
     {
-        // Create MenuItems list
-        List<MenuItem> items = new ArrayList();
-        MenuItem mi;
+        ViewBuilder<MenuItem> mib = new ViewBuilder<>(MenuItem.class);
 
         // Add RunConfigs MenuItems
-        List<RunConfig> rconfs = RunConfigs.get(getRootSite()).getRunConfigs();
-        for (RunConfig rconf : rconfs) {
-            String name = rconf.getName();
-            mi = new MenuItem();
-            mi.setName(name + "RunConfigMenuItem");
-            mi.setText(name);
-            items.add(mi);
+        List<RunConfig> runConfigs = RunConfigs.get(getRootSite()).getRunConfigs();
+        for (RunConfig runConfig : runConfigs) {
+            String name = runConfig.getName() + "RunConfigMenuItem";
+            mib.name(name).text(name).save();
         }
-        if (rconfs.size() > 0) items.add(new MenuItem()); //new SeparatorMenuItem()
+
+        // Add separator
+        if (runConfigs.size() > 0)
+            mib.save();
 
         // Add RunConfigsMenuItem
-        mi = new MenuItem();
-        mi.setText("Run Configurations...");
-        mi.setName("RunConfigsMenuItem");
-        items.add(mi);
-        mi = new MenuItem();
-        mi.setText("Show History...");
-        mi.setName("ShowHistoryMenuItem");
-        items.add(mi);
+        mib.name("RunConfigsMenuItem").text("Run Configurations...").save();
+        mib.name("ShowHistoryMenuItem").text("Show History...").save();
 
         // Return MenuItems
-        return items;
+        return mib.buildAll();
     }
 
     /**
@@ -451,8 +337,9 @@ public class AppPaneToolBar extends ViewOwner {
     public void setRunMenuButtonItems()
     {
         MenuButton rmb = getView("RunMenuButton", MenuButton.class);
-        rmb.setItems(getRunMenuButtonItems());
-        for (MenuItem mi : rmb.getItems()) mi.setOwner(this);
+        rmb.setItems(Arrays.asList(getRunMenuButtonItems()));
+        for (MenuItem mi : rmb.getItems())
+            mi.setOwner(this);
     }
 
     /**
@@ -467,14 +354,15 @@ public class AppPaneToolBar extends ViewOwner {
         }
 
         // Clear selected view
-        _selectedView = null;
+        _selTab = null;
 
         // Create HBox for tabs
         RowView hbox = new RowView();
         hbox.setSpacing(2);
 
         // Iterate over OpenFiles, create FileTabs, init and add
-        for (WebFile file : _openFiles) {
+        WebFile[] openFiles = _projFilesPane.getOpenFiles();
+        for (WebFile file : openFiles) {
             Label bm = new FileTab(file);
             bm.setOwner(this);
             enableEvents(bm, MouseEvents);
@@ -491,11 +379,11 @@ public class AppPaneToolBar extends ViewOwner {
     private List<WebFile> getFilesForPrefix(String aPrefix)
     {
         if (aPrefix.length() == 0) return Collections.EMPTY_LIST;
-        List<WebFile> files = new ArrayList();
-        if (aPrefix == null || aPrefix.length() == 0) return files;
+        List<WebFile> files = new ArrayList<>();
+
         for (WebSite site : getAppPane().getSites())
             getFilesForPrefix(aPrefix, site.getRootDir(), files);
-        Collections.sort(files, _fileComparator);
+        files.sort(_fileComparator);
         return files;
     }
 
@@ -505,8 +393,9 @@ public class AppPaneToolBar extends ViewOwner {
     private void getFilesForPrefix(String aPrefix, WebFile aFile, List<WebFile> theFiles)
     {
         // If hidden file, just return
-        SitePane spane = SitePane.get(aFile.getSite());
-        if (spane.isHiddenFile(aFile)) return;
+        SitePane sitePane = SitePane.get(aFile.getSite());
+        if (sitePane.isHiddenFile(aFile))
+            return;
 
         // If directory, recurse
         if (aFile.isDir()) for (WebFile file : aFile.getFiles())
@@ -518,29 +407,11 @@ public class AppPaneToolBar extends ViewOwner {
     }
 
     /**
-     * Shows history.
-     */
-    private void showHistory()
-    {
-        WebBrowser browser = getAppBrowser();
-        WebBrowserHistory history = browser.getHistory();
-        StringBuffer sb = new StringBuffer();
-        for (WebURL url : history.getLastURLs())
-            sb.append(url.getString()).append('\n');
-        WebFile file = WebURL.getURL("/tmp/History.txt").createFile(false);
-        file.setText(sb.toString());
-        browser.setFile(file);
-    }
-
-    /**
      * Comparator for files.
      */
-    Comparator<WebFile> _fileComparator = new Comparator<WebFile>() {
-        public int compare(WebFile o1, WebFile o2)
-        {
-            int c = o1.getSimpleName().compareToIgnoreCase(o2.getSimpleName());
-            return c != 0 ? c : o1.getName().compareToIgnoreCase(o2.getName());
-        }
+    Comparator<WebFile> _fileComparator = (o1, o2) -> {
+        int c = o1.getSimpleName().compareToIgnoreCase(o2.getSimpleName());
+        return c != 0 ? c : o1.getName().compareToIgnoreCase(o2.getName());
     };
 
     /**
@@ -566,8 +437,13 @@ public class AppPaneToolBar extends ViewOwner {
             setBorder(TAB_BORDER);
             setBorderRadius(6);
             setPadding(1, 2, 1, 4);
-            setFill(aFile == _selectedFile ? Color.WHITE : TAB_COLOR);
-            if (aFile == _selectedFile) _selectedView = this;
+            setFill(TAB_COLOR);
+
+            WebFile selFile = _projFilesPane.getSelectedFile();
+            if (aFile == selFile) {
+                setFill(Color.WHITE);
+                _selTab = this;
+            }
 
             // Add a close box graphic
             Polygon poly = new Polygon(0, 2, 2, 0, 5, 3, 8, 0, 10, 2, 7, 5, 10, 8, 8, 10, 5, 7, 2, 10, 0, 8, 3, 5);
@@ -581,10 +457,7 @@ public class AppPaneToolBar extends ViewOwner {
         /**
          * Returns the file.
          */
-        public WebFile getFile()
-        {
-            return _file;
-        }
+        public WebFile getFile()  { return _file; }
 
         /**
          * Called for events on tab close button.
@@ -599,8 +472,9 @@ public class AppPaneToolBar extends ViewOwner {
                 cbox.setFill(null);
                 cbox.setBorder(TAB_CLOSE_BORDER1);
             } else if (anEvent.isMouseRelease()) {
-                if (anEvent.isAltDown()) removeAllOpenFilesExcept(_file);
-                else removeOpenFile(_file);
+                if (anEvent.isAltDown())
+                    _projFilesPane.removeAllOpenFilesExcept(_file);
+                else _projFilesPane.removeOpenFile(_file);
             }
             anEvent.consume();
         }

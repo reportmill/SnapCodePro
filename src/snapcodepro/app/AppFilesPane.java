@@ -4,6 +4,7 @@ import snap.geom.Polygon;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Image;
+import snap.util.ArrayUtils;
 import snapcodepro.project.ProjectX;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
@@ -28,6 +29,9 @@ public class AppFilesPane extends ViewOwner {
     // The AppPane
     AppPane _appPane;
 
+    // The ProjectFilesPane
+    private ProjectFilesPane  _projFilesPane;
+
     // The file tree
     TreeView<AppFile> _filesTree;
 
@@ -50,15 +54,13 @@ public class AppFilesPane extends ViewOwner {
     public AppFilesPane(AppPane anAppPane)
     {
         _appPane = anAppPane;
+        _projFilesPane = _appPane.getProjFilesPane();
     }
 
     /**
      * Returns the AppPane.
      */
-    public AppPane getAppPane()
-    {
-        return _appPane;
-    }
+    public AppPane getAppPane()  { return _appPane; }
 
     /**
      * Returns the selected file.
@@ -224,10 +226,9 @@ public class AppFilesPane extends ViewOwner {
         _filesTree.setSelItem(afile);
 
         // Update FilesList
-        List<WebFile> wfiles = _appPane._toolBar._openFiles;
-        List afiles = new ArrayList(wfiles.size());
-        for (WebFile wf : wfiles) afiles.add(getAppFile(wf));
-        _filesList.setItems(afiles);
+        WebFile[] openFiles = _projFilesPane.getOpenFiles();
+        AppFile[] appFiles = ArrayUtils.map(openFiles, wf -> getAppFile(wf), AppFile.class);
+        _filesList.setItems(appFiles);
         _filesList.setSelItem(afile);
     }
 
@@ -541,7 +542,7 @@ public class AppFilesPane extends ViewOwner {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        _appPane._toolBar.removeOpenFile(aFile);
+        _appPane.getProjFilesPane().removeOpenFile(aFile);
     }
 
     /**
@@ -878,10 +879,13 @@ public class AppFilesPane extends ViewOwner {
         if (anEvent.isMouseEnter()) {
             cbox.setFill(Color.CRIMSON);
             cbox.setBorder(CLOSE_BOX_BORDER2);
-        } else if (anEvent.isMouseExit()) {
+        }
+        else if (anEvent.isMouseExit()) {
             cbox.setFill(Color.WHITE);
             cbox.setBorder(CLOSE_BOX_BORDER1);
-        } else if (anEvent.isMouseRelease()) _appPane._toolBar.removeOpenFile((WebFile) cbox.getProp("File"));
+        }
+        else if (anEvent.isMouseRelease())
+            _appPane.getProjFilesPane().removeOpenFile((WebFile) cbox.getProp("File"));
         anEvent.consume();
     }
 

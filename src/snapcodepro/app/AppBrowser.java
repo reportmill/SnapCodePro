@@ -1,6 +1,4 @@
 package snapcodepro.app;
-
-import snap.util.SnapUtils;
 import snap.viewx.TextPage;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
@@ -15,21 +13,23 @@ public class AppBrowser extends WebBrowser {
     // The AppPane that owns this browser
     AppPane _appPane;
 
+    // The ProjectFilesPane
+    private ProjectFilesPane  _projectFilesPane;
+
     /**
-     * Returns the AppPane.
+     * Constructor.
      */
-    public AppPane getAppPane()
+    public AppBrowser(AppPane appPane)
     {
-        return _appPane;
+        super();
+        _appPane = appPane;
+        _projectFilesPane = appPane.getProjFilesPane();
     }
 
     /**
-     * Sets the AppPane.
+     * Returns the AppPane.
      */
-    public void setAppPane(AppPane anAppPane)
-    {
-        _appPane = anAppPane;
-    }
+    public AppPane getAppPane()  { return _appPane; }
 
     /**
      * Override to make sure that AppPane is in sync.
@@ -42,12 +42,7 @@ public class AppBrowser extends WebBrowser {
 
         // Forward to AppPane and AppPaneToolBar
         WebFile file = aPage != null ? aPage.getFile() : null;
-        getAppPane().setSelectedFile(file);
-        getAppPane().getToolBar().setSelectedFile(file);
-
-        // Update ShowSideBar
-        boolean showSideBar = !SnapUtils.boolValue(aPage != null ? aPage.getUI().getProp("HideSideBar") : null);
-        getAppPane().setShowSideBar(showSideBar);
+        _projectFilesPane.setSelectedFile(file);
     }
 
     /**
@@ -80,5 +75,4 @@ public class AppBrowser extends WebBrowser {
         // Do normal version
         return super.getPageClass(aResp);
     }
-
 }
