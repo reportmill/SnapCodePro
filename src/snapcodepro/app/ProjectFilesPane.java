@@ -5,6 +5,7 @@ import snap.view.View;
 import snap.view.ViewOwner;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebBrowserHistory;
+import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -45,6 +46,38 @@ public class ProjectFilesPane extends ViewOwner {
         if (_browser != null) return _browser;
         getUI();
         return _browser;
+    }
+
+    /**
+     * Sets the browser URL.
+     */
+    public void setBrowserURL(WebURL aURL)
+    {
+        _browser.setURL(aURL);
+    }
+
+    /**
+     * Sets the browser URL.
+     */
+    public void setBrowserFile(WebFile aFile)
+    {
+        _browser.setFile(aFile);
+    }
+
+    /**
+     * Sets the browser URL.
+     */
+    public void setPageForURL(WebURL aURL, WebPage aPage)
+    {
+        _browser.setPage(aURL, aPage);
+    }
+
+    /**
+     * Reloads a file.
+     */
+    public void reloadFile(WebFile aFile)
+    {
+        _browser.reloadFile(aFile);
     }
 
     /**

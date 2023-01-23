@@ -61,11 +61,6 @@ public class AppPaneToolBar extends ViewOwner {
     public AppPane getAppPane()  { return _appPane; }
 
     /**
-     * Returns the AppPane AppBrowser.
-     */
-    public AppBrowser getAppBrowser()  { return _appPane.getBrowser(); }
-
-    /**
      * Returns the RootSite.
      */
     public WebSite getRootSite()  { return _appPane.getRootSite(); }
@@ -165,15 +160,17 @@ public class AppPaneToolBar extends ViewOwner {
     {
         // Get AppPane and AppBrowser
         AppPane appPane = getAppPane();
-        AppBrowser appBrowser = getAppBrowser();
+        AppBrowser appBrowser = _projFilesPane.getBrowser();
 
-        // Make buttons glow
+        // Handle MouseEnter: Make buttons glow
         if (anEvent.isMouseEnter() && anEvent.getView() != _selTab) {
             View view = anEvent.getView();
             _tempFill = view.getFill();
             view.setFill(Color.WHITE);
             return;
         }
+
+        // Handle MouseExit: Restore fill
         if (anEvent.isMouseExit() && anEvent.getView() != _selTab) {
             View view = anEvent.getView();
             view.setFill(_tempFill);
@@ -241,7 +238,7 @@ public class AppPaneToolBar extends ViewOwner {
     {
         if (_runConfigsPage != null) return _runConfigsPage;
         _runConfigsPage = new RunConfigsPage();
-        getAppBrowser().setPage(_runConfigsPage.getURL(), _runConfigsPage);
+        _projFilesPane.setPageForURL(_runConfigsPage.getURL(), _runConfigsPage);
         return _runConfigsPage;
     }
 
@@ -263,16 +260,16 @@ public class AppPaneToolBar extends ViewOwner {
 
         // Handle single click
         if (anEvent.getClickCount() == 1) {
-            getAppBrowser().setTransition(WebBrowser.Instant);
-            getAppPane().setSelectedFile(file);
+            _projFilesPane.getBrowser().setTransition(WebBrowser.Instant);
+            _projFilesPane.setSelectedFile(file);
         }
 
         // Handle double click
         else if (anEvent.getClickCount() == 2) {
-            WebBrowserPane bpane = new WebBrowserPane();
-            bpane.getUI().setPrefSize(800, 800);
-            bpane.getBrowser().setURL(file.getURL());
-            bpane.getWindow().show(getUI().getRootView(), 600, 200);
+            WebBrowserPane browserPane = new WebBrowserPane();
+            browserPane.getUI().setPrefSize(800, 800);
+            browserPane.getBrowser().setURL(file.getURL());
+            browserPane.getWindow().show(getUI().getRootView(), 600, 200);
         }
     }
 
@@ -287,17 +284,18 @@ public class AppPaneToolBar extends ViewOwner {
 
         // If file available, open file
         if (file != null)
-            getAppBrowser().setFile(file);
+            _projFilesPane.setBrowserFile(file);
 
             // If text available, either open URL or search for string
         else if (text != null && text.length() > 0) {
             int colon = text.indexOf(':');
             if (colon > 0 && colon < 6) {
                 WebURL url = WebURL.getURL(text);
-                getAppBrowser().setURL(url);
-            } else {
-                getAppPane().getSearchPane().search(text);
-                getAppPane().setSupportTrayIndex(SupportTray.SEARCH_PANE);
+                _projFilesPane.setBrowserURL(url);
+            }
+            else {
+                _appPane.getSearchPane().search(text);
+                _appPane.setSupportTrayIndex(SupportTray.SEARCH_PANE);
             }
         }
 

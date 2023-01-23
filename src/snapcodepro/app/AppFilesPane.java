@@ -98,20 +98,12 @@ public class AppFilesPane extends ViewOwner {
     }
 
     /**
-     * Returns the AppPane.Browser.
-     */
-    public AppBrowser getBrowser()
-    {
-        return _appPane.getBrowser();
-    }
-
-    /**
      * Returns the root files.
      */
     public List<AppFile> getRootFiles()
     {
         if (_rootFiles != null) return _rootFiles;
-        _rootFiles = new ArrayList(_appPane.getSiteCount());
+        _rootFiles = new ArrayList<>(_appPane.getSiteCount());
         for (int i = 0, iMax = _appPane.getSiteCount(); i < iMax; i++) {
             WebSite site = _appPane.getSite(i);
             _rootFiles.add(new AppFile(null, site.getRootDir()));
@@ -147,17 +139,20 @@ public class AppFilesPane extends ViewOwner {
      */
     public void updateFile(WebFile aFile)
     {
-        List<AppFile> afiles = new ArrayList();
+        List<AppFile> appFiles = new ArrayList<>();
         for (WebFile file = aFile; file != null; file = file.getParent()) {
             AppFile afile = getAppFile(file);
             if (afile != null) {
-                afiles.add(afile);
-                if (file == aFile) afile._children = null;
+                appFiles.add(afile);
+                if (file == aFile)
+                    afile._children = null;
             }
         }
-        _filesTree.updateItems(afiles.toArray(new AppFile[0]));
-        _filesList.updateItems(afiles.toArray(new AppFile[0]));
-        if (aFile.isDir()) resetLater();
+
+        _filesTree.updateItems(appFiles.toArray(new AppFile[0]));
+        _filesList.updateItems(appFiles.toArray(new AppFile[0]));
+        if (aFile.isDir())
+            resetLater();
     }
 
     /**
@@ -334,8 +329,8 @@ public class AppFilesPane extends ViewOwner {
             WebURL url = file.getURL();
             WebPage page = new TextPage();
             page.setURL(url);
-            getBrowser().setPage(page.getURL(), page);
-            getBrowser().setURL(url);
+            _projFilesPane.setPageForURL(page.getURL(), page);
+            _projFilesPane.setBrowserURL(url);
         }
 
         // Handle OpenInBrowserMenuItem
@@ -374,8 +369,8 @@ public class AppFilesPane extends ViewOwner {
         if (anEvent.equals("DiffFilesMenuItem")) {
             WebFile file = getSelectedFile();
             DiffPage diffPage = new DiffPage(file);
-            getBrowser().setPage(diffPage.getURL(), diffPage);
-            getBrowser().setURL(diffPage.getURL());
+            _projFilesPane.setPageForURL(diffPage.getURL(), diffPage);
+            _projFilesPane.setBrowserURL(diffPage.getURL());
         }
 
         // Handle CleanProjectMenuItem
@@ -388,10 +383,11 @@ public class AppFilesPane extends ViewOwner {
 
         // Handle ShowClassInfoMenuItem
         if (anEvent.equals("ShowClassInfoMenuItem")) {
-            WebFile jfile = getSelectedFile();
-            String cpath = jfile.getPath().replace("/src/", "/bin/").replace(".java", ".class");
-            WebFile cfile = jfile.getSite().getFileForPath(cpath);
-            if (cfile != null) getBrowser().setFile(cfile);
+            WebFile javaFile = getSelectedFile();
+            String classFilePath = javaFile.getPath().replace("/src/", "/bin/").replace(".java", ".class");
+            WebFile classFile = javaFile.getSite().getFileForPath(classFilePath);
+            if (classFile != null)
+                _projFilesPane.setBrowserFile(classFile);
         }
 
         // Handle CopyAction, PasteAction
@@ -443,7 +439,8 @@ public class AppFilesPane extends ViewOwner {
 
             // Create new directory
             WebFile directory = site.createFileForPath(aDirectory.getDirPath() + aFile.getName(), true);
-            for (File file : aFile.listFiles())
+            File[] dirFiles = aFile.listFiles();
+            for (File file : dirFiles)
                 addFile(directory, file);
         }
 
@@ -514,22 +511,24 @@ public class AppFilesPane extends ViewOwner {
             beep();
             return;
         }
-        SitePane spane = SitePane.get(file0.getSite());
-        spane.setAutoBuildEnabled(false);
+        SitePane sitePane = SitePane.get(file0.getSite());
+        sitePane.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
-        boolean success = true;
-        for (WebFile file : theFiles)
+        for (WebFile file : theFiles) {
             try {
-                if (file.getExists()) removeFile(file);
-            } catch (Exception e) {
+                if (file.getExists())
+                    removeFile(file);
+            }
+            catch (Exception e) {
                 e.printStackTrace();
                 beep();
             }
+        }
 
         // Enable auto build and build
-        spane.setAutoBuildEnabled(true);
-        spane.buildSite(false);
+        sitePane.setAutoBuildEnabled(true);
+        sitePane.buildSite(false);
     }
 
     /**
@@ -537,11 +536,8 @@ public class AppFilesPane extends ViewOwner {
      */
     public void removeFile(WebFile aFile)
     {
-        try {
-            aFile.delete();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        try { aFile.delete(); }
+        catch (Exception e) { throw new RuntimeException(e); }
         _appPane.getProjFilesPane().removeOpenFile(aFile);
     }
 
@@ -699,7 +695,8 @@ public class AppFilesPane extends ViewOwner {
         if (file == null) return;
         try {
             file.save();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             _appPane.getBrowser().showException(file.getURL(), e);
             return;
         }
@@ -783,7 +780,7 @@ public class AppFilesPane extends ViewOwner {
     {
         if (_homePage != null) return _homePage;
         _homePage = new HomePage();
-        getBrowser().setPage(_homePage.getURL(), _homePage);
+        _projFilesPane.setPageForURL(_homePage.getURL(), _homePage);
         return _homePage;
     }
 
@@ -801,10 +798,14 @@ public class AppFilesPane extends ViewOwner {
     public void copy()
     {
         List<WebFile> dfiles = getSelectedFiles();
-        List<File> files = new ArrayList();
-        for (WebFile df : dfiles) if (df.getJavaFile() != null) files.add(df.getJavaFile());
-        Clipboard cb = Clipboard.getCleared();
-        cb.addData(files);
+        List<File> files = new ArrayList<>();
+        for (WebFile df : dfiles) {
+            if (df.getJavaFile() != null)
+                files.add(df.getJavaFile());
+        }
+
+        Clipboard clipboard = Clipboard.getCleared();
+        clipboard.addData(files);
     }
 
     /**
@@ -813,7 +814,8 @@ public class AppFilesPane extends ViewOwner {
     public void paste()
     {
         Clipboard cb = Clipboard.get();
-        if (cb.hasFiles()) addFiles(cb.getJavaFiles());
+        if (cb.hasFiles())
+            addFiles(cb.getJavaFiles());
     }
 
     /**
@@ -835,7 +837,7 @@ public class AppFilesPane extends ViewOwner {
         // If file has been changed since last load, reload
         if (aFile.getLastModTime() < aFile.getURL().getLastModTime()) {
             aFile.reload();
-            getBrowser().reloadFile(aFile);
+            _projFilesPane.reloadFile(aFile);
         }
 
         // If file is directory, recurse
@@ -885,7 +887,7 @@ public class AppFilesPane extends ViewOwner {
             cbox.setBorder(CLOSE_BOX_BORDER1);
         }
         else if (anEvent.isMouseRelease())
-            _appPane.getProjFilesPane().removeOpenFile((WebFile) cbox.getProp("File"));
+            _projFilesPane.removeOpenFile((WebFile) cbox.getProp("File"));
         anEvent.consume();
     }
 
