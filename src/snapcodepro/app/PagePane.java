@@ -5,6 +5,7 @@ package snapcodepro.app;
 import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
+import snap.view.ColView;
 import snap.view.View;
 import snap.view.ViewOwner;
 import snap.viewx.TextPage;
@@ -283,12 +284,22 @@ public class PagePane extends ViewOwner {
     @Override
     protected View createUI()
     {
+        // Create TabsBox
+        PagePaneTabsBox tabsBox = new PagePaneTabsBox(this);
+
         // Create browser
         _browser = new AppBrowser();
         _browser.setGrowHeight(true);
+        _browser.setMargin(0, 4, 0, 4);
+
+        // Create ColView to hold TabsBox and Browser
+        ColView colView = new ColView();
+        colView.setFillWidth(true);
+        colView.setGrowHeight(true);
+        colView.setChildren(tabsBox.getUI(), _browser);
 
         // Return
-        return _browser;
+        return colView;
     }
 
     /**

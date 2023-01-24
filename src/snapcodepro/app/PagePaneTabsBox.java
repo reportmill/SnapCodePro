@@ -4,7 +4,6 @@
 package snapcodepro.app;
 import snap.geom.HPos;
 import snap.geom.Polygon;
-import snap.geom.VPos;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -27,10 +26,13 @@ public class PagePaneTabsBox extends ViewOwner {
     private FileTab  _selTab;
 
     // Constant for file tab attributes
-    private static Font TAB_FONT = new Font("Arial Bold", 12);
-    private static Color TAB_COLOR = new Color(.5, .65, .8, .8);
+    private static Color BOX_BORDER_COLOR = Color.GRAY7;
+    private static Font TAB_FONT = new Font("Arial", 12);
+    private static Color TAB_TEXT_COLOR = Color.GRAY2;
+    private static Color TAB_COLOR = null; //new Color(.5, .65, .8, .8);
     private static Color TAB_COLOR_SEL = Color.WHITE;
-    private static Color TAB_BORDER_COLOR = new Color(.33, .33, .33, .66);
+    private static int TAB_HEIGHT = 19;
+    private static Color TAB_BORDER_COLOR = Color.GRAY8;
     private static Border TAB_BORDER = Border.createLineBorder(TAB_BORDER_COLOR, 1);
     private static Border TAB_CLOSE_BORDER1 = Border.createLineBorder(Color.BLACK, .5);
     private static Border TAB_CLOSE_BORDER2 = Border.createLineBorder(Color.BLACK, 1);
@@ -45,37 +47,6 @@ public class PagePaneTabsBox extends ViewOwner {
     }
 
     /**
-     * Builds the file tabs.
-     */
-    public void buildFileTabs()
-    {
-        // If not on event thread, come back on that
-        if (!isEventThread()) {
-            runLater(() -> buildFileTabs());
-            return;
-        }
-
-        // Clear selected view
-        _selTab = null;
-
-        // Create HBox for tabs
-        RowView rowView = new RowView();
-        rowView.setSpacing(2);
-
-        // Iterate over OpenFiles, create FileTabs, init and add
-        WebFile[] openFiles = _pagePane.getOpenFiles();
-        for (WebFile file : openFiles) {
-            Label bm = new FileTab(file);
-            bm.setOwner(this);
-            enableEvents(bm, MouseEvents);
-            rowView.addChild(bm);
-        }
-
-        // Add box
-        _fileTabsBox.setContent(rowView);
-    }
-
-    /**
      * Create UI.
      */
     @Override
@@ -83,13 +54,13 @@ public class PagePaneTabsBox extends ViewOwner {
     {
         // Add FileTabsPane pane
         _fileTabsBox = new ScaleBox();
-        _fileTabsBox.setPadding(4, 0, 0, 4);
+        _fileTabsBox.setBorder(BOX_BORDER_COLOR, 1);
+        _fileTabsBox.setPadding(3, 3, 3, 5);
         _fileTabsBox.setAlignX(HPos.LEFT);
         _fileTabsBox.setGrowWidth(true);
-        _fileTabsBox.setLeanY(VPos.BOTTOM);
 
-        // Build tabs
-        buildFileTabs();
+        // Set PrefHeight so it will show when empty
+        _fileTabsBox.setPrefHeight(_fileTabsBox.getPadding().getHeight() + TAB_HEIGHT + 2);
 
         // Register to build tabs whenever PagePage changes
         _pagePane.addPropChangeListener(pc -> buildFileTabs(), PagePane.OpenFiles_Prop);
@@ -152,6 +123,37 @@ public class PagePaneTabsBox extends ViewOwner {
     }
 
     /**
+     * Builds the file tabs.
+     */
+    private void buildFileTabs()
+    {
+        // If not on event thread, come back on that
+        if (!isEventThread()) {
+            runLater(() -> buildFileTabs());
+            return;
+        }
+
+        // Clear selected view
+        _selTab = null;
+
+        // Create HBox for tabs
+        RowView rowView = new RowView();
+        rowView.setSpacing(4);
+
+        // Iterate over OpenFiles, create FileTabs, init and add
+        WebFile[] openFiles = _pagePane.getOpenFiles();
+        for (WebFile file : openFiles) {
+            Label fileTab = new FileTab(file);
+            fileTab.setOwner(this);
+            enableEvents(fileTab, MouseEvents);
+            rowView.addChild(fileTab);
+        }
+
+        // Add box
+        _fileTabsBox.setContent(rowView);
+    }
+
+    /**
      * A class to represent a rounded label.
      */
     protected class FileTab extends Label {
@@ -168,14 +170,15 @@ public class PagePaneTabsBox extends ViewOwner {
             _file = aFile;
             setText(aFile.getName());
             setFont(TAB_FONT);
+            setTextFill(TAB_TEXT_COLOR);
             setName("FileTab");
-            setPrefHeight(19);
-            setMaxHeight(19);
+            setPrefHeight(TAB_HEIGHT);
             setBorder(TAB_BORDER);
-            setBorderRadius(6);
+            setBorderRadius(4);
             setPadding(1, 2, 1, 4);
             setFill(TAB_COLOR);
 
+            // If selected, configure selected
             WebFile selFile = _pagePane.getSelectedFile();
             if (aFile == selFile) {
                 setFill(TAB_COLOR_SEL);

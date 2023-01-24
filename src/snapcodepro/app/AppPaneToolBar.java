@@ -1,6 +1,4 @@
 package snapcodepro.app;
-import snap.geom.HPos;
-import snap.geom.VPos;
 import snap.gfx.*;
 import snap.util.StringUtils;
 import snap.view.*;
@@ -20,9 +18,6 @@ public class AppPaneToolBar extends ViewOwner {
 
     // The PagePane
     private PagePane  _pagePane;
-
-    // The file tabs box
-    private PagePaneTabsBox  _tabsBox;
 
     // A placeholder for fill from toolbar button under mouse
     private Paint  _tempFill;
@@ -67,35 +62,27 @@ public class AppPaneToolBar extends ViewOwner {
     protected View createUI()
     {
         // Do normal version
-        SpringView uin = (SpringView) super.createUI();
+        RowView superUI = (RowView) super.createUI();
 
         // Add MenuButton
         MenuButton menuButton = new MenuButton();
         menuButton.setName("RunMenuButton");
-        menuButton.setBounds(207, 29, 15, 14);
+        menuButton.setPrefSize(15, 14);
+        menuButton.setMargin(22, 0, 0, 0);
         menuButton.setItems(Arrays.asList(getRunMenuButtonItems()));
         menuButton.getGraphicAfter().setPadding(0, 0, 0, 0);
-        uin.addChild(menuButton);
-
-        // Add FileTabsPane pane
-        _tabsBox = new PagePaneTabsBox(_pagePane);
-        View tabsBoxUI = _tabsBox.getUI();
-        tabsBoxUI.setBounds(0, 45, uin.getWidth() - 10, 24);
-        uin.addChild(tabsBoxUI);
+        superUI.addChild(menuButton, 5);
 
         // Add Expand button
         Button expandButton = new Button();
         expandButton.setName("ExpandButton");
         expandButton.setImage(SIDEBAR_EXPAND);
         expandButton.setShowArea(false);
-        expandButton.setBounds(uin.getWidth() - 20, uin.getHeight() - 20, 16, 16);
-        expandButton.setLeanX(HPos.RIGHT);
-        expandButton.setLeanY(VPos.BOTTOM);
-        uin.addChild(expandButton);
+        expandButton.setPrefSize(16, 16);
+        superUI.addChild(expandButton);
 
-        // Set min height and return
-        uin.setMinHeight(uin.getHeight());
-        return uin;
+        // Return
+        return superUI;
     }
 
     /**

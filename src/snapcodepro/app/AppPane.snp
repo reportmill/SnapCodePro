@@ -2,8 +2,8 @@
 <SplitView PrefWidth="958" PrefHeight="684" GrowHeight="true">
   <SplitView Name="SideBarSplitView" PrefWidth="220" Vertical="true" />
   <SplitView Name="BrowserBox" Vertical="true">
-    <ColView Name="BrowserAndStatusBar" Padding="0,4,0,4" GrowHeight="true" FillWidth="true">
-      <StackView Name="StatusBar" PrefHeight="20">
+    <ColView Name="BrowserAndStatusBar" GrowHeight="true" FillWidth="true">
+      <StackView Name="StatusBar" Padding="0,4,0,4" PrefHeight="20">
         <Label Name="StatusText" LeanX="LEFT" />
         <ProgressBar Name="ProgressBar" PrefWidth="80" PrefHeight="16" Visible="false" LeanX="CENTER" />
         <Button Name="ShowTrayButton" PrefWidth="60" PrefHeight="16" LeanX="CENTER" text="Show Tray" />
