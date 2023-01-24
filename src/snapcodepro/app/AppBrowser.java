@@ -28,11 +28,6 @@ public class AppBrowser extends WebBrowser {
     }
 
     /**
-     * Returns the AppPane.
-     */
-    public AppPane getAppPane()  { return _appPane; }
-
-    /**
      * Override to make sure that AppPane is in sync.
      */
     public void setPage(WebPage aPage)

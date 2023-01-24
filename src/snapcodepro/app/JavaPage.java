@@ -41,7 +41,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     AppPane getAppPane()
     {
         WebBrowser browser = getBrowser();
-        return browser instanceof AppBrowser ? ((AppBrowser) browser).getAppPane() : null;
+        return browser.getOwner(AppPane.class);
     }
 
     /**

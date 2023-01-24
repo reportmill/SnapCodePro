@@ -6,6 +6,7 @@ import snap.view.ScrollView;
 import snap.view.View;
 import snap.view.ViewArchiver;
 import snap.view.ViewEvent;
+import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -31,7 +32,8 @@ public class HomePage extends WebPage {
      */
     public AppPane getAppPane()
     {
-        return getBrowser().getAppPane();
+        WebBrowser browser = getBrowser();
+        return browser.getOwner(AppPane.class);
     }
 
     /**

@@ -3,6 +3,7 @@ package snapcodepro.app;
 import snap.view.ScrollView;
 import snap.view.View;
 import snap.view.ViewEvent;
+import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebSite;
 
@@ -29,7 +30,8 @@ public class RunConfigsPage extends WebPage {
      */
     public AppPane getAppPane()
     {
-        return getBrowser().getAppPane();
+        WebBrowser browser = getBrowser();
+        return browser.getOwner(AppPane.class);
     }
 
     /**
