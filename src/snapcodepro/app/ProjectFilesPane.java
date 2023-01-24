@@ -1,5 +1,6 @@
 package snapcodepro.app;
 import snap.props.PropChange;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.View;
 import snap.view.ViewOwner;
@@ -89,8 +90,8 @@ public class ProjectFilesPane extends ViewOwner {
         if (aFile.isDir()) return false;
 
         //
-        List<WebSite> projSites = _projPane.getSites();
-        return projSites.contains(aFile.getSite()) || aFile.getType().equals("java");
+        WebSite[] projSites = _projPane.getSites();
+        return ArrayUtils.containsId(projSites, aFile.getSite()) || aFile.getType().equals("java");
     }
 
     /**

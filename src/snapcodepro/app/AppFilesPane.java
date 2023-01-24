@@ -589,7 +589,7 @@ public class AppFilesPane extends ViewOwner {
     public void renameFile()
     {
         WebFile file = _appPane.getSelectedFile();
-        if (file == null || !_appPane.getSites().contains(file.getSite())) return;
+        if (file == null || !ArrayUtils.containsId(_appPane.getSites(), file.getSite())) return;
         DialogBox dbox = new DialogBox("Rename File");
         dbox.setMessage("Enter new name for " + file.getName());
         String newName = dbox.showInputDialog(_appPane.getUI(), file.getName());

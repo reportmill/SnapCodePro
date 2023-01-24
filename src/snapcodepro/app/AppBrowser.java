@@ -1,4 +1,5 @@
 package snapcodepro.app;
+import snap.util.ArrayUtils;
 import snap.viewx.TextPage;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
@@ -55,7 +56,7 @@ public class AppBrowser extends WebBrowser {
         String type = aResp.getPathType();
 
         // Handle Project Root directory
-        if (file != null && file.isRoot() && getAppPane().getSites().contains(file.getSite()))
+        if (file != null && file.isRoot() && ArrayUtils.containsId(_appPane.getSites(), file.getSite()))
             return SitePane.SitePage.class;
 
         // Handle Java
@@ -69,7 +70,7 @@ public class AppBrowser extends WebBrowser {
 
         if (type.equals("rpt")) return getPageClass("com.reportmill.app.ReportPageEditor", TextPage.class);
         //if(type.equals("snp")) return snapbuild.app.EditorPage.class;
-        if (type.equals("class") && getAppPane().getSites().contains(file.getSite())) return ClassInfoPage.class;
+        if (type.equals("class") && ArrayUtils.containsId(_appPane.getSites(), file.getSite())) return ClassInfoPage.class;
         if (type.equals("pgd")) return JavaShellPage.class;
 
         // Do normal version

@@ -3,20 +3,18 @@ import javakit.project.Breakpoint;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
 import javakit.ide.JavaTextPane;
+import snap.util.ArrayUtils;
 import snapcodepro.debug.RunApp;
 import snapcodepro.project.ProjectX;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.FileUtils;
-import snap.util.ListUtils;
 import snap.util.Prefs;
 import snap.view.*;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The main view class for Projects.
@@ -24,7 +22,7 @@ import java.util.List;
 public class AppPane extends ViewOwner {
 
     // The list of sites
-    private List<WebSite>  _sites = new ArrayList<>();
+    private WebSite[]  _sites = new WebSite[0];
 
     // The ProjectFilesPane
     private ProjectFilesPane  _projFilesPane;
@@ -182,22 +180,22 @@ public class AppPane extends ViewOwner {
     /**
      * Returns the top level site.
      */
-    public WebSite getRootSite()  { return _sites.get(0); }
+    public WebSite getRootSite()  { return _sites[0]; }
 
     /**
      * Returns the number of sites.
      */
-    public int getSiteCount()  { return _sites.size(); }
+    public int getSiteCount()  { return _sites.length; }
 
     /**
      * Returns the individual site at the given index.
      */
-    public WebSite getSite(int anIndex)  { return _sites.get(anIndex); }
+    public WebSite getSite(int anIndex)  { return _sites[anIndex]; }
 
     /**
      * Returns the list of sites.
      */
-    public List<WebSite> getSites()  { return _sites; }
+    public WebSite[] getSites()  { return _sites; }
 
     /**
      * Adds a site to sites list.
@@ -205,7 +203,7 @@ public class AppPane extends ViewOwner {
     public void addSite(WebSite aSite)
     {
         // If site already added, just return
-        if (_sites.contains(aSite)) return;
+        if (ArrayUtils.contains(_sites, aSite)) return;
 
         // Create project for site
         ProjectX proj = ProjectX.getProjectForSite(aSite);
@@ -217,7 +215,7 @@ public class AppPane extends ViewOwner {
         proj.getBuildIssues().addPropChangeListener(pc -> projBuildIssuesDidChange(pc));
 
         // Add site
-        _sites.add(aSite);
+        _sites = ArrayUtils.add(_sites, aSite);
         SitePane sitePane = SitePane.get(aSite, true);
         sitePane.setAppPane(this);
         aSite.addFileChangeListener(_siteFileLsnr);
@@ -236,7 +234,7 @@ public class AppPane extends ViewOwner {
      */
     public void removeSite(WebSite aSite)
     {
-        _sites.remove(aSite);
+        _sites = ArrayUtils.remove(_sites, aSite);
         aSite.removeFileChangeListener(_siteFileLsnr);
         _filesPane._rootFiles = null;
         resetLater();
@@ -320,7 +318,7 @@ public class AppPane extends ViewOwner {
     {
         WebFile file = getSelectedFile();
         WebSite site = file != null ? file.getSite() : null;
-        if (!ListUtils.containsId(getSites(), site))
+        if (!ArrayUtils.containsId(getSites(), site))
             site = getSite(0);
         return site;
     }
