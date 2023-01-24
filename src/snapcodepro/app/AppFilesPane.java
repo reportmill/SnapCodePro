@@ -1,5 +1,4 @@
 package snapcodepro.app;
-
 import snap.geom.Polygon;
 import snap.gfx.Border;
 import snap.gfx.Color;
@@ -27,26 +26,23 @@ import java.util.List;
 public class AppFilesPane extends ViewOwner {
 
     // The AppPane
-    AppPane _appPane;
+    private AppPane  _appPane;
 
-    // The ProjectFilesPane
-    private ProjectFilesPane  _projFilesPane;
+    // The PagePane
+    private PagePane  _pagePane;
 
     // The file tree
-    TreeView<AppFile> _filesTree;
+    private TreeView<AppFile>  _filesTree;
 
     // The file list
-    ListView<AppFile> _filesList;
+    private ListView<AppFile>  _filesList;
 
     // The root AppFiles (for TreeView)
-    List<AppFile> _rootFiles;
-
-    // The default HomePage
-    HomePage _homePage;
+    protected List<AppFile>  _rootFiles;
 
     // Images for files tree/list
-    static Image FILES_TREE_ICON = Image.get(AppFilesPane.class, "FilesTree.png");
-    static Image FILES_LIST_ICON = Image.get(AppFilesPane.class, "FilesList.png");
+    private static Image FILES_TREE_ICON = Image.get(AppFilesPane.class, "FilesTree.png");
+    private static Image FILES_LIST_ICON = Image.get(AppFilesPane.class, "FilesList.png");
 
     /**
      * Creates a new AppPaneFilesPane.
@@ -54,7 +50,7 @@ public class AppFilesPane extends ViewOwner {
     public AppFilesPane(AppPane anAppPane)
     {
         _appPane = anAppPane;
-        _projFilesPane = _appPane.getProjFilesPane();
+        _pagePane = _appPane.getPagePane();
     }
 
     /**
@@ -84,31 +80,30 @@ public class AppFilesPane extends ViewOwner {
     /**
      * Returns the top level site.
      */
-    public WebSite getRootSite()
-    {
-        return _appPane.getRootSite();
-    }
+    public WebSite getRootSite()  { return _appPane.getRootSite(); }
 
     /**
      * Returns the selected site.
      */
-    public WebSite getSelectedSite()
-    {
-        return _appPane.getSelectedSite();
-    }
+    public WebSite getSelectedSite()  { return _appPane.getSelectedSite(); }
 
     /**
      * Returns the root files.
      */
     public List<AppFile> getRootFiles()
     {
+        // If already set, just return
         if (_rootFiles != null) return _rootFiles;
-        _rootFiles = new ArrayList<>(_appPane.getSiteCount());
+
+        // Create RootFiles
+        List<AppFile> rootFiles = new ArrayList<>(_appPane.getSiteCount());
         for (int i = 0, iMax = _appPane.getSiteCount(); i < iMax; i++) {
             WebSite site = _appPane.getSite(i);
-            _rootFiles.add(new AppFile(null, site.getRootDir()));
+            rootFiles.add(new AppFile(null, site.getRootDir()));
         }
-        return _rootFiles;
+
+        // Set, Return
+        return _rootFiles = rootFiles;
     }
 
     /**
@@ -131,7 +126,9 @@ public class AppFilesPane extends ViewOwner {
             if (apar != null) // && _filesTree.isExpanded(apar))
                 for (AppFile af : apar.getChildren()) if (aFile == af.getFile()) return af;
         }
-        return null; // Return null since file not found
+
+        // Return not found
+        return null;
     }
 
     /**
@@ -221,8 +218,8 @@ public class AppFilesPane extends ViewOwner {
         _filesTree.setSelItem(afile);
 
         // Update FilesList
-        WebFile[] openFiles = _projFilesPane.getOpenFiles();
-        AppFile[] appFiles = ArrayUtils.map(openFiles, wf -> getAppFile(wf), AppFile.class);
+        WebFile[] openFiles = _pagePane.getOpenFiles();
+        AppFile[] appFiles = ArrayUtils.map(openFiles, openFile -> getAppFile(openFile), AppFile.class);
         _filesList.setItems(appFiles);
         _filesList.setSelItem(afile);
     }
@@ -329,8 +326,8 @@ public class AppFilesPane extends ViewOwner {
             WebURL url = file.getURL();
             WebPage page = new TextPage();
             page.setURL(url);
-            _projFilesPane.setPageForURL(page.getURL(), page);
-            _projFilesPane.setBrowserURL(url);
+            _pagePane.setPageForURL(page.getURL(), page);
+            _pagePane.setBrowserURL(url);
         }
 
         // Handle OpenInBrowserMenuItem
@@ -369,8 +366,8 @@ public class AppFilesPane extends ViewOwner {
         if (anEvent.equals("DiffFilesMenuItem")) {
             WebFile file = getSelectedFile();
             DiffPage diffPage = new DiffPage(file);
-            _projFilesPane.setPageForURL(diffPage.getURL(), diffPage);
-            _projFilesPane.setBrowserURL(diffPage.getURL());
+            _pagePane.setPageForURL(diffPage.getURL(), diffPage);
+            _pagePane.setBrowserURL(diffPage.getURL());
         }
 
         // Handle CleanProjectMenuItem
@@ -387,7 +384,7 @@ public class AppFilesPane extends ViewOwner {
             String classFilePath = javaFile.getPath().replace("/src/", "/bin/").replace(".java", ".class");
             WebFile classFile = javaFile.getSite().getFileForPath(classFilePath);
             if (classFile != null)
-                _projFilesPane.setBrowserFile(classFile);
+                _pagePane.setBrowserFile(classFile);
         }
 
         // Handle CopyAction, PasteAction
@@ -538,7 +535,7 @@ public class AppFilesPane extends ViewOwner {
     {
         try { aFile.delete(); }
         catch (Exception e) { throw new RuntimeException(e); }
-        _appPane.getProjFilesPane().removeOpenFile(aFile);
+        _appPane.getPagePane().removeOpenFile(aFile);
     }
 
     /**
@@ -688,7 +685,7 @@ public class AppFilesPane extends ViewOwner {
 
         // Create suggested file and page
         WebFile file = site.createFileForPath(path, isDir);
-        WebPage page = _appPane.getBrowser().createPage(file);
+        WebPage page = _pagePane.createPage(file);
 
         // ShowNewFilePanel and save returned file
         file = page.showNewFilePanel(_appPane.getUI(), file);
@@ -697,7 +694,7 @@ public class AppFilesPane extends ViewOwner {
             file.save();
         }
         catch (Exception e) {
-            _appPane.getBrowser().showException(file.getURL(), e);
+            _pagePane.showException(file.getURL(), e);
             return;
         }
 
@@ -774,25 +771,6 @@ public class AppFilesPane extends ViewOwner {
     }
 
     /**
-     * Returns the HomePage.
-     */
-    public HomePage getHomePage()
-    {
-        if (_homePage != null) return _homePage;
-        _homePage = new HomePage();
-        _projFilesPane.setPageForURL(_homePage.getURL(), _homePage);
-        return _homePage;
-    }
-
-    /**
-     * Returns the HomePageURL.
-     */
-    public WebURL getHomePageURL()
-    {
-        return getHomePage().getURL();
-    }
-
-    /**
      * Handle Copy.
      */
     public void copy()
@@ -837,7 +815,7 @@ public class AppFilesPane extends ViewOwner {
         // If file has been changed since last load, reload
         if (aFile.getLastModTime() < aFile.getURL().getLastModTime()) {
             aFile.reload();
-            _projFilesPane.reloadFile(aFile);
+            _pagePane.reloadFile(aFile);
         }
 
         // If file is directory, recurse
@@ -887,7 +865,7 @@ public class AppFilesPane extends ViewOwner {
             cbox.setBorder(CLOSE_BOX_BORDER1);
         }
         else if (anEvent.isMouseRelease())
-            _projFilesPane.removeOpenFile((WebFile) cbox.getProp("File"));
+            _pagePane.removeOpenFile((WebFile) cbox.getProp("File"));
         anEvent.consume();
     }
 

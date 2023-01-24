@@ -15,7 +15,6 @@ import snap.view.*;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snap.web.WebURL;
 
 /**
  * The main view class for Projects.
@@ -25,8 +24,8 @@ public class AppPane extends ViewOwner {
     // The list of sites
     private WebSite[]  _sites = new WebSite[0];
 
-    // The ProjectFilesPane
-    private ProjectFilesPane  _projFilesPane;
+    // The PagePane to display project files for editing
+    private PagePane  _pagePane;
 
     // The AppPaneToolBar
     protected AppPaneToolBar  _toolBar;
@@ -86,20 +85,20 @@ public class AppPane extends ViewOwner {
     {
         super();
 
-        _projFilesPane = new ProjectFilesPane(this);
+        _pagePane = new PagePane(this);
         _toolBar = new AppPaneToolBar(this);
         _filesPane = new AppFilesPane(this);
     }
 
     /**
-     * Returns the FilesPane.
+     * Returns the PagePane.
      */
-    public ProjectFilesPane getProjFilesPane()  { return _projFilesPane; }
+    public PagePane getPagePane()  { return _pagePane; }
 
     /**
-     * Returns the browser.
+     * Returns the PagePane.Browser.
      */
-    public WebBrowser getBrowser()  { return _projFilesPane.getBrowser(); }
+    public WebBrowser getBrowser()  { return _pagePane.getBrowser(); }
 
     /**
      * Returns the toolbar.
@@ -255,7 +254,7 @@ public class AppPane extends ViewOwner {
 
         // Open site and show home page
         SitePane.get(getSite(0)).openSite();
-        showHomePage();
+        _pagePane.showHomePage();
     }
 
     /**
@@ -283,33 +282,16 @@ public class AppPane extends ViewOwner {
     public static AppPane getOpenAppPane()  { return _openAppPane; }
 
     /**
-     * Shows the home page.
-     */
-    public void showHomePage()
-    {
-        getBrowser().setURL(getHomePageURL());
-    }
-
-    /**
-     * Returns the HomePageURL.
-     */
-    public WebURL getHomePageURL()
-    {
-        WebURL url = SitePane.get(getSite(0)).getHomePageURL();
-        return url != null ? url : getFilesPane().getHomePageURL();
-    }
-
-    /**
      * Returns the selected file.
      */
-    public WebFile getSelectedFile()  { return _projFilesPane.getSelectedFile(); }
+    public WebFile getSelectedFile()  { return _pagePane.getSelectedFile(); }
 
     /**
      * Sets the selected site file.
      */
     public void setSelectedFile(WebFile aFile)
     {
-        _projFilesPane.setSelectedFile(aFile);
+        _pagePane.setSelectedFile(aFile);
     }
 
     /**
@@ -368,8 +350,8 @@ public class AppPane extends ViewOwner {
      */
     protected void initUI()
     {
-        // Get ProjectFilesPane
-        View projectFilesUI = _projFilesPane.getUI();
+        // Install PagePage UI
+        View projectFilesUI = _pagePane.getUI();
         ColView colView = getView("BrowserAndStatusBar", ColView.class);
         colView.addChild(projectFilesUI, 0);
 
@@ -458,7 +440,7 @@ public class AppPane extends ViewOwner {
 
         // Handle CloseMenuItem, CloseFileAction
         if (anEvent.equals("CloseMenuItem") || anEvent.equals("CloseFileAction")) {
-            getProjFilesPane().removeOpenFile(getSelectedFile());
+            getPagePane().removeOpenFile(getSelectedFile());
             anEvent.consume();
         }
 

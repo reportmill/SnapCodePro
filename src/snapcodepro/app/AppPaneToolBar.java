@@ -19,8 +19,8 @@ public class AppPaneToolBar extends ViewOwner {
     // The AppPane
     private AppPane  _appPane;
 
-    // The AppPane
-    private ProjectFilesPane  _projFilesPane;
+    // The PagePane
+    private PagePane  _pagePane;
 
     // The file tabs box
     private BoxView  _fileTabsBox;
@@ -52,7 +52,7 @@ public class AppPaneToolBar extends ViewOwner {
     public AppPaneToolBar(AppPane anAppPane)
     {
         _appPane = anAppPane;
-        _projFilesPane = _appPane.getProjFilesPane();
+        _pagePane = _appPane.getPagePane();
     }
 
     /**
@@ -160,7 +160,7 @@ public class AppPaneToolBar extends ViewOwner {
     {
         // Get AppPane and AppBrowser
         AppPane appPane = getAppPane();
-        WebBrowser appBrowser = _projFilesPane.getBrowser();
+        WebBrowser appBrowser = _pagePane.getBrowser();
 
         // Handle MouseEnter: Make buttons glow
         if (anEvent.isMouseEnter() && anEvent.getView() != _selTab) {
@@ -179,7 +179,7 @@ public class AppPaneToolBar extends ViewOwner {
 
         // Handle HomeButton
         if (anEvent.equals("HomeButton") && anEvent.isMouseRelease())
-            appPane.showHomePage();
+            _pagePane.showHomePage();
 
         // Handle LastButton, NextButton
         if (anEvent.equals("BackButton") && anEvent.isMouseRelease())
@@ -214,7 +214,7 @@ public class AppPaneToolBar extends ViewOwner {
 
         // Show history
         if (anEvent.equals("ShowHistoryMenuItem"))
-            _projFilesPane.showHistory();
+            _pagePane.showHistory();
 
         // Handle FileTab
         if (anEvent.equals("FileTab") && anEvent.isMouseRelease())
@@ -238,7 +238,7 @@ public class AppPaneToolBar extends ViewOwner {
     {
         if (_runConfigsPage != null) return _runConfigsPage;
         _runConfigsPage = new RunConfigsPage();
-        _projFilesPane.setPageForURL(_runConfigsPage.getURL(), _runConfigsPage);
+        _pagePane.setPageForURL(_runConfigsPage.getURL(), _runConfigsPage);
         return _runConfigsPage;
     }
 
@@ -260,8 +260,8 @@ public class AppPaneToolBar extends ViewOwner {
 
         // Handle single click
         if (anEvent.getClickCount() == 1) {
-            _projFilesPane.getBrowser().setTransition(WebBrowser.Instant);
-            _projFilesPane.setSelectedFile(file);
+            _pagePane.getBrowser().setTransition(WebBrowser.Instant);
+            _pagePane.setSelectedFile(file);
         }
 
         // Handle double click
@@ -284,14 +284,14 @@ public class AppPaneToolBar extends ViewOwner {
 
         // If file available, open file
         if (file != null)
-            _projFilesPane.setBrowserFile(file);
+            _pagePane.setBrowserFile(file);
 
             // If text available, either open URL or search for string
         else if (text != null && text.length() > 0) {
             int colon = text.indexOf(':');
             if (colon > 0 && colon < 6) {
                 WebURL url = WebURL.getURL(text);
-                _projFilesPane.setBrowserURL(url);
+                _pagePane.setBrowserURL(url);
             }
             else {
                 _appPane.getSearchPane().search(text);
@@ -359,7 +359,7 @@ public class AppPaneToolBar extends ViewOwner {
         hbox.setSpacing(2);
 
         // Iterate over OpenFiles, create FileTabs, init and add
-        WebFile[] openFiles = _projFilesPane.getOpenFiles();
+        WebFile[] openFiles = _pagePane.getOpenFiles();
         for (WebFile file : openFiles) {
             Label bm = new FileTab(file);
             bm.setOwner(this);
@@ -437,7 +437,7 @@ public class AppPaneToolBar extends ViewOwner {
             setPadding(1, 2, 1, 4);
             setFill(TAB_COLOR);
 
-            WebFile selFile = _projFilesPane.getSelectedFile();
+            WebFile selFile = _pagePane.getSelectedFile();
             if (aFile == selFile) {
                 setFill(Color.WHITE);
                 _selTab = this;
@@ -471,8 +471,8 @@ public class AppPaneToolBar extends ViewOwner {
                 cbox.setBorder(TAB_CLOSE_BORDER1);
             } else if (anEvent.isMouseRelease()) {
                 if (anEvent.isAltDown())
-                    _projFilesPane.removeAllOpenFilesExcept(_file);
-                else _projFilesPane.removeOpenFile(_file);
+                    _pagePane.removeAllOpenFilesExcept(_file);
+                else _pagePane.removeOpenFile(_file);
             }
             anEvent.consume();
         }

@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This ViewOwner displays files for editing.
+ * This class manages and displays pages for editing project files.
  */
-public class ProjectFilesPane extends ViewOwner {
+public class PagePane extends ViewOwner {
 
     // The ProjectPane
     private AppPane  _projPane;
@@ -32,10 +32,13 @@ public class ProjectFilesPane extends ViewOwner {
     // The WebBrowser for displaying editors
     private WebBrowser  _browser;
 
+    // The default HomePage
+    private HomePage  _homePage;
+
     /**
      * Constructor.
      */
-    public ProjectFilesPane(AppPane aProjPane)
+    public PagePane(AppPane aProjPane)
     {
         super();
         _projPane = aProjPane;
@@ -86,7 +89,7 @@ public class ProjectFilesPane extends ViewOwner {
         // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
         if (aFile == _selFile) {
             WebURL url = getFallbackURL();
-            if (!url.equals(_projPane.getHomePageURL()))
+            if (!url.equals(getHomePageURL()))
                 getBrowser().setTransition(WebBrowser.Instant);
             getBrowser().setURL(url);
         }
@@ -160,6 +163,43 @@ public class ProjectFilesPane extends ViewOwner {
     public void reloadFile(WebFile aFile)  { _browser.reloadFile(aFile); }
 
     /**
+     * Returns the selected page.
+     */
+    public WebPage getSelPage()  { return _browser.getPage(); }
+
+    /**
+     * Sets the selected page.
+     */
+    public void setSelPage(WebPage aPage)
+    {
+        _browser.setPage(aPage);
+    }
+
+    /**
+     * Creates page for given URL.
+     */
+    public WebPage createPage(WebFile aFile)
+    {
+        return _browser.createPage(aFile);
+    }
+
+    /**
+     * Shows the given exception.
+     */
+    public void showException(WebURL aURL, Exception e)
+    {
+        _browser.showException(aURL, e);
+    }
+
+    /**
+     * Shows the home page.
+     */
+    public void showHomePage()
+    {
+        _browser.setURL(getHomePageURL());
+    }
+
+    /**
      * Shows history.
      */
     public void showHistory()
@@ -174,6 +214,28 @@ public class ProjectFilesPane extends ViewOwner {
         WebFile file = fileURL.createFile(false);
         file.setText(sb.toString());
         browser.setFile(file);
+    }
+
+    /**
+     * Returns the HomePage URL.
+     */
+    public WebURL getHomePageURL()
+    {
+        //WebSite rootSite = _projPane.getRootSite();
+        //WebURL url = SitePane.get(rootSite).getHomePageURL();
+        //return url != null ? url : getHomePageURL();
+        return getHomePage().getURL();
+    }
+
+    /**
+     * Returns the HomePage.
+     */
+    public HomePage getHomePage()
+    {
+        if (_homePage != null) return _homePage;
+        _homePage = new HomePage();
+        setPageForURL(_homePage.getURL(), _homePage);
+        return _homePage;
     }
 
     /**
@@ -197,8 +259,8 @@ public class ProjectFilesPane extends ViewOwner {
                 return url.getFileURL();
         }
 
-        //
-        return _projPane.getHomePageURL();
+        // Return
+        return getHomePageURL();
     }
 
     /**
