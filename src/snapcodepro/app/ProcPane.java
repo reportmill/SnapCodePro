@@ -425,10 +425,10 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
         _progCounterLine = aLine;
 
         // Reset JavaPage.TextArea for old/new files
-        WebPage page = oldPCF != null ? getAppPane().getBrowser().getPage(oldPCF.getURL()) : null;
+        WebPage page = oldPCF != null ? getAppPane().getBrowser().getPageForURL(oldPCF.getURL()) : null;
         if (page instanceof JavaPage)
             ((JavaPage) page).getTextArea().repaint();
-        page = _progCounterFile != null ? getAppPane().getBrowser().getPage(_progCounterFile.getURL()) : null;
+        page = _progCounterFile != null ? getAppPane().getBrowser().getPageForURL(_progCounterFile.getURL()) : null;
         if (page instanceof JavaPage)
             ((JavaPage) page).getTextArea().repaint();
     }

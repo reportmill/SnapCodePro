@@ -599,7 +599,7 @@ public class AppPane extends ViewOwner {
             Breakpoint oval = (Breakpoint) pc.getOldValue();
 
             // Make current JavaPage.TextArea resetLater
-            WebPage page = getBrowser().getPage(oval.getFile().getURL());
+            WebPage page = getBrowser().getPageForURL(oval.getFile().getURL());
             if (page instanceof JavaPage)
                 ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
 
@@ -622,7 +622,7 @@ public class AppPane extends ViewOwner {
 
             // Make current JavaPage.TextArea resetLater
             WebFile issueFile = issueAdded.getFile();
-            WebPage page = getBrowser().getPage(issueFile.getURL());
+            WebPage page = getBrowser().getPageForURL(issueFile.getURL());
             if (page instanceof JavaPage) {
                 JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
                 javaTextPane.buildIssueOrBreakPointMarkerChanged();
@@ -639,7 +639,7 @@ public class AppPane extends ViewOwner {
             WebFile issueFile = issueRemoved.getFile();
 
             // Make current JavaPage.TextArea resetLater
-            WebPage page = getBrowser().getPage(issueFile.getURL());
+            WebPage page = getBrowser().getPageForURL(issueFile.getURL());
             if (page instanceof JavaPage) {
                 JavaTextPane<?> javaTextPane = ((JavaPage) page).getTextPane();
                 javaTextPane.buildIssueOrBreakPointMarkerChanged();

@@ -685,7 +685,7 @@ public class AppFilesPane extends ViewOwner {
 
         // Create suggested file and page
         WebFile file = site.createFileForPath(path, isDir);
-        WebPage page = _pagePane.createPage(file);
+        WebPage page = _pagePane.createPageForURL(file.getURL());
 
         // ShowNewFilePanel and save returned file
         file = page.showNewFilePanel(_appPane.getUI(), file);

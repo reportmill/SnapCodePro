@@ -200,7 +200,7 @@ public class JavaPage extends WebPage implements WebFile.Updater {
         WebPage page = new SnapEditorPage(this);
         page.setFile(file);
         WebBrowser browser = getBrowser();
-        browser.setPage(url, page);
+        browser.setPageForURL(url, page);
         browser.setURL(file.getURL());
     }
 

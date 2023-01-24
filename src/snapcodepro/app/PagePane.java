@@ -155,7 +155,7 @@ public class PagePane extends ViewOwner {
     /**
      * Sets the browser URL.
      */
-    public void setPageForURL(WebURL aURL, WebPage aPage)  { _browser.setPage(aURL, aPage); }
+    public void setPageForURL(WebURL aURL, WebPage aPage)  { _browser.setPageForURL(aURL, aPage); }
 
     /**
      * Reloads a file.
@@ -178,9 +178,9 @@ public class PagePane extends ViewOwner {
     /**
      * Creates page for given URL.
      */
-    public WebPage createPage(WebFile aFile)
+    public WebPage createPageForURL(WebURL aURL)
     {
-        return _browser.createPage(aFile);
+        return _browser.createPageForURL(aURL);
     }
 
     /**

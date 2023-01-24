@@ -85,14 +85,16 @@ public class HomePage extends WebPage {
 
         // Handle NewJavaFile
         if (anEvent.equals("JavaPlayground") && anEvent.isMouseRelease()) {
-            WebFile file = getRootSite().createFileForPath("/Playground.pgd", false);
-            WebPage page = getBrowser().createPage(file);
-            //file = page.showNewFilePanel(getBrowser());
-            if (file != null) try {
-                //file.save();
-                getBrowser().setFile(file);
-            } catch (Exception e) {
-                getBrowser().showException(file.getURL(), e);
+
+            // Create playground file
+            WebSite rootSite = getRootSite();
+            WebFile file = rootSite.createFileForPath("/Playground.pgd", false);
+
+            // Set file
+            if (file != null) {
+                WebBrowser browser = getBrowser();
+                try { browser.setFile(file); }
+                catch (Exception e) { browser.showException(file.getURL(), e); }
             }
         }
 
