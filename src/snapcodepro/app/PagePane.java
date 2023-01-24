@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snapcodepro.app;
 import snap.props.PropChange;
 import snap.util.ArrayUtils;
@@ -34,6 +37,9 @@ public class PagePane extends ViewOwner {
 
     // The default HomePage
     private HomePage  _homePage;
+
+    // Constants for properties
+    public static final String OpenFiles_Prop = "OpenFiles";
 
     /**
      * Constructor.
@@ -72,18 +78,24 @@ public class PagePane extends ViewOwner {
         if (ListUtils.containsId(_openFiles, aFile))
             return;
 
+        // Add file
         _openFiles.add(aFile);
-        _projPane.getToolBar().buildFileTabs();
+
+        // Fire prop change
+        firePropChange(OpenFiles_Prop, null, aFile, _openFiles.size() - 1);
     }
 
     /**
      * Removes a file from OpenFiles list.
      */
-    public int removeOpenFile(WebFile aFile)
+    public void removeOpenFile(WebFile aFile)
     {
         // Remove file from list (just return if not available)
         int index = ListUtils.indexOfId(_openFiles, aFile);
-        if (index < 0) return index;
+        if (index < 0)
+            return;
+
+        // Remove file
         _openFiles.remove(index);
 
         // If removed file is selected file, set browser file to last file (that is still in OpenFiles list)
@@ -94,9 +106,8 @@ public class PagePane extends ViewOwner {
             getBrowser().setURL(url);
         }
 
-        // Rebuild file tabs and return
-        _projPane.getToolBar().buildFileTabs();
-        return index;
+        // Fire prop change
+        firePropChange(OpenFiles_Prop, aFile, null, index);
     }
 
     /**
@@ -196,7 +207,8 @@ public class PagePane extends ViewOwner {
      */
     public void showHomePage()
     {
-        _browser.setURL(getHomePageURL());
+        WebURL url = getHomePageURL();
+        _browser.setURL(url);
     }
 
     /**
@@ -204,12 +216,14 @@ public class PagePane extends ViewOwner {
      */
     public void showHistory()
     {
+        // Create History string
         WebBrowser browser = getBrowser();
         WebBrowserHistory history = browser.getHistory();
         StringBuilder sb = new StringBuilder();
         for (WebURL url : history.getLastURLs())
             sb.append(url.getString()).append('\n');
 
+        // Create temp file and show
         WebURL fileURL = WebURL.getURL("/tmp/History.txt");
         WebFile file = fileURL.createFile(false);
         file.setText(sb.toString());

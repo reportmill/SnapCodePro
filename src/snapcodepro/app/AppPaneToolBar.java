@@ -1,6 +1,5 @@
 package snapcodepro.app;
 import snap.geom.HPos;
-import snap.geom.Polygon;
 import snap.geom.VPos;
 import snap.gfx.*;
 import snap.util.StringUtils;
@@ -23,24 +22,13 @@ public class AppPaneToolBar extends ViewOwner {
     private PagePane  _pagePane;
 
     // The file tabs box
-    private BoxView  _fileTabsBox;
-
-    // The view for the currently selected view
-    private FileTab  _selTab;
+    private PagePaneTabsBox  _tabsBox;
 
     // A placeholder for fill from toolbar button under mouse
     private Paint  _tempFill;
 
     // RunConfigsPage
     private RunConfigsPage  _runConfigsPage;
-
-    // Constant for file tab attributes
-    static Font TAB_FONT = new Font("Arial Bold", 12);
-    static Color TAB_COLOR = new Color(.5, .65, .8, .8);
-    static Color TAB_BORDER_COLOR = new Color(.33, .33, .33, .66);
-    static Border TAB_BORDER = Border.createLineBorder(TAB_BORDER_COLOR, 1);
-    static Border TAB_CLOSE_BORDER1 = Border.createLineBorder(Color.BLACK, .5);
-    static Border TAB_CLOSE_BORDER2 = Border.createLineBorder(Color.BLACK, 1);
 
     // Shared images
     static Image SIDEBAR_EXPAND = Image.get(AppPane.class, "SideBar_Expand.png");
@@ -90,14 +78,10 @@ public class AppPaneToolBar extends ViewOwner {
         uin.addChild(menuButton);
 
         // Add FileTabsPane pane
-        _fileTabsBox = new ScaleBox();
-        _fileTabsBox.setPadding(4, 0, 0, 4);
-        _fileTabsBox.setAlignX(HPos.LEFT);
-        _fileTabsBox.setBounds(0, 45, uin.getWidth() - 10, 24);
-        _fileTabsBox.setGrowWidth(true);
-        _fileTabsBox.setLeanY(VPos.BOTTOM);
-        uin.addChild(_fileTabsBox);
-        buildFileTabs();
+        _tabsBox = new PagePaneTabsBox(_pagePane);
+        View tabsBoxUI = _tabsBox.getUI();
+        tabsBoxUI.setBounds(0, 45, uin.getWidth() - 10, 24);
+        uin.addChild(tabsBoxUI);
 
         // Add Expand button
         Button expandButton = new Button();
@@ -121,8 +105,8 @@ public class AppPaneToolBar extends ViewOwner {
     {
         // Get/configure SearchComboBox
         ComboBox<WebFile> searchComboBox = getView("SearchComboBox", ComboBox.class);
-        searchComboBox.setItemTextFunction(itm -> itm.getName());
-        searchComboBox.getListView().setItemTextFunction(itm -> itm.getName() + " - " + itm.getParent().getPath());
+        searchComboBox.setItemTextFunction(item -> item.getName());
+        searchComboBox.getListView().setItemTextFunction(item -> item.getName() + " - " + item.getParent().getPath());
         searchComboBox.setPrefixFunction(s -> getFilesForPrefix(s));
 
         // Get/configure SearchComboBox.PopupList
@@ -140,13 +124,15 @@ public class AppPaneToolBar extends ViewOwner {
         TextField.setBackLabelAlignAnimatedOnFocused(searchText, true);
 
         // Enable events on buttons
-        String[] bnames = {"HomeButton", "BackButton", "NextButton", "RefreshButton", "RunButton"};
-        for (String name : bnames) enableEvents(name, MouseRelease, MouseEnter, MouseExit);
+        String[] buttonNames = { "HomeButton", "BackButton", "NextButton", "RefreshButton", "RunButton" };
+        for (String name : buttonNames)
+            enableEvents(name, MouseRelease, MouseEnter, MouseExit);
     }
 
     /**
      * Reset UI.
      */
+    @Override
     protected void resetUI()
     {
         Image img = getAppPane().isShowSideBar() ? SIDEBAR_EXPAND : SIDEBAR_COLLAPSE;
@@ -156,14 +142,15 @@ public class AppPaneToolBar extends ViewOwner {
     /**
      * Respond to UI changes.
      */
-    public void respondUI(ViewEvent anEvent)
+    @Override
+    protected void respondUI(ViewEvent anEvent)
     {
         // Get AppPane and AppBrowser
         AppPane appPane = getAppPane();
         WebBrowser appBrowser = _pagePane.getBrowser();
 
         // Handle MouseEnter: Make buttons glow
-        if (anEvent.isMouseEnter() && anEvent.getView() != _selTab) {
+        if (anEvent.isMouseEnter()) {
             View view = anEvent.getView();
             _tempFill = view.getFill();
             view.setFill(Color.WHITE);
@@ -171,7 +158,7 @@ public class AppPaneToolBar extends ViewOwner {
         }
 
         // Handle MouseExit: Restore fill
-        if (anEvent.isMouseExit() && anEvent.getView() != _selTab) {
+        if (anEvent.isMouseExit()) {
             View view = anEvent.getView();
             view.setFill(_tempFill);
             return;
@@ -216,10 +203,6 @@ public class AppPaneToolBar extends ViewOwner {
         if (anEvent.equals("ShowHistoryMenuItem"))
             _pagePane.showHistory();
 
-        // Handle FileTab
-        if (anEvent.equals("FileTab") && anEvent.isMouseRelease())
-            handleFileTabClicked(anEvent);
-
         // Handle SearchComboBox
         if (anEvent.equals("SearchComboBox"))
             handleSearchComboBox(anEvent);
@@ -248,29 +231,6 @@ public class AppPaneToolBar extends ViewOwner {
     public WebURL getRunConfigsPageURL()
     {
         return getRunConfigsPage().getURL();
-    }
-
-    /**
-     * Handle FileTab clicked.
-     */
-    protected void handleFileTabClicked(ViewEvent anEvent)
-    {
-        FileTab fileTab = anEvent.getView(FileTab.class);
-        WebFile file = fileTab.getFile();
-
-        // Handle single click
-        if (anEvent.getClickCount() == 1) {
-            _pagePane.getBrowser().setTransition(WebBrowser.Instant);
-            _pagePane.setSelectedFile(file);
-        }
-
-        // Handle double click
-        else if (anEvent.getClickCount() == 2) {
-            WebBrowserPane browserPane = new WebBrowserPane();
-            browserPane.getUI().setPrefSize(800, 800);
-            browserPane.getBrowser().setURL(file.getURL());
-            browserPane.getWindow().show(getUI().getRootView(), 600, 200);
-        }
     }
 
     /**
@@ -341,37 +301,6 @@ public class AppPaneToolBar extends ViewOwner {
     }
 
     /**
-     * Builds the file tabs.
-     */
-    public void buildFileTabs()
-    {
-        // If not on event thread, come back on that
-        if (!isEventThread()) {
-            runLater(() -> buildFileTabs());
-            return;
-        }
-
-        // Clear selected view
-        _selTab = null;
-
-        // Create HBox for tabs
-        RowView hbox = new RowView();
-        hbox.setSpacing(2);
-
-        // Iterate over OpenFiles, create FileTabs, init and add
-        WebFile[] openFiles = _pagePane.getOpenFiles();
-        for (WebFile file : openFiles) {
-            Label bm = new FileTab(file);
-            bm.setOwner(this);
-            enableEvents(bm, MouseEvents);
-            hbox.addChild(bm);
-        }
-
-        // Add box
-        _fileTabsBox.setContent(hbox);
-    }
-
-    /**
      * Returns a list of files for given prefix.
      */
     private List<WebFile> getFilesForPrefix(String aPrefix)
@@ -411,70 +340,4 @@ public class AppPaneToolBar extends ViewOwner {
         int c = o1.getSimpleName().compareToIgnoreCase(o2.getSimpleName());
         return c != 0 ? c : o1.getName().compareToIgnoreCase(o2.getName());
     };
-
-    /**
-     * A class to represent a rounded label.
-     */
-    protected class FileTab extends Label {
-
-        // The File
-        WebFile _file;
-
-        /**
-         * Creates a new FileTab for given file.
-         */
-        public FileTab(WebFile aFile)
-        {
-            // Create label for file and configure
-            _file = aFile;
-            setText(aFile.getName());
-            setFont(TAB_FONT);
-            setName("FileTab");
-            setPrefHeight(19);
-            setMaxHeight(19);
-            setBorder(TAB_BORDER);
-            setBorderRadius(6);
-            setPadding(1, 2, 1, 4);
-            setFill(TAB_COLOR);
-
-            WebFile selFile = _pagePane.getSelectedFile();
-            if (aFile == selFile) {
-                setFill(Color.WHITE);
-                _selTab = this;
-            }
-
-            // Add a close box graphic
-            Polygon poly = new Polygon(0, 2, 2, 0, 5, 3, 8, 0, 10, 2, 7, 5, 10, 8, 8, 10, 5, 7, 2, 10, 0, 8, 3, 5);
-            ShapeView sview = new ShapeView(poly);
-            sview.setBorder(TAB_CLOSE_BORDER1);
-            sview.setPrefSize(11, 11);
-            sview.addEventFilter(e -> handleTabCloseBoxEvent(e), MouseEnter, MouseExit, MouseRelease);
-            setGraphicAfter(sview);
-        }
-
-        /**
-         * Returns the file.
-         */
-        public WebFile getFile()  { return _file; }
-
-        /**
-         * Called for events on tab close button.
-         */
-        private void handleTabCloseBoxEvent(ViewEvent anEvent)
-        {
-            View cbox = anEvent.getView();
-            if (anEvent.isMouseEnter()) {
-                cbox.setFill(Color.CRIMSON);
-                cbox.setBorder(TAB_CLOSE_BORDER2);
-            } else if (anEvent.isMouseExit()) {
-                cbox.setFill(null);
-                cbox.setBorder(TAB_CLOSE_BORDER1);
-            } else if (anEvent.isMouseRelease()) {
-                if (anEvent.isAltDown())
-                    _pagePane.removeAllOpenFilesExcept(_file);
-                else _pagePane.removeOpenFile(_file);
-            }
-            anEvent.consume();
-        }
-    }
 }
