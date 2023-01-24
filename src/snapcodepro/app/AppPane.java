@@ -4,6 +4,7 @@ import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
 import javakit.ide.JavaTextPane;
 import snap.util.ArrayUtils;
+import snap.viewx.WebBrowser;
 import snapcodepro.debug.RunApp;
 import snapcodepro.project.ProjectX;
 import snap.props.PropChange;
@@ -98,7 +99,7 @@ public class AppPane extends ViewOwner {
     /**
      * Returns the browser.
      */
-    public AppBrowser getBrowser()  { return _projFilesPane.getBrowser(); }
+    public WebBrowser getBrowser()  { return _projFilesPane.getBrowser(); }
 
     /**
      * Returns the toolbar.

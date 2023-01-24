@@ -160,7 +160,7 @@ public class AppPaneToolBar extends ViewOwner {
     {
         // Get AppPane and AppBrowser
         AppPane appPane = getAppPane();
-        AppBrowser appBrowser = _projFilesPane.getBrowser();
+        WebBrowser appBrowser = _projFilesPane.getBrowser();
 
         // Handle MouseEnter: Make buttons glow
         if (anEvent.isMouseEnter() && anEvent.getView() != _selTab) {

@@ -1,5 +1,4 @@
 package snapcodepro.app;
-
 import snap.gfx.Color;
 import snap.gfx.GFXEnv;
 import snap.view.ScrollView;
@@ -18,14 +17,6 @@ public class HomePage extends WebPage {
 
     // Whether to do stupid animation (rotate buttons on mouse enter)
     boolean _stupidAnim;
-
-    /**
-     * Returns the browser as AppBrowser.
-     */
-    public AppBrowser getBrowser()
-    {
-        return (AppBrowser) super.getBrowser();
-    }
 
     /**
      * Returns the AppPane.

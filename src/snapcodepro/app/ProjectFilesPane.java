@@ -4,10 +4,12 @@ import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.View;
 import snap.view.ViewOwner;
+import snap.viewx.TextPage;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebBrowserHistory;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
+import snap.web.WebResponse;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import java.util.ArrayList;
@@ -22,13 +24,13 @@ public class ProjectFilesPane extends ViewOwner {
     private AppPane  _projPane;
 
     // A list of open files
-    List<WebFile> _openFiles = new ArrayList<>();
+    List<WebFile>  _openFiles = new ArrayList<>();
 
     // The currently selected file
     private WebFile  _selFile;
 
     // The WebBrowser for displaying editors
-    private AppBrowser  _browser;
+    private WebBrowser  _browser;
 
     /**
      * Constructor.
@@ -37,48 +39,6 @@ public class ProjectFilesPane extends ViewOwner {
     {
         super();
         _projPane = aProjPane;
-    }
-
-    /**
-     * Returns the browser.
-     */
-    public AppBrowser getBrowser()
-    {
-        if (_browser != null) return _browser;
-        getUI();
-        return _browser;
-    }
-
-    /**
-     * Sets the browser URL.
-     */
-    public void setBrowserURL(WebURL aURL)
-    {
-        _browser.setURL(aURL);
-    }
-
-    /**
-     * Sets the browser URL.
-     */
-    public void setBrowserFile(WebFile aFile)
-    {
-        _browser.setFile(aFile);
-    }
-
-    /**
-     * Sets the browser URL.
-     */
-    public void setPageForURL(WebURL aURL, WebPage aPage)
-    {
-        _browser.setPage(aURL, aPage);
-    }
-
-    /**
-     * Reloads a file.
-     */
-    public void reloadFile(WebFile aFile)
-    {
-        _browser.reloadFile(aFile);
     }
 
     /**
@@ -170,6 +130,36 @@ public class ProjectFilesPane extends ViewOwner {
     }
 
     /**
+     * Returns the browser.
+     */
+    public WebBrowser getBrowser()
+    {
+        if (_browser != null) return _browser;
+        getUI();
+        return _browser;
+    }
+
+    /**
+     * Sets the browser URL.
+     */
+    public void setBrowserURL(WebURL aURL)  { _browser.setURL(aURL); }
+
+    /**
+     * Sets the browser URL.
+     */
+    public void setBrowserFile(WebFile aFile)  { _browser.setFile(aFile); }
+
+    /**
+     * Sets the browser URL.
+     */
+    public void setPageForURL(WebURL aURL, WebPage aPage)  { _browser.setPage(aURL, aPage); }
+
+    /**
+     * Reloads a file.
+     */
+    public void reloadFile(WebFile aFile)  { _browser.reloadFile(aFile); }
+
+    /**
      * Shows history.
      */
     public void showHistory()
@@ -192,7 +182,7 @@ public class ProjectFilesPane extends ViewOwner {
     private WebURL getFallbackURL()
     {
         // Return the most recently opened of the remaining OpenFiles, or the Project.HomePageURL
-        AppBrowser browser = getBrowser();
+        WebBrowser browser = getBrowser();
         WebURL[] urls = browser.getHistory().getNextURLs();
         for (WebURL url : urls) {
             WebFile file = url.getFile();
@@ -218,7 +208,7 @@ public class ProjectFilesPane extends ViewOwner {
     protected View createUI()
     {
         // Create browser
-        _browser = new AppBrowser(_projPane);
+        _browser = new AppBrowser();
         _browser.setGrowHeight(true);
 
         // Return
@@ -242,5 +232,57 @@ public class ProjectFilesPane extends ViewOwner {
     private void browserDidPropChange(PropChange aPC)
     {
         _projPane.resetLater();
+    }
+
+    /**
+     * A custom browser subclass.
+     */
+    private class AppBrowser extends WebBrowser {
+
+        /**
+         * Override to make sure that AppPane is in sync.
+         */
+        public void setPage(WebPage aPage)
+        {
+            // Do normal version
+            if (aPage == getPage()) return;
+            super.setPage(aPage);
+
+            // Select page file
+            WebFile file = aPage != null ? aPage.getFile() : null;
+            setSelectedFile(file);
+        }
+
+        /**
+         * Creates a WebPage for given file.
+         */
+        protected Class<? extends WebPage> getPageClass(WebResponse aResp)
+        {
+            // Get file and data
+            WebFile file = aResp.getFile();
+            String type = aResp.getPathType();
+
+            // Handle Project Root directory
+            if (file != null && file.isRoot() && ArrayUtils.containsId(_projPane.getSites(), file.getSite()))
+                return SitePane.SitePage.class;
+
+            // Handle Java
+            if (type.equals("java")) {
+                if (file != null && SnapEditorPage.isSnapEditSet(file))
+                    return SnapEditorPage.class;
+                return JavaPage.class;
+            }
+
+            //if(type.equals("snp")) return snapbuild.app.EditorPage.class;
+            if (type.equals("rpt"))
+                return getPageClass("com.reportmill.app.ReportPageEditor", TextPage.class);
+            if (type.equals("class") && ArrayUtils.containsId(_projPane.getSites(), file.getSite()))
+                return ClassInfoPage.class;
+            if (type.equals("pgd"))
+                return JavaShellPage.class;
+
+            // Do normal version
+            return super.getPageClass(aResp);
+        }
     }
 }

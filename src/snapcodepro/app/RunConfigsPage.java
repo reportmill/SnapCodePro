@@ -1,12 +1,10 @@
 package snapcodepro.app;
-
 import snap.view.ScrollView;
 import snap.view.View;
 import snap.view.ViewEvent;
 import snap.viewx.WebBrowser;
 import snap.viewx.WebPage;
 import snap.web.WebSite;
-
 import java.util.List;
 
 /**
@@ -16,14 +14,6 @@ public class RunConfigsPage extends WebPage {
 
     // The selected RunConfig
     RunConfig _runConfig;
-
-    /**
-     * Returns the app browser.
-     */
-    public AppBrowser getBrowser()
-    {
-        return (AppBrowser) super.getBrowser();
-    }
 
     /**
      * Returns the AppPane.
