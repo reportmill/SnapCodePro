@@ -7,6 +7,8 @@ import snap.geom.Polygon;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.props.PropChange;
+import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.viewx.WebBrowser;
 import snap.web.WebFile;
@@ -63,7 +65,7 @@ public class PagePaneTabsBox extends ViewOwner {
         _fileTabsBox.setPrefHeight(_fileTabsBox.getPadding().getHeight() + TAB_HEIGHT + 2);
 
         // Register to build tabs whenever PagePage changes
-        _pagePane.addPropChangeListener(pc -> buildFileTabs(), PagePane.OpenFiles_Prop);
+        _pagePane.addPropChangeListener(pc -> propPaneDidPropChange(pc), PagePane.OpenFiles_Prop, PagePane.SelFile_Prop);
 
         // Return
         return _fileTabsBox;
@@ -106,11 +108,6 @@ public class PagePaneTabsBox extends ViewOwner {
         if (anEvent.getClickCount() == 1) {
             _pagePane.getBrowser().setTransition(WebBrowser.Instant);
             _pagePane.setSelectedFile(file);
-
-            if (_selTab != null)
-                _selTab.setFill(TAB_COLOR);
-            _selTab = fileTab;
-            _selTab.setFill(TAB_COLOR_SEL);
         }
 
         // Handle double click
@@ -151,6 +148,41 @@ public class PagePaneTabsBox extends ViewOwner {
 
         // Add box
         _fileTabsBox.setContent(rowView);
+    }
+
+    /**
+     * Called when PropPane does PropChange.
+     */
+    private void propPaneDidPropChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+
+        // Handle OpenFiles
+        if (propName == PagePane.OpenFiles_Prop)
+            buildFileTabs();
+
+        // Handle SelFile
+        if (propName == PagePane.SelFile_Prop)
+            setSelTabForFile(_pagePane.getSelectedFile());
+    }
+
+    /**
+     * Sets the SelTab.
+     */
+    private void setSelTabForFile(WebFile aFile)
+    {
+        // Get SelTab for file
+        ParentView tabView = (ParentView) _fileTabsBox.getContent();
+        if (tabView == null) return;
+        View[] fileTabs = tabView.getChildren();
+        FileTab selTab = (FileTab) ArrayUtils.findMatch(fileTabs, fileTab -> ((FileTab) fileTab)._file == aFile);
+
+        // Reset SelTab fills
+        if (_selTab != null)
+            _selTab.setFill(TAB_COLOR);
+        _selTab = selTab;
+        if (_selTab != null)
+            _selTab.setFill(TAB_COLOR_SEL);
     }
 
     /**

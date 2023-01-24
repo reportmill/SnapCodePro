@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.app;
-import snap.props.PropChange;
 import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.view.ColView;
@@ -41,6 +40,7 @@ public class PagePane extends ViewOwner {
 
     // Constants for properties
     public static final String OpenFiles_Prop = "OpenFiles";
+    public static final String SelFile_Prop = "SelFile";
 
     /**
      * Constructor.
@@ -52,16 +52,19 @@ public class PagePane extends ViewOwner {
     }
 
     /**
-     * Returns whether a file is an "OpenFile" (whether it needs a File Bookmark).
+     * Returns whether a file is an "OpenFile" (whether it needs a file tab).
      */
-    protected boolean isOpenFile(WebFile aFile)
+    protected boolean shouldHaveFileTab(WebFile aFile)
     {
         // If directory, return false
         if (aFile.isDir()) return false;
 
-        //
-        WebSite[] projSites = _projPane.getSites();
-        return ArrayUtils.containsId(projSites, aFile.getSite()) || aFile.getType().equals("java");
+        // Accept all Java files
+        if (aFile.getType().equals("java"))
+            return true;
+
+        // Accept all project files
+        return isProjectFile(aFile);
     }
 
     /**
@@ -75,7 +78,8 @@ public class PagePane extends ViewOwner {
     public void addOpenFile(WebFile aFile)
     {
         // If already open file, just return
-        if (aFile == null || !isOpenFile(aFile)) return;
+        if (aFile == null || !shouldHaveFileTab(aFile))
+            return;
         if (ListUtils.containsId(_openFiles, aFile))
             return;
 
@@ -132,16 +136,20 @@ public class PagePane extends ViewOwner {
     {
         // If file already set, just return
         if (aFile == null || aFile == getSelectedFile()) return;
+
+        // Set SelFile
+        WebFile oldSelFile = _selFile;
         _selFile = aFile;
 
         // Set selected file and update tree
         if (_selFile.isFile() || _selFile.isRoot())
             getBrowser().setFile(_selFile);
 
+        // Add to OpenFiles
         addOpenFile(aFile);
 
-        // Reset FilesPane
-        _projPane._filesPane.resetLater();
+        // Fire prop change
+        firePropChange(SelFile_Prop, oldSelFile, _selFile);
     }
 
     /**
@@ -236,8 +244,7 @@ public class PagePane extends ViewOwner {
      */
     public WebURL getHomePageURL()
     {
-        //WebSite rootSite = _projPane.getRootSite();
-        //WebURL url = SitePane.get(rootSite).getHomePageURL();
+        //WebURL url = SitePane.get(getRootSite()).getHomePageURL();
         //return url != null ? url : getHomePageURL();
         return getHomePage().getURL();
     }
@@ -306,19 +313,16 @@ public class PagePane extends ViewOwner {
      * Initialize UI.
      */
     @Override
-    protected void initUI()
-    {
-        // Listen to Browser PropChanges, to update ActivityText, ProgressBar, Window.Title
-        _browser.addPropChangeListener(pc -> browserDidPropChange(pc));
-
-    }
+    protected void initUI()  { }
 
     /**
-     * Called when Browser has changes.
+     * Returns whether given file is a project file.
      */
-    private void browserDidPropChange(PropChange aPC)
+    protected boolean isProjectFile(WebFile aFile)
     {
-        _projPane.resetLater();
+        WebSite[] projSites = _projPane.getSites();
+        WebSite fileSite = aFile.getSite();
+        return ArrayUtils.containsId(projSites, fileSite);
     }
 
     /**
@@ -350,7 +354,7 @@ public class PagePane extends ViewOwner {
             String type = aResp.getPathType();
 
             // Handle Project Root directory
-            if (file != null && file.isRoot() && ArrayUtils.containsId(_projPane.getSites(), file.getSite()))
+            if (file != null && file.isRoot() && isProjectFile(file))
                 return SitePane.SitePage.class;
 
             // Handle Java
@@ -363,7 +367,7 @@ public class PagePane extends ViewOwner {
             //if(type.equals("snp")) return snapbuild.app.EditorPage.class;
             if (type.equals("rpt"))
                 return getPageClass("com.reportmill.app.ReportPageEditor", TextPage.class);
-            if (type.equals("class") && ArrayUtils.containsId(_projPane.getSites(), file.getSite()))
+            if (type.equals("class") && isProjectFile(file))
                 return ClassInfoPage.class;
             if (type.equals("pgd"))
                 return JavaShellPage.class;

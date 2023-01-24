@@ -355,6 +355,11 @@ public class AppPane extends ViewOwner {
         ColView colView = getView("BrowserAndStatusBar", ColView.class);
         colView.addChild(projectFilesUI, 0);
 
+        // Listen to PagePane and PagePane.Browser changes
+        _pagePane.addPropChangeListener(pc -> pagePaneDidPropChange(pc), PagePane.SelFile_Prop);
+        _pagePane.getBrowser().addPropChangeListener(pc -> pagePaneBrowserDidPropChange(pc),
+                WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
+
         // Get SideBarSplit and add FilesPane, ProcPane
         _sideBarSplit = getView("SideBarSplitView", SplitView.class);
         _sideBarSplit.setBorder(null);
@@ -575,6 +580,28 @@ public class AppPane extends ViewOwner {
     public void showNewFilePanel()
     {
         _filesPane.showNewFilePanel();
+    }
+
+    /**
+     * Called when PagePane does prop change.
+     */
+    private void pagePaneDidPropChange(PropChange aPC)
+    {
+        // Handle SelFile
+        String propName = aPC.getPropName();
+        if (propName == PagePane.SelFile_Prop)
+            _filesPane.resetLater();
+    }
+
+    /**
+     * Called when PagePane.Browser does prop change.
+     */
+    private void pagePaneBrowserDidPropChange(PropChange aPC)
+    {
+        // Handle Activity, Status, Loading
+        String propName = aPC.getPropName();
+        if (propName == WebBrowser.Activity_Prop || propName == WebBrowser.Loading_Prop || propName == WebBrowser.Status_Prop)
+            resetLater();
     }
 
     /**
