@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<VBox PrefWidth="500" PrefHeight="500" Padding="16" Spacing="10">
-  <HBox Spacing="5">
+<ColView PrefWidth="500" PrefHeight="500" Padding="16" Spacing="10">
+  <RowView Spacing="5">
     <Label text="Home Page:" />
     <TextField Name="HomePageText" PrefWidth="255" />
     <Button Name="ResetHomePageButton" PrefWidth="47" text="Reset" />
-  </HBox>
-  <HBox Spacing="5">
+  </RowView>
+  <RowView Spacing="5">
     <Label text="Source Directory:" />
     <TextField Name="SourcePathText" PrefWidth="255" />
-  </HBox>
-  <HBox Spacing="5">
+  </RowView>
+  <RowView Spacing="5">
     <Label text="Build Directory:" />
     <TextField Name="BuildPathText" PrefWidth="255" />
-  </HBox>
+  </RowView>
   <Label text="Dependencies:" />
   <TabView PrefWidth="360" PrefHeight="160">
     <BevelBorder />
@@ -40,4 +40,4 @@
       <LineBorder Color="#808080" />
     </TextView>
   </TitleView>
-</VBox>
+</ColView>
