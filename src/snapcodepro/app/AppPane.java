@@ -3,6 +3,7 @@ import javakit.project.Breakpoint;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
 import javakit.ide.JavaTextPane;
+import snap.geom.Pos;
 import snap.util.ArrayUtils;
 import snap.viewx.WebBrowser;
 import snapcodepro.debug.RunApp;
@@ -42,9 +43,6 @@ public class AppPane extends ViewOwner {
     // The ProcPane manages run/debug processes
     private ProcPane  _procPane = new ProcPane(this);
 
-    // The pane that the browser sits in
-    private SplitView _browserBox;
-
     // The SupportTray
     private SupportTray  _supportTray = new SupportTray(this);
 
@@ -68,9 +66,6 @@ public class AppPane extends ViewOwner {
 
     // Whether to show side bar
     private boolean  _showSideBar = true;
-
-    // The menu bar
-    private MenuBar  _menuBar;
 
     // The currently open AppPane
     private static AppPane  _openAppPane;
@@ -137,7 +132,7 @@ public class AppPane extends ViewOwner {
      */
     public boolean isSupportTrayVisible()
     {
-        return _browserBox.getItemCount() > 1;
+        return _supportTray.getUI().getHeight() > 50;
     }
 
     /**
@@ -152,9 +147,11 @@ public class AppPane extends ViewOwner {
         View supTrayUI = _supportTray.getUI();
 
         // Add/remove SupportTrayUI with animator
+        //if (aValue) _browserBox.addItemWithAnim(supTrayUI, 240);
+        //else _browserBox.removeItemWithAnim(supTrayUI);
         if (aValue)
-            _browserBox.addItemWithAnim(supTrayUI, 240);
-        else _browserBox.removeItemWithAnim(supTrayUI);
+            supTrayUI.setPrefHeight(240);
+        else supTrayUI.setPrefHeight(30);
 
         // Update ShowTrayButton
         setViewText("ShowTrayButton", aValue ? "Hide Tray" : "Show Tray");
@@ -328,51 +325,61 @@ public class AppPane extends ViewOwner {
     }
 
     /**
-     * Creates the UI.
-     */
-    protected View createUI()
-    {
-        // Create basic UI
-        _mainSplit = (SplitView) super.createUI();
-
-        // Create ColView to hold ToolBar and MainSplit
-        ColView vbox = new ColView();
-        vbox.setFillWidth(true);
-        vbox.setChildren(_toolBar.getUI(), _mainSplit); //return vbox;
-
-        // Create ColView holding MenuBar and EditorPane UI (with key listener so MenuBar catches shortcut keys)
-        View mbarView = MenuBar.createMenuBarView(getMenuBar(), vbox);
-        return mbarView;
-    }
-
-    /**
      * Initializes UI panel.
      */
     protected void initUI()
     {
+        // Get MainSplit
+        _mainSplit = getUI(SplitView.class);
+
+        // Get MenuBar and register to process events
+        MenuBar menuBar = getView("MenuBar", MenuBar.class);
+        menuBar.addEventHandler(e -> { if (e.isShortcutDown()) ViewUtils.processEvent(menuBar, e); }, KeyPress);
+
+        // Install ToolBar
+        ColView mainColView = getView("MainColView", ColView.class);
+        mainColView.addChild(_toolBar.getUI(), 1);
+
+        // Get PagePaneSplitView
+        SplitView pagePaneSplitView = getView("PagePaneSplitView", SplitView.class);
+
         // Install PagePage UI
         View projectFilesUI = _pagePane.getUI();
-        ColView colView = getView("BrowserAndStatusBar", ColView.class);
-        colView.addChild(projectFilesUI, 0);
+        pagePaneSplitView.addItem(projectFilesUI);
 
         // Listen to PagePane and PagePane.Browser changes
         _pagePane.addPropChangeListener(pc -> pagePaneDidPropChange(pc), PagePane.SelFile_Prop);
         _pagePane.getBrowser().addPropChangeListener(pc -> pagePaneBrowserDidPropChange(pc),
                 WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
 
-        // Get SideBarSplit and add FilesPane, ProcPane
+        // Get SideBarSplitView
         _sideBarSplit = getView("SideBarSplitView", SplitView.class);
         _sideBarSplit.setBorder(null);
+        _sideBarSplit.setClipToBounds(true);
+
+        // Add FilesPane
         View filesPaneUI = _filesPane.getUI();
         filesPaneUI.setGrowHeight(true);
+
+        // Add ProcPane
         View procPaneUI = _procPane.getUI();
         procPaneUI.setPrefHeight(250);
         _sideBarSplit.setItems(filesPaneUI, procPaneUI);
-        _sideBarSplit.setClipToBounds(true);
 
-        // Get browser box
-        _browserBox = getView("BrowserBox", SplitView.class);
-        _browserBox.setBorder(null);
+        // Get StatusBar and remove from MainSplit
+        View statusBar = getView("StatusBar");
+        _mainSplit.removeItem(statusBar);
+
+        // Add SupportTray to MainSplit
+        TabView supportTrayUI = (TabView) _supportTray.getUI();
+        supportTrayUI.setPrefHeight(30);
+        _mainSplit.addItem(supportTrayUI);
+
+        // Add StatusBar to MainSplit
+        statusBar.setManaged(false);
+        statusBar.setLean(Pos.BOTTOM_RIGHT);
+        statusBar.setSize(500, 30);
+        ViewUtils.addChild(_mainSplit, statusBar);
 
         // Add key binding to OpenMenuItem and CloseWindow
         //addKeyActionHandler("OpenMenuItem", "meta O");
@@ -468,60 +475,6 @@ public class AppPane extends ViewOwner {
                 WelcomePanel.getShared().showPanel();
             });
         }
-    }
-
-    /**
-     * Returns the MenuBar.
-     */
-    public MenuBar getMenuBar()
-    {
-        if (_menuBar != null) return _menuBar;
-        return _menuBar = createMenuBar();
-    }
-
-    /**
-     * Creates the MenuBar.
-     */
-    protected MenuBar createMenuBar()
-    {
-        ViewBuilder<MenuItem> mib = new ViewBuilder<>(MenuItem.class);
-
-        // Create FileMenu and menu items
-        mib.name("NewMenuItem").text("New").save().setShortcut("Shortcut+N");
-        mib.save(); //SeparatorMenuItem
-        mib.name("OpenMenuItem").text("Open").save().setShortcut("Shortcut+O");
-        mib.name("CloseMenuItem").text("Close").save().setShortcut("Shortcut+W");
-        mib.name("SaveMenuItem").text("Save").save().setShortcut("Shortcut+S");
-        mib.name("SaveAsMenuItem").text("Save As...").save().setShortcut("Shortcut+Shift+S");
-        mib.name("RevertMenuItem").text("Revert to Saved").save().setShortcut("Shortcut+U");
-        mib.name("QuitMenuItem").text("Quit").save().setShortcut("Shortcut+Q");
-        Menu fileMenu = mib.buildMenu("FileMenu", "File");
-
-        // Create EditMenu menu items
-        mib.name("UndoMenuItem").text("Undo").save().setShortcut("Shortcut+Z");
-        mib.name("RedoMenuItem").text("Redo").save().setShortcut("Shortcut+Shift+Z");
-        mib.save(); //SeparatorMenuItem
-        mib.name("CutMenuItem").text("Cut").save().setShortcut("Shortcut+X");
-        mib.name("CopyMenuItem").text("Copy").save().setShortcut("Shortcut+C");
-        mib.name("PasteMenuItem").text("Paste").save().setShortcut("Shortcut+V");
-        mib.name("SelectAllMenuItem").text("Select All").save().setShortcut("Shortcut+A");
-        Menu editMenu = mib.buildMenu("EditMenu", "Edit");
-
-        // Create HelpMenu and menu items
-        mib.name("SupportPageMenuItem").text("Support Page").save();
-        mib.name("JavaDocMenuItem").text("Tutorial").save();
-        mib.name("ShowJavaHomeMenuItem").text("Show Java Home").save();
-        Menu helpMenu = mib.buildMenu("HelpMenu", "Help");
-
-        // Create MenuBar
-        MenuBar menuBar = new MenuBar();
-        menuBar.addMenu(fileMenu);
-        menuBar.addMenu(editMenu);
-        menuBar.addMenu(helpMenu);
-        menuBar.setOwner(this);
-
-        // Return
-        return menuBar;
     }
 
     /**
