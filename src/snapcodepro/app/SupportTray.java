@@ -90,7 +90,7 @@ public class SupportTray extends ViewOwner {
         _tpane = new TabView();
         _tpane.setName("TabView");
         _tpane.setFont(_tpane.getFont().deriveFont(12));
-        _tpane.setTabMinWidth(70);
+        _tpane.getTabBar().setTabMinWidth(70);
         _tpane.addTab("Problems", _appPane.getProblemsPane().getUI());
         _tpane.addTab("Console", new Label("RunConsole"));
         _tpane.addTab("Variables", new Label("DebugVarsPane"));
