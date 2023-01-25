@@ -3,6 +3,7 @@ import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.ide.NodeMatcher;
 import javakit.project.JavaAgent;
+import javakit.project.ProjectConfig;
 import snapcodepro.project.ProjectX;
 import snapcodepro.project.ProjectSet;
 import snapcodepro.project.VersionControl;
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * A class to manage UI aspects of a Project.
  */
-public class ProjectPane extends BindingViewOwner {
+public class ProjectConfigPane extends ViewOwner {
 
     // The AppPane
     private AppPane  _appPane;
@@ -59,7 +60,7 @@ public class ProjectPane extends BindingViewOwner {
     /**
      * Constructor for given project.
      */
-    public ProjectPane(WebSite aSite)
+    public ProjectConfigPane(WebSite aSite)
     {
         _site = aSite;
         _proj = ProjectX.getProjectForSite(_site);
@@ -71,11 +72,11 @@ public class ProjectPane extends BindingViewOwner {
     /**
      * Creates a new ProjectPane for given project.
      */
-    public ProjectPane(SitePane aSitePane)
+    public ProjectConfigPane(SitePane aSitePane)
     {
         this(aSitePane.getSite());
         _sitePane = aSitePane;
-        _site.setProp(ProjectPane.class.getName(), this);
+        _site.setProp(ProjectConfigPane.class.getName(), this);
     }
 
     /**
@@ -279,7 +280,7 @@ public class ProjectPane extends BindingViewOwner {
     {
         // If not root ProjectPane, forward on to it
         ProjectX rootProj = _proj.getRootProject();
-        ProjectPane rootProjPane = _proj != rootProj ? ProjectPane.getProjectPane(rootProj.getSite()) : this;
+        ProjectConfigPane rootProjPane = _proj != rootProj ? ProjectConfigPane.getProjectPane(rootProj.getSite()) : this;
         if (this != rootProjPane) {
             rootProjPane.buildProjectLater(doAddFiles);
             return;
@@ -488,37 +489,97 @@ public class ProjectPane extends BindingViewOwner {
     }
 
     /**
+     * Reset UI.
+     */
+    @Override
+    protected void resetUI()
+    {
+        // Update HomePageText, AutoBuildCheckBox
+        SitePane sitePane = getSitePane();
+        setViewValue("HomePageText", sitePane.getHomePageURLString());
+        setViewValue("AutoBuildCheckBox", sitePane.isAutoBuild());
+
+        // Update SourcePathText, BuildPathText
+        ProjectX proj = getProject();
+        ProjectConfig projConfig = proj.getProjectConfig();
+        setViewValue("SourcePathText", projConfig.getSourcePath());
+        setViewValue("BuildPathText", projConfig.getBuildPath());
+
+        // Update JarPathsList, ProjectPathsList
+        setViewItems("JarPathsList", getJarPaths());
+        setViewSelItem("JarPathsList", getSelectedJarPath());
+        setViewItems("ProjectPathsList", getProjectPaths());
+        setViewSelItem("ProjectPathsList", getSelectedProjectPath());
+    }
+
+    /**
      * Respond to UI changes.
      */
     public void respondUI(ViewEvent anEvent)
     {
+        SitePane sitePane = getSitePane();
+        ProjectX proj = getProject();
+        ProjectConfig projConfig = proj.getProjectConfig();
+
+        // Handle HomePageText, AutoBuildCheckBox
+        if (anEvent.equals("HomePageText"))
+            sitePane.setHomePageURLString(anEvent.getStringValue());
+        if (anEvent.equals("AutoBuildCheckBox"))
+            sitePane.setAutoBuild(anEvent.getBoolValue());
+
+        // Update SourcePathText, BuildPathText
+        if (anEvent.equals("SourcePathText"))
+            projConfig.setSourcePath(anEvent.getStringValue());
+        if (anEvent.equals("BuildPathText"))
+            projConfig.setBuildPath(anEvent.getStringValue());
+
         // Handle ResetHomePageButton
         if (anEvent.equals("ResetHomePageButton"))
             _sitePane.setHomePageURLString(null);
 
         // Handle JarPathsList
-        if (anEvent.equals("JarPathsList") && anEvent.isDragEvent()) {
-            anEvent.acceptDrag(); //TransferModes(TransferMode.COPY);
-            anEvent.consume();
-            if (anEvent.isDragDropEvent()) {
-                List<File> files = anEvent.getClipboard().getJavaFiles();
-                if (files == null || files.size() == 0) return;
-                for (File file : files) {
-                    String path = file.getAbsolutePath(); //if(StringUtils.endsWithIC(path, ".jar"))
-                    _proj.getProjectConfig().addLibPath(path);
-                }
-                _sitePane.buildSite(false);
-                anEvent.dropComplete();
-            }
+        if (anEvent.equals("JarPathsList")) {
+
+            // Handle DragEvent
+             if (anEvent.isDragEvent()) {
+                 anEvent.acceptDrag(); //TransferModes(TransferMode.COPY);
+                 anEvent.consume();
+                 if (anEvent.isDragDropEvent()) {
+                     List<File> files = anEvent.getClipboard().getJavaFiles();
+                     if (files == null || files.size() == 0) return;
+                     for (File file : files) {
+                         String path = file.getAbsolutePath(); //if(StringUtils.endsWithIC(path, ".jar"))
+                         _proj.getProjectConfig().addLibPath(path);
+                     }
+                     _sitePane.buildSite(false);
+                     anEvent.dropComplete();
+                 }
+             }
+
+             // Handle click
+            else {
+                String jarPath = anEvent.getStringValue();
+                setSelectedJarPath(jarPath);
+             }
         }
 
         // Handle ProjectPathsList
-        if (anEvent.equals("ProjectPathsList") && anEvent.getClickCount() > 1) {
-            DialogBox dbox = new DialogBox("Add Project Dependency");
-            dbox.setQuestionMessage("Enter Project Name:");
-            String pname = dbox.showInputDialog(getUI(), null);
-            if (pname == null || pname.length() == 0) return;
-            addProject(pname, null);
+        if (anEvent.equals("ProjectPathsList")) {
+
+            // Handle double click
+            if (anEvent.getClickCount() > 1) {
+                DialogBox dbox = new DialogBox("Add Project Dependency");
+                dbox.setQuestionMessage("Enter Project Name:");
+                String pname = dbox.showInputDialog(getUI(), null);
+                if (pname == null || pname.length() == 0) return;
+                addProject(pname, null);
+            }
+
+            // Handle click
+            else {
+                String projPath = anEvent.getStringValue();
+                setSelectedProjectPath(projPath);
+            }
         }
 
         // Handle DeleteAction
@@ -666,8 +727,8 @@ public class ProjectPane extends BindingViewOwner {
     /**
      * Returns the ProjectPane for a site.
      */
-    public synchronized static ProjectPane getProjectPane(WebSite aSite)
+    public synchronized static ProjectConfigPane getProjectPane(WebSite aSite)
     {
-        return (ProjectPane) aSite.getProp(ProjectPane.class.getName());
+        return (ProjectConfigPane) aSite.getProp(ProjectConfigPane.class.getName());
     }
 }

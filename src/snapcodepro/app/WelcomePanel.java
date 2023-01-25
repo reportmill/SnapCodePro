@@ -517,7 +517,7 @@ public class WelcomePanel extends ViewOwner {
             copyGreenfootFile(child, destDir);
 
         // Create ProjectPane and add SnapKit and Greenfoot
-        ProjectPane ppane = new ProjectPane(site);
+        ProjectConfigPane ppane = new ProjectConfigPane(site);
         ppane.addProject("SnapKit", "https://github.com/reportmill/SnapKit.git", getUI());
         ppane.addProject("Greenfoot", "https://github.com/reportmill/Greenfoot.git", getUI());
     }

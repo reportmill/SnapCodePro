@@ -27,7 +27,7 @@ public class SitePane extends WebPage {
     AppConsole _consolePane = new AppConsole();
 
     // The ProjectPane
-    ProjectPane _projPane;
+    ProjectConfigPane _projPane;
 
     // The VersionControl pane
     VcsPane _vcp;
@@ -50,7 +50,7 @@ public class SitePane extends WebPage {
         _site.addFileChangeListener(_siteFileLsnr);
 
         // Set ProjectPane
-        _projPane = new ProjectPane(this);
+        _projPane = new ProjectConfigPane(this);
 
         // Set VersionControlPane
         String urls = getRemoteURLString();
@@ -102,7 +102,7 @@ public class SitePane extends WebPage {
     /**
      * Returns the ProjectPane for this site.
      */
-    public ProjectPane getProjPane()
+    public ProjectConfigPane getProjPane()
     {
         return _projPane;
     }
@@ -380,7 +380,7 @@ public class SitePane extends WebPage {
         TabView _tview = new TabView();
 
         // Add ProjectPane
-        ProjectPane projPane = getProjPane();
+        ProjectConfigPane projPane = getProjPane();
         if (projPane != null)
             _tview.addTab("Settings", projPane.getUI()); //tab.setTooltip(new Tooltip("Project Settings"));
 

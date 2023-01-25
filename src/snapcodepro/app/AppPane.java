@@ -372,18 +372,11 @@ public class AppPane extends ViewOwner {
 
         // Get browser box
         _browserBox = getView("BrowserBox", SplitView.class);
-        _browserBox.setGrowWidth(true);
         _browserBox.setBorder(null);
-        for (View c : _browserBox.getChildren()) c.setBorder(null);
-        _browserBox.getChild(0).setGrowHeight(true); // So support tray has constant size
 
         // Add key binding to OpenMenuItem and CloseWindow
         //addKeyActionHandler("OpenMenuItem", "meta O");
         //addKeyActionHandler("CloseFileAction", "meta W");
-
-        // Configure Window
-        getWindow().setTitle("SnapCode Project");
-        //getRootView().setMenuBar(getMenuBar());
 
         // Register for WelcomePanel on close
         enableEvents(getWindow(), WinClose);
@@ -395,16 +388,17 @@ public class AppPane extends ViewOwner {
     public void resetUI()
     {
         // Reset window title
-        WebPage page = getBrowser().getPage();
+        WebPage page = _pagePane.getSelPage();
         getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
 
         // Set ActivityText, StatusText
-        setViewText("ActivityText", getBrowser().getActivity());
-        setViewText("StatusText", getBrowser().getStatus());
+        WebBrowser browser = getBrowser();
+        setViewText("ActivityText", browser.getActivity());
+        setViewText("StatusText", browser.getStatus());
 
         // Update ProgressBar
         ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
-        boolean loading = getBrowser().isLoading();
+        boolean loading = browser.isLoading();
         if (loading && !progressBar.isVisible()) {
             progressBar.setVisible(true);
             progressBar.setProgress(-1);

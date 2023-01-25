@@ -2,22 +2,16 @@
 <VBox PrefWidth="500" PrefHeight="500" Padding="16" Spacing="10">
   <HBox Spacing="5">
     <Label text="Home Page:" />
-    <TextField PrefWidth="255">
-      <binding aspect="Text" key="SitePane.HomePageURLString" />
-    </TextField>
+    <TextField Name="HomePageText" PrefWidth="255" />
     <Button Name="ResetHomePageButton" PrefWidth="47" text="Reset" />
   </HBox>
   <HBox Spacing="5">
     <Label text="Source Directory:" />
-    <TextField PrefWidth="255">
-      <binding aspect="Text" key="Project.ClassPath.SourcePath" />
-    </TextField>
+    <TextField Name="SourcePathText" PrefWidth="255" />
   </HBox>
   <HBox Spacing="5">
     <Label text="Build Directory:" />
-    <TextField PrefWidth="255">
-      <binding aspect="Text" key="Project.ClassPath.BuildPath" />
-    </TextField>
+    <TextField Name="BuildPathText" PrefWidth="255" />
   </HBox>
   <Label text="Dependencies:" />
   <TabView PrefWidth="360" PrefHeight="160">
@@ -25,21 +19,15 @@
     <Box Padding="3" FillWidth="true" FillHeight="true" title="    Jars    ">
       <ListView Name="JarPathsList">
         <font name="Arial" size="12" />
-        <binding aspect="Items" key="JarPaths" />
-        <binding aspect="SelItem" key="SelectedJarPath" />
       </ListView>
     </Box>
     <Box Padding="3" FillWidth="true" FillHeight="true" title="  Projects  ">
       <ListView Name="ProjectPathsList">
         <font name="Arial" size="12" />
-        <binding aspect="Items" key="ProjectPaths" />
-        <binding aspect="SelItem" key="SelectedProjectPath" />
       </ListView>
     </Box>
   </TabView>
-  <CheckBox text="Build Project Automatically">
-    <binding aspect="Selected" key="SitePane.AutoBuild" />
-  </CheckBox>
+  <CheckBox Name="AutoBuildCheckBox" text="Build Project Automatically" />
   <TitleView name="LOCTitleView" PrefWidth="120" PrefHeight="22" Title="Show Lines of Code" TitleStyle="Plain" Collapsible="true" Expanded="false">
     <TextView name="LOCText" PrefWidth="300" Padding="5">
       <Font name="Arial" size="14" />
