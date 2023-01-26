@@ -2,9 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snapcodepro.app;
-import snap.geom.HPos;
-import snap.geom.Polygon;
-import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.props.PropChange;
@@ -21,23 +18,13 @@ public class PagePaneTabsBox extends ViewOwner {
     // The PagePane
     private PagePane  _pagePane;
 
-    // The file tabs box
-    private BoxView  _fileTabsBox;
-
-    // The view for the currently selected view
-    private FileTab  _selTab;
+    // The TabBar
+    private TabBar  _tabBar;
 
     // Constant for file tab attributes
     private static Color BOX_BORDER_COLOR = Color.GRAY7;
     private static Font TAB_FONT = new Font("Arial", 12);
     private static Color TAB_TEXT_COLOR = Color.GRAY2;
-    private static Color TAB_COLOR = null; //new Color(.5, .65, .8, .8);
-    private static Color TAB_COLOR_SEL = Color.WHITE;
-    private static int TAB_HEIGHT = 19;
-    private static Color TAB_BORDER_COLOR = Color.GRAY8;
-    private static Border TAB_BORDER = Border.createLineBorder(TAB_BORDER_COLOR, 1);
-    private static Border TAB_CLOSE_BORDER1 = Border.createLineBorder(Color.BLACK, .5);
-    private static Border TAB_CLOSE_BORDER2 = Border.createLineBorder(Color.BLACK, 1);
 
     /**
      * Constructor.
@@ -55,20 +42,23 @@ public class PagePaneTabsBox extends ViewOwner {
     protected View createUI()
     {
         // Add FileTabsPane pane
-        _fileTabsBox = new ScaleBox();
-        _fileTabsBox.setBorder(BOX_BORDER_COLOR, 1);
-        _fileTabsBox.setPadding(3, 3, 3, 5);
-        _fileTabsBox.setAlignX(HPos.LEFT);
-        _fileTabsBox.setGrowWidth(true);
+        _tabBar = new TabBar();
+        _tabBar.setBorder(BOX_BORDER_COLOR, 1);
+        _tabBar.setFont(TAB_FONT);
+        _tabBar.setGrowWidth(true);
 
         // Set PrefHeight so it will show when empty
-        _fileTabsBox.setPrefHeight(_fileTabsBox.getPadding().getHeight() + TAB_HEIGHT + 2);
+        Tab sampleTab = new Tab();
+        sampleTab.setTitle("XXX");
+        _tabBar.addTab(sampleTab);
+        _tabBar.setPrefHeight(_tabBar.getPrefHeight());
+        _tabBar.removeTab(0);
 
         // Register to build tabs whenever PagePage changes
         _pagePane.addPropChangeListener(pc -> propPaneDidPropChange(pc), PagePane.OpenFiles_Prop, PagePane.SelFile_Prop);
 
         // Return
-        return _fileTabsBox;
+        return _tabBar;
     }
 
     /**
@@ -77,46 +67,13 @@ public class PagePaneTabsBox extends ViewOwner {
     @Override
     protected void respondUI(ViewEvent anEvent)
     {
-        // Handle MouseEnter: Make buttons glow
-        if (anEvent.isMouseEnter() && anEvent.getView() != _selTab) {
-            View view = anEvent.getView();
-            view.setFill(TAB_COLOR_SEL);
-            return;
-        }
-
-        // Handle MouseExit: Restore fill
-        if (anEvent.isMouseExit() && anEvent.getView() != _selTab) {
-            View view = anEvent.getView();
-            view.setFill(TAB_COLOR);
-            return;
-        }
-
-        // Handle FileTab
-        if (anEvent.equals("FileTab") && anEvent.isMouseRelease())
-            handleFileTabMouseClick(anEvent);
-    }
-
-    /**
-     * Handle FileTab clicked.
-     */
-    protected void handleFileTabMouseClick(ViewEvent anEvent)
-    {
-        FileTab fileTab = anEvent.getView(FileTab.class);
-        WebFile file = fileTab._file;
-
-        // Handle single click
-        if (anEvent.getClickCount() == 1) {
+        if (anEvent.getView() == _tabBar) {
+            int selIndex = _tabBar.getSelIndex();
+            WebFile[] openFiles = _pagePane.getOpenFiles();
+            WebFile openFile = selIndex >= 0 ? openFiles[selIndex] : null;
             _pagePane.getBrowser().setTransition(WebBrowser.Instant);
-            _pagePane.setSelectedFile(file);
+            _pagePane.setSelectedFile(openFile);
         }
-
-        // Handle double click
-        /* else if (anEvent.getClickCount() == 2) {
-            WebBrowserPane browserPane = new WebBrowserPane();
-            browserPane.getUI().setPrefSize(800, 800);
-            browserPane.getBrowser().setURL(file.getURL());
-            browserPane.getWindow().show(getUI().getRootView(), 600, 200);
-        }*/
     }
 
     /**
@@ -130,24 +87,23 @@ public class PagePaneTabsBox extends ViewOwner {
             return;
         }
 
-        // Clear selected view
-        _selTab = null;
-
-        // Create HBox for tabs
-        RowView rowView = new RowView();
-        rowView.setSpacing(4);
+        // Remove tabs
+        _tabBar.removeTabs();
 
         // Iterate over OpenFiles, create FileTabs, init and add
         WebFile[] openFiles = _pagePane.getOpenFiles();
         for (WebFile file : openFiles) {
-            Label fileTab = new FileTab(file);
-            fileTab.setOwner(this);
-            enableEvents(fileTab, MouseEvents);
-            rowView.addChild(fileTab);
-        }
 
-        // Add box
-        _fileTabsBox.setContent(rowView);
+            // Create/config/add Tab
+            Tab fileTab = new Tab();
+            fileTab.setTitle(file.getName());
+            fileTab.setClosable(true);
+            _tabBar.addTab(fileTab);
+
+            // Configure Tab.Button
+            ToggleButton tabButton = fileTab.getButton();
+            tabButton.setTextFill(TAB_TEXT_COLOR);
+        }
     }
 
     /**
@@ -162,101 +118,11 @@ public class PagePaneTabsBox extends ViewOwner {
             buildFileTabs();
 
         // Handle SelFile
-        if (propName == PagePane.SelFile_Prop)
-            setSelTabForFile(_pagePane.getSelectedFile());
-    }
-
-    /**
-     * Sets the SelTab.
-     */
-    private void setSelTabForFile(WebFile aFile)
-    {
-        // Get SelTab for file
-        ParentView tabView = (ParentView) _fileTabsBox.getContent();
-        if (tabView == null) return;
-        View[] fileTabs = tabView.getChildren();
-        FileTab selTab = (FileTab) ArrayUtils.findMatch(fileTabs, fileTab -> ((FileTab) fileTab)._file == aFile);
-
-        // Reset SelTab fills
-        if (_selTab != null)
-            _selTab.setFill(TAB_COLOR);
-        _selTab = selTab;
-        if (_selTab != null)
-            _selTab.setFill(TAB_COLOR_SEL);
-    }
-
-    /**
-     * A class to represent a rounded label.
-     */
-    protected class FileTab extends Label {
-
-        // The File
-        private WebFile _file;
-
-        /**
-         * Creates a new FileTab for given file.
-         */
-        public FileTab(WebFile aFile)
-        {
-            // Create label for file and configure
-            _file = aFile;
-            setText(aFile.getName());
-            setFont(TAB_FONT);
-            setTextFill(TAB_TEXT_COLOR);
-            setName("FileTab");
-            setPrefHeight(TAB_HEIGHT);
-            setBorder(TAB_BORDER);
-            setBorderRadius(4);
-            setPadding(1, 2, 1, 4);
-            setFill(TAB_COLOR);
-
-            // If selected, configure selected
+        if (propName == PagePane.SelFile_Prop) {
             WebFile selFile = _pagePane.getSelectedFile();
-            if (aFile == selFile) {
-                setFill(TAB_COLOR_SEL);
-                _selTab = this;
-            }
-
-            // Create close box polygon
-            Polygon poly = new Polygon(0, 2, 2, 0, 5, 3, 8, 0, 10, 2, 7, 5, 10, 8, 8, 10, 5, 7, 2, 10, 0, 8, 3, 5);
-
-            // Create close box ShapeView
-            ShapeView closeBox = new ShapeView(poly);
-            closeBox.setBorder(TAB_CLOSE_BORDER1);
-            closeBox.setPrefSize(11, 11);
-            closeBox.addEventFilter(e -> handleTabCloseBoxEvent(e), MouseEnter, MouseExit, MouseRelease);
-
-            // Add to FileTab
-            setGraphicAfter(closeBox);
-        }
-
-        /**
-         * Called for events on tab close button.
-         */
-        private void handleTabCloseBoxEvent(ViewEvent anEvent)
-        {
-            View closeBox = anEvent.getView();
-
-            // Handle MouseEnter
-            if (anEvent.isMouseEnter()) {
-                closeBox.setFill(Color.CRIMSON);
-                closeBox.setBorder(TAB_CLOSE_BORDER2);
-            }
-
-            // Handle MouseExit
-            else if (anEvent.isMouseExit()) {
-                closeBox.setFill(null);
-                closeBox.setBorder(TAB_CLOSE_BORDER1);
-            }
-
-            // Handle MouseRemove
-            else if (anEvent.isMouseRelease()) {
-                if (anEvent.isAltDown())
-                    _pagePane.removeAllOpenFilesExcept(_file);
-                else _pagePane.removeOpenFile(_file);
-            }
-
-            anEvent.consume();
+            WebFile[] openFiles = _pagePane.getOpenFiles();
+            int selIndex = ArrayUtils.indexOfId(openFiles, selFile);
+            _tabBar.setSelIndex(selIndex);
         }
     }
 }
