@@ -1,5 +1,4 @@
 package snapcodepro.app;
-
 import snap.view.*;
 
 /**
@@ -8,16 +7,16 @@ import snap.view.*;
 public class SupportTray extends ViewOwner {
 
     // The AppPane
-    AppPane _appPane;
+    private AppPane  _appPane;
 
-    // The tabbed pane
-    TabView _tpane;
+    // The tab view
+    private TabView  _tabView;
 
     // The list of tab owners
-    ViewOwner[] _tabOwners;
+    private ViewOwner[]  _tabOwners;
 
     // Whether tray was explicitly opened
-    boolean _explicitlyOpened;
+    private boolean  _explicitlyOpened;
 
     // Constants for tabs
     public static final int PROBLEMS_PANE = 0;
@@ -40,7 +39,7 @@ public class SupportTray extends ViewOwner {
      */
     public int getSelIndex()
     {
-        return _tpane != null ? _tpane.getSelIndex() : -1;
+        return _tabView != null ? _tabView.getSelIndex() : -1;
     }
 
     /**
@@ -48,7 +47,7 @@ public class SupportTray extends ViewOwner {
      */
     public void setSelIndex(int anIndex)
     {
-        _tpane.setSelIndex(anIndex);
+        _tabView.setSelIndex(anIndex);
     }
 
     /**
@@ -87,17 +86,17 @@ public class SupportTray extends ViewOwner {
                 _appPane.getDebugExprsPane(), _appPane.getBreakpointsPanel(), _appPane.getSearchPane()};
 
         // Create TabbedPane, configure and return
-        _tpane = new TabView();
-        _tpane.setName("TabView");
-        _tpane.setFont(_tpane.getFont().deriveFont(12));
-        _tpane.getTabBar().setTabMinWidth(70);
-        _tpane.addTab("Problems", _appPane.getProblemsPane().getUI());
-        _tpane.addTab("Console", new Label("RunConsole"));
-        _tpane.addTab("Variables", new Label("DebugVarsPane"));
-        _tpane.addTab("Expressions", new Label("DebugExprsPane"));
-        _tpane.addTab("Breakpoints", new Label("Breakpoints"));
-        _tpane.addTab("Search", new Label("Search"));
-        return _tpane;
+        _tabView = new TabView();
+        _tabView.setName("TabView");
+        _tabView.setFont(_tabView.getFont().deriveFont(12));
+        _tabView.getTabBar().setTabMinWidth(70);
+        _tabView.addTab("Problems", _appPane.getProblemsPane().getUI());
+        _tabView.addTab("Console", new Label("RunConsole"));
+        _tabView.addTab("Variables", new Label("DebugVarsPane"));
+        _tabView.addTab("Expressions", new Label("DebugExprsPane"));
+        _tabView.addTab("Breakpoints", new Label("Breakpoints"));
+        _tabView.addTab("Search", new Label("Search"));
+        return _tabView;
     }
 
     /**
@@ -105,7 +104,7 @@ public class SupportTray extends ViewOwner {
      */
     protected void resetUI()
     {
-        int index = _tpane.getSelIndex();
+        int index = _tabView.getSelIndex();
         ViewOwner sowner = _tabOwners[index];
         if (sowner != null)
             sowner.resetLater();
@@ -117,11 +116,14 @@ public class SupportTray extends ViewOwner {
     protected void respondUI(ViewEvent anEvent)
     {
         // Handle TabView
-        if (_tpane.getTabContent(_tpane.getSelIndex()) instanceof Label) {
-            int index = _tpane.getSelIndex();
-            ViewOwner sowner = _tabOwners[index];
-            _tpane.setTabContent(sowner.getUI(), index);
+        int selIndex = _tabView.getSelIndex();
+        View selContent = _tabView.getTabContent(selIndex);
+        if (selContent instanceof Label) {
+            ViewOwner viewOwner = _tabOwners[selIndex];
+            _tabView.setTabContent(viewOwner.getUI(), selIndex);
         }
-    }
 
+        // Open or close panel
+        _appPane.setSupportTrayVisible(selIndex >= 0);
+    }
 }

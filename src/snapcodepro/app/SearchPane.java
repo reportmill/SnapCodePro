@@ -12,7 +12,6 @@ import javakit.ide.NodeMatcher;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
 import snapcodepro.project.JavaData;
-import snapcodepro.project.ProjectX;
 import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
@@ -28,28 +27,21 @@ import java.util.Set;
 public class SearchPane extends ViewOwner {
 
     // The app pane
-    AppPane _appPane;
+    private AppPane  _appPane;
 
     // The current search
-    Search _search;
+    private Search  _search;
 
     // The current selected result
-    Result _sresult;
+    private Result  _selResult;
 
     /**
      * Creates a new search pane for app pane.
      */
     public SearchPane(AppPane anAppPane)
     {
+        super();
         _appPane = anAppPane;
-    }
-
-    /**
-     * Returns the root project.
-     */
-    public ProjectX getRootProject()
-    {
-        return ProjectX.getProjectForSite(_appPane.getRootSite());
     }
 
     /**
@@ -68,17 +60,14 @@ public class SearchPane extends ViewOwner {
     /**
      * Returns the current selected search result.
      */
-    public Result getSelectedResult()
-    {
-        return _sresult;
-    }
+    public Result getSelectedResult()  { return _selResult; }
 
     /**
      * Sets the current selected search result.
      */
     public void setSelectedResult(Result aResult)
     {
-        _sresult = aResult;
+        _selResult = aResult;
     }
 
     /**
@@ -97,17 +86,21 @@ public class SearchPane extends ViewOwner {
      */
     public void resetUI()
     {
+        // Update ClearButton
         setViewEnabled("ClearButton", _search != null);
 
-        String results = "";
+        // Update SearchResultsText
+        String resultsStr = "";
         if (_search != null) {
             int hits = 0;
-            for (Result rslt : _search._results) hits += rslt._count;
+            for (Result results : _search._results)
+                hits += results._count;
             String typ = _search._kind == Search.Kind.Declaration ? "declarations" : "references";
-            results = String.format("'%s' - %d %s", _search._string, hits, typ);
+            resultsStr = String.format("'%s' - %d %s", _search._string, hits, typ);
         }
-        setViewValue("SearchResultsText", results);
+        setViewValue("SearchResultsText", resultsStr);
 
+        // Update ResultsList
         setViewItems("ResultsList", getResults());
         setViewSelItem("ResultsList", getSelectedResult());
     }
@@ -119,9 +112,9 @@ public class SearchPane extends ViewOwner {
     {
         // Handle SearchButton
         if (anEvent.equals("SearchButton")) {
-            DialogBox dbox = new DialogBox("Search Panel");
-            dbox.setMessage("Enter search string:");
-            String string = dbox.showInputDialog(getUI(), null);
+            DialogBox dialogBox = new DialogBox("Search Panel");
+            dialogBox.setMessage("Enter search string:");
+            String string = dialogBox.showInputDialog(getUI(), null);
             if (string != null)
                 search(string);
         }
@@ -132,8 +125,16 @@ public class SearchPane extends ViewOwner {
 
         // Handle ResultsList
         if (anEvent.equals("ResultsList")) {
-            Result result = getSelectedResult();
-            _appPane.getBrowser().setURLString(result.getURLString());
+
+            // Update SelResult
+            Result result = (Result) anEvent.getSelItem();
+            setSelectedResult(result);
+
+            // Set in browser
+            if (result != null) {
+                String resultURL = result.getURLString();
+                _appPane.getBrowser().setURLString(resultURL);
+            }
         }
     }
 
@@ -155,12 +156,14 @@ public class SearchPane extends ViewOwner {
     protected void search(WebFile aFile, List<Result> theResults, String aString)
     {
         // If hidden file, just return
-        SitePane spane = SitePane.get(aFile.getSite());
-        if (spane.isHiddenFile(aFile)) return;
+        SitePane sitePane = SitePane.get(aFile.getSite());
+        if (sitePane.isHiddenFile(aFile))
+            return;
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _appPane.getBuildDir()) return;
+            if (aFile == _appPane.getBuildDir())
+                return;
             for (WebFile file : aFile.getFiles())
                 search(file, theResults, aString);
         }
@@ -171,7 +174,8 @@ public class SearchPane extends ViewOwner {
             Result result = null;
             int len = aString.length();
             for (int start = text.indexOf(aString); start >= 0; start = text.indexOf(aString, start + len)) {
-                if (result == null) theResults.add(result = new Result(aFile));
+                if (result == null)
+                    theResults.add(result = new Result(aFile));
                 else result._count++;
             }
         }
@@ -183,7 +187,7 @@ public class SearchPane extends ViewOwner {
     protected boolean isSearchTextFile(WebFile aFile)
     {
         String type = aFile.getType();
-        String[] types = {"java", "snp", "txt", "js", "rib"};
+        String[] types = { "java", "snp", "txt", "js" };
         return ArrayUtils.contains(types, type);
     }
 
@@ -432,7 +436,8 @@ public class SearchPane extends ViewOwner {
     private void configureResultListCell(ListCell<Result> aCell)
     {
         Result result = aCell.getItem();
-        if (result == null) return;
+        if (result == null)
+            return;
         aCell.setText(result.getDescriptor());
         aCell.setImage(result.getImage());
         aCell.getGraphic().setPadding(2, 4, 2, 4);
