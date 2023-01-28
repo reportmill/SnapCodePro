@@ -17,44 +17,40 @@ import snap.web.WebFile;
 public class RunConsole extends ViewOwner {
 
     // The AppPane
-    AppPane _appPane;
+    private AppPane  _appPane;
 
     // The output text
-    RCTextView  _textView;
+    private RCTextView  _textView;
 
     // The error color
-    static Color ERROR_COLOR = new Color("CC0000");
+    private static Color ERROR_COLOR = new Color("CC0000");
 
     /**
      * Creates a new DebugPane.
      */
     public RunConsole(AppPane anAppPane)
     {
+        super();
         _appPane = anAppPane;
     }
 
     /**
      * Returns the AppPane.
      */
-    public AppPane getAppPane()
-    {
-        return _appPane;
-    }
+    public AppPane getAppPane()  { return _appPane; }
 
     /**
      * Returns the ProcPane.
      */
-    public ProcPane getProcPane()
-    {
-        return _appPane.getProcPane();
-    }
+    public ProcPane getProcPane()  { return _appPane.getProcPane(); }
 
     /**
      * Clears the RunConsole text.
      */
     public void clear()
     {
-        if (_textView != null) _textView.clear();
+        if (_textView != null)
+            _textView.clear();
     }
 
     /**
@@ -62,11 +58,12 @@ public class RunConsole extends ViewOwner {
      */
     public void appendOut(String aStr)
     {
+        // Make sure we're in app event thread
         if (!isEventThread()) {
-            runLater(() -> appendOut(aStr));
-            return;
-        }  // Make sure we're in app event thread
-        appendString(aStr, Color.BLACK);                               // Append string in black
+            runLater(() -> appendOut(aStr)); return; }
+
+        // Append string in black
+        appendString(aStr, Color.BLACK);
     }
 
     /**
@@ -74,11 +71,12 @@ public class RunConsole extends ViewOwner {
      */
     public void appendErr(String aStr)
     {
+        // Make sure we're in app event thread
         if (!isEventThread()) {
-            runLater(() -> appendErr(aStr));
-            return;
-        }  // Make sure we're in app event thread
-        appendString(aStr, ERROR_COLOR);                                   // Append string in red
+            runLater(() -> appendErr(aStr)); return; }
+
+        // Append string in red
+        appendString(aStr, ERROR_COLOR);
     }
 
     /**
@@ -96,18 +94,19 @@ public class RunConsole extends ViewOwner {
         for (int i = aStr.indexOf(".java:"); i > 0; i = aStr.indexOf(".java:", start)) {
 
             // Get start/end of Java file name inside parens (if parens not found, just add chars and continue)
-            int s = aStr.lastIndexOf("(", i), e = aStr.indexOf(")", i);
-            if (s < start || e < 0) {
+            int parenStartIndex = aStr.lastIndexOf("(", i);
+            int parenEndIndex = aStr.indexOf(")", i);
+            if (parenStartIndex < start || parenEndIndex < 0) {
                 _textView.addChars(aStr.substring(start, start = i + 6), style);
                 continue;
             }
 
             // Get chars before parens and add
-            String prefix = aStr.substring(start, s + 1);
+            String prefix = aStr.substring(start, parenStartIndex + 1);
             _textView.addChars(prefix, style);
 
             // Get link text, link address, TextLink
-            String linkText = aStr.substring(s + 1, e);
+            String linkText = aStr.substring(parenStartIndex + 1, parenEndIndex);
             String linkAddr = getLink(prefix, linkText);
             TextLink textLink = new TextLink(linkAddr);
 
@@ -116,7 +115,7 @@ public class RunConsole extends ViewOwner {
             _textView.addChars(linkText, lstyle);
 
             // Update start to end of link text and continue
-            start = e;
+            start = parenEndIndex;
         }
 
         // Add remainder normally
@@ -130,11 +129,14 @@ public class RunConsole extends ViewOwner {
     {
         // Get start/end of full class path for .java
         int start = aPrefix.indexOf("at ");
-        if (start < 0) return "/Unknown";
+        if (start < 0)
+            return "/Unknown";
         start += 3;
         int end = aPrefix.indexOf('$');
-        if (end < start) end = aPrefix.lastIndexOf('.');
-        if (end < start) end = aPrefix.length() - 1;
+        if (end < start)
+            end = aPrefix.lastIndexOf('.');
+        if (end < start)
+            end = aPrefix.length() - 1;
 
         // Create link from path and return
         String path = aPrefix.substring(start, end);
@@ -142,7 +144,8 @@ public class RunConsole extends ViewOwner {
         path = getSourceURL(path);
         String lineStr = linkedText.substring(linkedText.indexOf(":") + 1);
         int line = SnapUtils.intValue(lineStr);
-        if (line > 0) path += "#LineNumber=" + line;
+        if (line > 0)
+            path += "#LineNumber=" + line;
         return path;
     }
 
@@ -152,9 +155,9 @@ public class RunConsole extends ViewOwner {
     String getSourceURL(String aPath)
     {
         if (aPath.startsWith("/java/") || aPath.startsWith("/javax/"))
-            return "http://reportmill.com/jars/8u05/src.zip!" + aPath;
+            return "https://reportmill.com/jars/8u05/src.zip!" + aPath;
         if (aPath.startsWith("/javafx/"))
-            return "http://reportmill.com/jars/8u05/javafx-src.zip!" + aPath;
+            return "https://reportmill.com/jars/8u05/javafx-src.zip!" + aPath;
         ProjectX proj = ProjectX.getProjectForSite(_appPane.getRootSite());
         if (proj == null) return aPath;
         WebFile file = proj.getProjectSet().getSourceFile(aPath);
@@ -169,9 +172,9 @@ public class RunConsole extends ViewOwner {
         // Get font
         String[] names = {"Monoco", "Consolas", "Courier"};
         Font defaultFont = null;
-        for (int i = 0; i < names.length; i++) {
-            defaultFont = new Font(names[i], 12);
-            if (defaultFont.getFamily().startsWith(names[i]))
+        for (String name : names) {
+            defaultFont = new Font(name, 12);
+            if (defaultFont.getFamily().startsWith(name))
                 break;
         }
 
@@ -187,10 +190,11 @@ public class RunConsole extends ViewOwner {
     @Override
     protected void resetUI()
     {
-        RunApp selApp = getProcPane().getSelApp();
-        String labelText = selApp.getName() + " Console";
+        ProcPane procPane = getProcPane();
+        RunApp selApp = procPane.getSelApp();
+        String labelText = selApp != null ? selApp.getName() + " Console" : null;
         setViewText("NameLabel", labelText);
-        setViewEnabled("TerminateButton", !selApp.isTerminated());
+        setViewEnabled("TerminateButton", selApp != null && !selApp.isTerminated());
     }
 
     /**
@@ -198,15 +202,18 @@ public class RunConsole extends ViewOwner {
      */
     public void respondUI(ViewEvent anEvent)
     {
+        ProcPane procPane = getProcPane();
+        RunApp selApp = procPane.getSelApp();
+
         // Handle ClearButton
         if (anEvent.equals("ClearButton")) {
             clear();
-            getProcPane().getSelApp().clearOutput();
+            selApp.clearOutput();
         }
 
         // Handle TerminateButton
         if (anEvent.equals("TerminateButton"))
-            getProcPane().getSelApp().terminate();
+            selApp.terminate();
     }
 
     /**
@@ -235,5 +242,4 @@ public class RunConsole extends ViewOwner {
             proc.sendInput(str);
         }
     }
-
 }
