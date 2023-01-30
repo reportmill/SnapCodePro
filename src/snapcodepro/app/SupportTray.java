@@ -33,33 +33,6 @@ public class SupportTray extends ViewOwner {
     }
 
     /**
-     * Returns whether SupportTray is visible.
-     */
-    public boolean isTrayVisible()
-    {
-        return getUI().getHeight() > 50;
-    }
-
-    /**
-     * Sets SupportTray visible.
-     */
-    public void setTrayVisible(boolean aValue)
-    {
-        // If value already set, or if asked to close ExplicitlyOpened SupportTray, just return
-        if (aValue == isTrayVisible()) return;
-
-        // Get SupportTray UI and SplitView
-        View supTrayUI = getUI();
-
-        // Add/remove SupportTrayUI with animator
-        //if (aValue) _browserBox.addItemWithAnim(supTrayUI, 240);
-        //else _browserBox.removeItemWithAnim(supTrayUI);
-        if (aValue)
-            supTrayUI.setPrefHeight(240);
-        else supTrayUI.setPrefHeight(30);
-    }
-
-    /**
      * Returns the selected index.
      */
     public int getSelIndex()  { return _tabView != null ? _tabView.getSelIndex() : -1; }
@@ -117,6 +90,12 @@ public class SupportTray extends ViewOwner {
         _tabView.getTabBar().setTabMinWidth(70);
         _tabView.getTabBar().setAllowEmptySelection(true);
 
+        // Bogus: Manually set TabView PrefHeight
+        _tabView.addPropChangeListener(pc -> {
+            double prefH = _tabView.getContent() != null ? 240 : 30;
+            _tabView.setPrefHeight(prefH);
+        }, TabView.SelIndex_Prop);
+
         // Add Tabs
         _tabView.addTab("Problems", _appPane.getProblemsPane().getUI());
         _tabView.addTab("Console", new Label("RunConsole"));
@@ -124,9 +103,6 @@ public class SupportTray extends ViewOwner {
         _tabView.addTab("Expressions", new Label("DebugExprsPane"));
         _tabView.addTab("Breakpoints", new Label("Breakpoints"));
         _tabView.addTab("Search", new Label("Search"));
-
-        // Set TabView default close height
-        _tabView.setPrefHeight(30);
 
         // Return
         return _tabView;
@@ -155,8 +131,5 @@ public class SupportTray extends ViewOwner {
             ViewOwner viewOwner = _tabOwners[selIndex];
             _tabView.setTabContent(viewOwner.getUI(), selIndex);
         }
-
-        // Open or close panel
-        setTrayVisible(selIndex >= 0);
     }
 }
