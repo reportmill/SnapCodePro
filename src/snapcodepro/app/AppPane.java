@@ -3,7 +3,6 @@ import javakit.project.Breakpoint;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
 import javakit.ide.JavaTextPane;
-import snap.geom.Pos;
 import snap.util.ArrayUtils;
 import snap.viewx.WebBrowser;
 import snapcodepro.debug.RunApp;
@@ -44,7 +43,7 @@ public class AppPane extends ViewOwner {
     private ProcPane  _procPane = new ProcPane(this);
 
     // The SupportTray
-    private SupportTray  _supportTray = new SupportTray(this);
+    private SupportTray  _supportTray;
 
     // The Problems pane
     private BuildIssuesPane  _problemsPane = new BuildIssuesPane(this);
@@ -64,6 +63,9 @@ public class AppPane extends ViewOwner {
     // The SearchPane
     private SearchPane  _searchPane = new SearchPane(this);
 
+    // The StatusBar
+    private StatusBar  _statusBar;
+
     // Whether to show side bar
     private boolean  _showSideBar = true;
 
@@ -80,9 +82,12 @@ public class AppPane extends ViewOwner {
     {
         super();
 
+        // Create parts
         _pagePane = new PagePane(this);
         _toolBar = new AppPaneToolBar(this);
         _filesPane = new AppFilesPane(this);
+        _supportTray = new SupportTray(this);
+        _statusBar = new StatusBar(this);
     }
 
     /**
@@ -302,8 +307,8 @@ public class AppPane extends ViewOwner {
         SplitView pagePaneSplitView = getView("PagePaneSplitView", SplitView.class);
 
         // Install PagePage UI
-        View projectFilesUI = _pagePane.getUI();
-        pagePaneSplitView.addItem(projectFilesUI);
+        View pagePaneUI = _pagePane.getUI();
+        pagePaneSplitView.addItem(pagePaneUI);
 
         // Listen to PagePane and PagePane.Browser changes
         _pagePane.addPropChangeListener(pc -> pagePaneDidPropChange(pc), PagePane.SelFile_Prop);
@@ -324,19 +329,13 @@ public class AppPane extends ViewOwner {
         procPaneUI.setPrefHeight(250);
         _sideBarSplit.setItems(filesPaneUI, procPaneUI);
 
-        // Get StatusBar and remove from MainSplit
-        View statusBar = getView("StatusBar");
-        _mainSplit.removeItem(statusBar);
-
         // Add SupportTray to MainSplit
         TabView supportTrayUI = (TabView) _supportTray.getUI();
         _mainSplit.addItem(supportTrayUI);
 
-        // Add StatusBar to MainSplit
-        statusBar.setManaged(false);
-        statusBar.setLean(Pos.BOTTOM_RIGHT);
-        statusBar.setSize(500, 30);
-        ViewUtils.addChild(_mainSplit, statusBar);
+        // Add StatusBar
+        TabBar tabBar = supportTrayUI.getTabBar();
+        _statusBar.addToView(tabBar);
 
         // Add key binding to OpenMenuItem and CloseWindow
         //addKeyActionHandler("OpenMenuItem", "meta O");
@@ -355,27 +354,11 @@ public class AppPane extends ViewOwner {
         WebPage page = _pagePane.getSelPage();
         getWindow().setTitle(page != null ? page.getTitle() : "SnapCode");
 
-        // Set ActivityText, StatusText
-        WebBrowser browser = getBrowser();
-        setViewText("ActivityText", browser.getActivity());
-        setViewText("StatusText", browser.getStatus());
-
-        // Update ProgressBar
-        ProgressBar progressBar = getView("ProgressBar", ProgressBar.class);
-        boolean loading = browser.isLoading();
-        if (loading && !progressBar.isVisible()) {
-            progressBar.setVisible(true);
-            progressBar.setProgress(-1);
-        }
-        else if (!loading && progressBar.isVisible()) {
-            progressBar.setProgress(0);
-            progressBar.setVisible(false);
-        }
-
         // Reset FilesPane and SupportTray
         _filesPane.resetLater();
         _procPane.resetLater();
         _supportTray.resetLater();
+        _statusBar.resetLater();
     }
 
     /**

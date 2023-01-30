@@ -297,7 +297,7 @@ public class PagePane extends ViewOwner {
         // Create browser
         _browser = new AppBrowser();
         _browser.setGrowHeight(true);
-        _browser.setMargin(0, 4, 0, 4);
+        //_browser.setMargin(0, 4, 0, 4);
 
         // Create ColView to hold TabsBox and Browser
         ColView colView = new ColView();

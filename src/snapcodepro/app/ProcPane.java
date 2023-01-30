@@ -25,7 +25,7 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
     private RunApp  _selApp;
 
     // The Process TreeView
-    private TreeView<Object>  _procTree;
+    private TreeView  _procTree;
 
     // Whether Console needs to be reset
     private boolean  _resetConsole;
