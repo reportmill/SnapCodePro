@@ -34,7 +34,6 @@
   <StackView Name="StatusBar" Padding="0,4,0,4" PrefHeight="20">
     <Label Name="StatusText" LeanX="LEFT" />
     <ProgressBar Name="ProgressBar" PrefWidth="80" PrefHeight="16" Visible="false" LeanX="CENTER" />
-    <Button Name="ShowTrayButton" PrefWidth="60" PrefHeight="16" LeanX="CENTER" text="Show Tray" />
     <Label Name="ActivityText" LeanX="RIGHT" />
   </StackView>
 </SplitView>

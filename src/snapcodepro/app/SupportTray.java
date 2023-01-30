@@ -1,4 +1,5 @@
 package snapcodepro.app;
+import snap.geom.Side;
 import snap.view.*;
 
 /**
@@ -14,9 +15,6 @@ public class SupportTray extends ViewOwner {
 
     // The list of tab owners
     private ViewOwner[]  _tabOwners;
-
-    // Whether tray was explicitly opened
-    private boolean  _explicitlyOpened;
 
     // Constants for tabs
     public static final int PROBLEMS_PANE = 0;
@@ -35,12 +33,36 @@ public class SupportTray extends ViewOwner {
     }
 
     /**
+     * Returns whether SupportTray is visible.
+     */
+    public boolean isTrayVisible()
+    {
+        return getUI().getHeight() > 50;
+    }
+
+    /**
+     * Sets SupportTray visible.
+     */
+    public void setTrayVisible(boolean aValue)
+    {
+        // If value already set, or if asked to close ExplicitlyOpened SupportTray, just return
+        if (aValue == isTrayVisible()) return;
+
+        // Get SupportTray UI and SplitView
+        View supTrayUI = getUI();
+
+        // Add/remove SupportTrayUI with animator
+        //if (aValue) _browserBox.addItemWithAnim(supTrayUI, 240);
+        //else _browserBox.removeItemWithAnim(supTrayUI);
+        if (aValue)
+            supTrayUI.setPrefHeight(240);
+        else supTrayUI.setPrefHeight(30);
+    }
+
+    /**
      * Returns the selected index.
      */
-    public int getSelIndex()
-    {
-        return _tabView != null ? _tabView.getSelIndex() : -1;
-    }
+    public int getSelIndex()  { return _tabView != null ? _tabView.getSelIndex() : -1; }
 
     /**
      * Sets the selected index.
@@ -51,30 +73,29 @@ public class SupportTray extends ViewOwner {
     }
 
     /**
+     * Shows the problems tool.
+     */
+    public void showProblemsTool()  { setSelIndex(PROBLEMS_PANE); }
+
+    /**
+     * Shows the search tool.
+     */
+    public void showSearchTool()  { setSelIndex(SEARCH_PANE); }
+
+    /**
+     * Shows the run tool.
+     */
+    public void showRunTool()  { setSelIndex(RUN_PANE); }
+
+    /**
      * Sets selected index to debug.
      */
-    public void setDebug()
-    {
-        int ind = getSelIndex();
-        if (ind != DEBUG_PANE_VARS && ind != DEBUG_PANE_EXPRS)
-            _appPane.setSupportTrayIndex(DEBUG_PANE_VARS);
-    }
+    public void showDebugTool()  { setSelIndex(DEBUG_PANE_VARS); }
 
     /**
-     * Returns whether SupportTray was explicitly opened ("Show Tray" button was pressed).
+     * Hides selected tool.
      */
-    public boolean isExplicitlyOpened()
-    {
-        return _explicitlyOpened;
-    }
-
-    /**
-     * Sets whether SupportTray was explicitly opened ("Show Tray" button was pressed).
-     */
-    public void setExplicitlyOpened(boolean aValue)
-    {
-        _explicitlyOpened = aValue;
-    }
+    public void hideTools()  { setSelIndex(-1); }
 
     /**
      * Creates UI for SupportTray.
@@ -82,20 +103,32 @@ public class SupportTray extends ViewOwner {
     protected View createUI()
     {
         // Set TabOwners
-        _tabOwners = new ViewOwner[]{_appPane.getProblemsPane(), _appPane.getRunConsole(), _appPane.getDebugVarsPane(),
-                _appPane.getDebugExprsPane(), _appPane.getBreakpointsPanel(), _appPane.getSearchPane()};
+        _tabOwners = new ViewOwner[] {
+                _appPane.getProblemsPane(), _appPane.getRunConsole(),
+                _appPane.getDebugVarsPane(), _appPane.getDebugExprsPane(),
+                _appPane.getBreakpointsPanel(), _appPane.getSearchPane()
+        };
 
-        // Create TabbedPane, configure and return
+        // Create/config TabView
         _tabView = new TabView();
         _tabView.setName("TabView");
         _tabView.setFont(_tabView.getFont().deriveFont(12));
+        _tabView.setTabSide(Side.BOTTOM);
         _tabView.getTabBar().setTabMinWidth(70);
+        _tabView.getTabBar().setAllowEmptySelection(true);
+
+        // Add Tabs
         _tabView.addTab("Problems", _appPane.getProblemsPane().getUI());
         _tabView.addTab("Console", new Label("RunConsole"));
         _tabView.addTab("Variables", new Label("DebugVarsPane"));
         _tabView.addTab("Expressions", new Label("DebugExprsPane"));
         _tabView.addTab("Breakpoints", new Label("Breakpoints"));
         _tabView.addTab("Search", new Label("Search"));
+
+        // Set TabView default close height
+        _tabView.setPrefHeight(30);
+
+        // Return
         return _tabView;
     }
 
@@ -104,10 +137,10 @@ public class SupportTray extends ViewOwner {
      */
     protected void resetUI()
     {
-        int index = _tabView.getSelIndex();
-        ViewOwner sowner = _tabOwners[index];
-        if (sowner != null)
-            sowner.resetLater();
+        int selIndex = _tabView.getSelIndex();
+        ViewOwner viewOwner = selIndex >= 0 ? _tabOwners[selIndex] : null;
+        if (viewOwner != null)
+            viewOwner.resetLater();
     }
 
     /**
@@ -117,13 +150,13 @@ public class SupportTray extends ViewOwner {
     {
         // Handle TabView
         int selIndex = _tabView.getSelIndex();
-        View selContent = _tabView.getTabContent(selIndex);
+        View selContent = selIndex >= 0 ? _tabView.getTabContent(selIndex) : null;
         if (selContent instanceof Label) {
             ViewOwner viewOwner = _tabOwners[selIndex];
             _tabView.setTabContent(viewOwner.getUI(), selIndex);
         }
 
         // Open or close panel
-        _appPane.setSupportTrayVisible(selIndex >= 0);
+        setTrayVisible(selIndex >= 0);
     }
 }

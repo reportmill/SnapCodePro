@@ -242,7 +242,8 @@ public class AppPaneToolBar extends ViewOwner {
             }
             else {
                 _appPane.getSearchPane().search(text);
-                _appPane.setSupportTrayIndex(SupportTray.SEARCH_PANE);
+                SupportTray supportTray = _appPane.getSupportTray();
+                supportTray.showSearchTool();
             }
         }
 

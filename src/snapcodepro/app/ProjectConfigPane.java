@@ -468,12 +468,20 @@ public class ProjectConfigPane extends ViewOwner {
      */
     protected void handleBuildCompleted()
     {
-        // Get final error count and see if problems pane should show or hide
+        // If final error count non-zero, show problems pane
         int errorCount = _proj.getRootProject().getBuildIssues().getErrorCount();
-        if (errorCount > 0 && getAppPane().getSupportTrayIndex() != 0)
-            getAppPane().setSupportTrayIndex(0);
-        if (errorCount == 0 && _appPane.getSupportTrayIndex() == SupportTray.PROBLEMS_PANE)
-            _appPane.setSupportTrayVisible(false);
+        if (errorCount > 0) {
+            SupportTray supportTray = _appPane.getSupportTray();
+            if (supportTray.getSelIndex() != SupportTray.PROBLEMS_PANE)
+                supportTray.showProblemsTool();
+        }
+
+        // If error count zero and SupportTray showing problems, close
+        if (errorCount == 0) {
+            SupportTray supportTray = _appPane.getSupportTray();
+            if (supportTray.getSelIndex() == SupportTray.PROBLEMS_PANE)
+                supportTray.hideTools();
+        }
     }
 
     /**

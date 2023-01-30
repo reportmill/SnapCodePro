@@ -128,51 +128,9 @@ public class AppPane extends ViewOwner {
     }
 
     /**
-     * Returns whether SupportTray is visible.
+     * Returns the support tray.
      */
-    public boolean isSupportTrayVisible()
-    {
-        return _supportTray.getUI().getHeight() > 50;
-    }
-
-    /**
-     * Sets SupportTray visible.
-     */
-    public void setSupportTrayVisible(boolean aValue)
-    {
-        // If value already set, or if asked to close ExplicitlyOpened SupportTray, just return
-        if (aValue == isSupportTrayVisible() || !aValue && _supportTray.isExplicitlyOpened()) return;
-
-        // Get SupportTray UI and SplitView
-        View supTrayUI = _supportTray.getUI();
-
-        // Add/remove SupportTrayUI with animator
-        //if (aValue) _browserBox.addItemWithAnim(supTrayUI, 240);
-        //else _browserBox.removeItemWithAnim(supTrayUI);
-        if (aValue)
-            supTrayUI.setPrefHeight(240);
-        else supTrayUI.setPrefHeight(30);
-
-        // Update ShowTrayButton
-        setViewText("ShowTrayButton", aValue ? "Hide Tray" : "Show Tray");
-    }
-
-    /**
-     * Returns the SupportTray index.
-     */
-    public int getSupportTrayIndex()
-    {
-        return isSupportTrayVisible() ? _supportTray.getSelIndex() : -1;
-    }
-
-    /**
-     * Sets SupportTray visible to given index.
-     */
-    public void setSupportTrayIndex(int anIndex)
-    {
-        setSupportTrayVisible(true);
-        _supportTray.setSelIndex(anIndex);
-    }
+    public SupportTray getSupportTray()  { return _supportTray; }
 
     /**
      * Returns the top level site.
@@ -372,7 +330,6 @@ public class AppPane extends ViewOwner {
 
         // Add SupportTray to MainSplit
         TabView supportTrayUI = (TabView) _supportTray.getUI();
-        supportTrayUI.setPrefHeight(30);
         _mainSplit.addItem(supportTrayUI);
 
         // Add StatusBar to MainSplit
@@ -450,16 +407,11 @@ public class AppPane extends ViewOwner {
             anEvent.consume();
         }
 
-        // Handle ShowTrayButton
-        if (anEvent.equals("ShowTrayButton")) {
-            boolean isVisible = isSupportTrayVisible();
-            _supportTray.setExplicitlyOpened(!isVisible);
-            setSupportTrayVisible(!isVisible);
-        }
-
         // Handle ProcessesList
-        if (anEvent.equals("ProcessesList"))
-            setSupportTrayIndex(2);
+        if (anEvent.equals("ProcessesList")) {
+            SupportTray supportTray = getSupportTray();
+            supportTray.showDebugTool();
+        }
 
         // Handle ShowJavaHomeMenuItem
         if (anEvent.equals("ShowJavaHomeMenuItem")) {
@@ -476,11 +428,6 @@ public class AppPane extends ViewOwner {
             });
         }
     }
-
-    /**
-     * Returns the support tray.
-     */
-    public SupportTray getSupportTray()  { return _supportTray; }
 
     /**
      * Returns the problems pane.

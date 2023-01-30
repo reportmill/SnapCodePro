@@ -330,7 +330,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     {
         if (getAppPane() == null) return;
         getAppPane().getSearchPane().searchReference(aNode);
-        getAppPane().setSupportTrayIndex(SupportTray.SEARCH_PANE);
+        SupportTray supportTray = getAppPane().getSupportTray();
+        supportTray.showSearchTool();
     }
 
     /**
@@ -340,7 +341,8 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     {
         if (getAppPane() == null) return;
         getAppPane().getSearchPane().searchDeclaration(aNode);
-        getAppPane().setSupportTrayIndex(SupportTray.SEARCH_PANE);
+        SupportTray supportTray = getAppPane().getSupportTray();
+        supportTray.showSearchTool();
     }
 
     /**

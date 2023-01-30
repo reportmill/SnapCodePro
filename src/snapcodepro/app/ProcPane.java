@@ -16,28 +16,28 @@ import java.util.List;
 public class ProcPane extends ViewOwner implements RunApp.AppListener {
 
     // The AppPane
-    AppPane _appPane;
+    private AppPane  _appPane;
 
     // The list of recently run apps
-    List<RunApp> _apps = new ArrayList();
+    private List<RunApp>  _apps = new ArrayList<>();
 
     // The selected app
-    RunApp _selApp;
+    private RunApp  _selApp;
 
     // The Process TreeView
-    TreeView _procTree;
+    private TreeView<Object>  _procTree;
 
     // Whether Console needs to be reset
-    boolean _resetConsole;
+    private boolean  _resetConsole;
 
     // The file that currently has the ProgramCounter
-    WebFile _progCounterFile;
+    private WebFile  _progCounterFile;
 
     // The current ProgramCounter line
-    int _progCounterLine;
+    private int  _progCounterLine;
 
     // The limit to the number of running processes
-    int _procLimit = 1;
+    private int  _procLimit = 1;
 
     // Images
     public static Image ProcImage = Image.get(ProcPane.class, "Process.png");
@@ -55,58 +55,37 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
     /**
      * Returns the AppPane.
      */
-    public AppPane getAppPane()
-    {
-        return _appPane;
-    }
+    public AppPane getAppPane()  { return _appPane; }
 
     /**
      * Returns the RunConsole.
      */
-    public RunConsole getRunConsole()
-    {
-        return _appPane.getRunConsole();
-    }
+    public RunConsole getRunConsole()  { return _appPane.getRunConsole(); }
 
     /**
      * Returns the DebugVarsPane.
      */
-    public DebugVarsPane getDebugVarsPane()
-    {
-        return _appPane.getDebugVarsPane();
-    }
+    public DebugVarsPane getDebugVarsPane()  { return _appPane.getDebugVarsPane(); }
 
     /**
      * Returns the DebugExprsPane.
      */
-    public DebugExprsPane getDebugExprsPane()
-    {
-        return _appPane.getDebugExprsPane();
-    }
+    public DebugExprsPane getDebugExprsPane()  { return _appPane.getDebugExprsPane(); }
 
     /**
      * Returns the list of processes.
      */
-    public List<RunApp> getProcs()
-    {
-        return _apps;
-    }
+    public List<RunApp> getProcs()  { return _apps; }
 
     /**
      * Returns the number of processes.
      */
-    public int getProcCount()
-    {
-        return _apps.size();
-    }
+    public int getProcCount()  { return _apps.size(); }
 
     /**
      * Returns the process at given index.
      */
-    public RunApp getProc(int anIndex)
-    {
-        return _apps.get(anIndex);
-    }
+    public RunApp getProc(int anIndex)  { return _apps.get(anIndex); }
 
     /**
      * Adds a new process.
@@ -115,7 +94,9 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
     {
         // Remove procs that are terminated and procs beyond limit
         for (RunApp p : _apps.toArray(new RunApp[0]))
-            if (p.isTerminated()) removeProc(p);
+            if (p.isTerminated())
+                removeProc(p);
+
         if (getProcCount() + 1 > _procLimit) {
             RunApp proc = getProc(0);
             proc.terminate();
@@ -155,24 +136,9 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
         setSelApp(null);
         addProc(aProc);
         setSelApp(aProc);
-        getAppPane().setSupportTrayIndex(1);
+        SupportTray supportTray = getAppPane().getSupportTray();
+        supportTray.showRunTool();
         aProc.exec();
-    }
-
-    /**
-     * Returns the limit for number of active processes.
-     */
-    public int getProcLimit()
-    {
-        return _procLimit;
-    }
-
-    /**
-     * Sets the limit for number of active processes.
-     */
-    public void setProcLimit(int aValue)
-    {
-        _procLimit = aValue;
     }
 
     /**
@@ -291,10 +257,6 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
         resetLater();
         _appPane.resetLater();
 
-        // If selected app, update SupportTray visible state
-        if (aProc == getSelApp() && _appPane.getSupportTrayIndex() == SupportTray.RUN_PANE && !aProc.hadError())
-            _appPane.setSupportTrayVisible(false);
-
         // If debug app, reset Debug vars, expressions and current line counter
         if (aProc instanceof DebugApp) {
             getDebugVarsPane().resetVarTable();
@@ -350,7 +312,7 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
         }
 
         // Make DebugVarsPane visible and updateVarTable
-        getAppPane().getSupportTray().setDebug();
+        getAppPane().getSupportTray().showDebugTool();
 
         DebugFrame frame = aProc.getFrame();
         if (frame == null) return;
@@ -365,28 +327,18 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
 
         // Set ProgramCounter file and line
         WebURL url = WebURL.getURL(path);
-        setProgramCounter(url.getFile(), lineNum - 1);
+        WebFile file = url.getFile();
+        setProgramCounter(file, lineNum - 1);
         _appPane.getBrowser().setURL(url);
     }
 
     /**
      * DebugListener breakpoint methods.
      */
-    public void requestSet(BreakpointReq e)
-    {
-    }
-
-    public void requestDeferred(BreakpointReq e)
-    {
-    }
-
-    public void requestDeleted(BreakpointReq e)
-    {
-    }
-
-    public void requestError(BreakpointReq e)
-    {
-    }
+    public void requestSet(BreakpointReq e)  { }
+    public void requestDeferred(BreakpointReq e)  { }
+    public void requestDeleted(BreakpointReq e)  { }
+    public void requestError(BreakpointReq e)  { }
 
     /**
      * RunProc.Listener method - called when output is available.
@@ -478,8 +430,10 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
         // Reset items, auto expand threads
         List<RunApp> apps = getProcs();
         _procTree.setItems(apps);
-        for (RunApp app : apps) _procTree.expandItem(app);
-        if (apps.size() > 0) _procTree.updateItems();
+        for (RunApp app : apps)
+            _procTree.expandItem(app);
+        if (apps.size() > 0)
+            _procTree.updateItems();
 
         // If current proc is Debug with suspended thread, select current frame
         RunApp proc = getSelApp();
@@ -555,7 +509,7 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
             else if (item instanceof DebugFrame) {
                 DebugFrame frame = (DebugFrame) item;
                 frame.select();
-                getAppPane().getSupportTray().setDebug();
+                getAppPane().getSupportTray().showDebugTool();
             }
         }
     }
@@ -563,7 +517,7 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
     /**
      * A TreeResolver for ProcTree.
      */
-    private class ProcTreeResolver extends TreeResolver {
+    private static class ProcTreeResolver extends TreeResolver<Object> {
 
         /**
          * Whether given object is a parent (has children).
