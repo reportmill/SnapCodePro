@@ -1,5 +1,4 @@
 package snapcodepro.views;
-
 import javakit.parse.*;
 import javakit.resolver.JavaClass;
 import javakit.ide.JavaTextArea;
@@ -17,18 +16,18 @@ import java.util.List;
 public class SnapEditor extends StackView {
 
     // The JavaTextArea
-    JavaTextArea _jtextArea;
+    private JavaTextArea  _jtextArea;
 
     // The scripts pane
-    JFileView _filePart;
+    private JFileView  _filePart;
 
     // The selected part
-    JNodeView _selPart;
+    private JNodeView<?> _selPart;
 
     // The mouse node and X/Y during mouse drag
-    View _mnode;
-    JNodeView _mpart;
-    double _mx, _my;
+    private View  _mnode;
+    private JNodeView<?>  _mpart;
+    private double  _mx, _my;
 
     /**
      * Creates a new SnapCodeArea.
@@ -61,15 +60,12 @@ public class SnapEditor extends StackView {
     /**
      * Returns the JavaTextArea.
      */
-    public JavaTextArea getJavaTextArea()
-    {
-        return _jtextArea;
-    }
+    public JavaTextArea getJavaTextArea()  { return _jtextArea; }
 
     /**
      * Returns the selected part.
      */
-    public JNodeView getSelectedPart()
+    public JNodeView<?> getSelectedPart()
     {
         return _selPart;
     }
@@ -77,7 +73,7 @@ public class SnapEditor extends StackView {
     /**
      * Sets the selected parts.
      */
-    public void setSelectedPart(JNodeView aPart)
+    public void setSelectedPart(JNodeView<?> aPart)
     {
         if (_selPart != null) _selPart.setSelected(false);
         _selPart = aPart != null ? aPart : _filePart;
@@ -115,7 +111,7 @@ public class SnapEditor extends StackView {
     public Class<?> getSelectedPartClass()
     {
         // Get selected NodeView
-        JNodeView selNodeView = getSelectedPart();
+        JNodeView<?> selNodeView = getSelectedPart();
         if (selNodeView == null)
             selNodeView = getFilePart();
 
@@ -133,10 +129,10 @@ public class SnapEditor extends StackView {
     /**
      * Returns the selected part's class or the enclosing class, if void.class.
      */
-    public Class getSelectedPartEnclClass()
+    public Class<?> getSelectedPartEnclClass()
     {
         // Get selected NodeView
-        JNodeView selNodeView = getSelectedPart();
+        JNodeView<?> selNodeView = getSelectedPart();
         if (selNodeView == null)
             selNodeView = getFilePart();
 
@@ -167,19 +163,19 @@ public class SnapEditor extends StackView {
     void setSelectedPartFromTextArea()
     {
         int index = getJavaTextArea().getSelStart();
-        JNodeView spart = getSnapPartAt(getFilePart(), index);
-        setSelectedPart(spart);
+        JNodeView<?> selPart = getSnapPartAt(getFilePart(), index);
+        setSelectedPart(selPart);
     }
 
     /**
      * Returns the snap part at given index.
      */
-    public JNodeView getSnapPartAt(JNodeView aPart, int anIndex)
+    public JNodeView<?> getSnapPartAt(JNodeView aPart, int anIndex)
     {
         // Check children
-        List<JNodeView> children = aPart.getJNodeViews();
-        for (JNodeView child : children) {
-            JNodeView part = getSnapPartAt(child, anIndex);
+        List<JNodeView<?>> children = aPart.getJNodeViews();
+        for (JNodeView<?> child : children) {
+            JNodeView<?> part = getSnapPartAt(child, anIndex);
             if (part != null)
                 return part;
         }
@@ -300,13 +296,11 @@ public class SnapEditor extends StackView {
     String getIndent(JNode aNode, int aPos)
     {
         int index = aNode.getStartCharIndex();
-        TextBoxLine tline = getJavaTextArea().getLineForCharIndex(index);
-        int c = 0;
-        while (c < tline.length() && Character.isWhitespace(tline.charAt(c))) c++;
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < c; i++) sb.append(' ');
-        if (aPos == 0) sb.append("    ");
-        return sb.toString();
+        TextBoxLine textLine = getJavaTextArea().getLineForCharIndex(index);
+        String indentStr = textLine.getIndentString();
+        if (aPos == 0)
+            indentStr += "    ";
+        return indentStr;
     }
 
     /**
