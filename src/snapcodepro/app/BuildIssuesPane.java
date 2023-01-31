@@ -1,39 +1,30 @@
 package snapcodepro.app;
 import javakit.project.BuildIssue;
 import javakit.ide.JavaTextUtils;
+import javakit.project.BuildIssues;
+import javakit.project.Project;
 import snap.gfx.Image;
 import snap.view.*;
-import snapcodepro.project.ProjectX;
 import snap.web.WebFile;
 
 /**
  * A pane/panel to show current build issues.
  */
-public class BuildIssuesPane extends ViewOwner {
-
-    // The AppPane
-    AppPane _appPane;
-
-    // The project
-    ProjectX _proj;
+public class BuildIssuesPane extends ProjectTool {
 
     // The selected issue
-    BuildIssue _selectedIssue;
+    private BuildIssue  _selIssue;
+
+    // Constants
+    private static Image ErrorImage = Image.get(JavaTextUtils.class, "ErrorMarker.png");
+    private static Image WarningImage = Image.get(JavaTextUtils.class, "WarningMarker.png");
 
     /**
      * Creates a new ProblemsPane.
      */
-    public BuildIssuesPane(AppPane anAP)
+    public BuildIssuesPane(ProjectPane projPane)
     {
-        _appPane = anAP;
-    }
-
-    /**
-     * Returns the selected project.
-     */
-    public ProjectX getProject()
-    {
-        return _proj != null ? _proj : (_proj = ProjectX.getProjectForSite(_appPane.getRootSite()));
+        super(projPane);
     }
 
     /**
@@ -41,23 +32,21 @@ public class BuildIssuesPane extends ViewOwner {
      */
     public BuildIssue[] getIssues()
     {
-        return getProject().getBuildIssues().getIssues();
+        Project proj = getProject();
+        return proj.getBuildIssues().getIssues();
     }
 
     /**
      * Returns the selected issue.
      */
-    public BuildIssue getSelectedIssue()
-    {
-        return _selectedIssue;
-    }
+    public BuildIssue getSelIssue()  { return _selIssue; }
 
     /**
      * Sets the selected issue.
      */
-    public void setSelectedIssue(BuildIssue anIssue)
+    public void setSelIssue(BuildIssue anIssue)
     {
-        _selectedIssue = anIssue;
+        _selIssue = anIssue;
     }
 
     /**
@@ -65,10 +54,13 @@ public class BuildIssuesPane extends ViewOwner {
      */
     public String getBuildStatusText()
     {
-        ProjectX proj = getProject();
-        int ec = proj.getBuildIssues().getErrorCount(), wc = proj.getBuildIssues().getWarningCount();
-        String error = ec == 1 ? "error" : "errors", warning = wc == 1 ? "warning" : "warnings";
-        return String.format("%d %s, %d %s", ec, error, wc, warning);
+        Project proj = getProject();
+        BuildIssues buildIssues = proj.getBuildIssues();
+        int errorCount = buildIssues.getErrorCount();
+        int warningCount = buildIssues.getWarningCount();
+        String error = errorCount == 1 ? "error" : "errors";
+        String warning = warningCount == 1 ? "warning" : "warnings";
+        return String.format("%d %s, %d %s", errorCount, error, warningCount, warning);
     }
 
     /**
@@ -91,7 +83,7 @@ public class BuildIssuesPane extends ViewOwner {
         setViewText("BuildStatusLabel", getBuildStatusText());
 
         setViewItems("ErrorsList", getIssues());
-        setViewSelItem("ErrorsList", getSelectedIssue());
+        setViewSelItem("ErrorsList", getSelIssue());
     }
 
     /**
@@ -101,11 +93,11 @@ public class BuildIssuesPane extends ViewOwner {
     {
         // Handle ErrorsList
         if (anEvent.equals("ErrorsList")) {
-            BuildIssue issue = getSelectedIssue();
+            BuildIssue issue = getSelIssue();
             if (issue != null) {
                 WebFile file = issue.getFile();
                 String urls = file.getURL().getString() + "#LineNumber=" + issue.getLineNumber();
-                _appPane.getBrowser().setURLString(urls);
+                getBrowser().setURLString(urls);
             }
         }
     }
@@ -115,19 +107,18 @@ public class BuildIssuesPane extends ViewOwner {
      */
     protected void configureErrorsCell(ListCell<BuildIssue> aCell)
     {
-        BuildIssue aBI = aCell.getItem();
-        if (aBI == null) return;
-        String text = String.format("%s (%s:%d)", aBI.getText(), aBI.getFile().getName(), aBI.getLine() + 1);
+        BuildIssue buildIssue = aCell.getItem();
+        if (buildIssue == null) return;
+        String text = String.format("%s (%s:%d)", buildIssue.getText(), buildIssue.getFile().getName(), buildIssue.getLine() + 1);
         text = text.replace('\n', ' ');
         aCell.setText(text);
-        aCell.setImage(aBI.isError() ? ErrorImage : WarningImage);
+        aCell.setImage(buildIssue.isError() ? ErrorImage : WarningImage);
         aCell.getGraphic().setPadding(2, 5, 2, 5);
     }
 
     /**
-     * Returns the error icon.
+     * Override for title.
      */
-    static Image ErrorImage = Image.get(JavaTextUtils.class, "ErrorMarker.png");
-    static Image WarningImage = Image.get(JavaTextUtils.class, "WarningMarker.png");
-
+    @Override
+    public String getTitle()  { return "Problems"; }
 }

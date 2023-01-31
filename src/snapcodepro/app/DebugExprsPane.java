@@ -1,5 +1,4 @@
 package snapcodepro.app;
-
 import snapcodepro.debug.DebugApp;
 import snapcodepro.debug.ExprEval;
 import snap.geom.HPos;
@@ -13,34 +12,27 @@ import java.util.List;
 /**
  * A debug pane.
  */
-public class DebugExprsPane extends ViewOwner {
+public class DebugExprsPane extends ProjectTool {
 
-    // The AppPane
-    AppPane _appPane;
+    // The ProcPane
+    private ProcPane  _procPane;
 
     // The variable table
-    TreeView<ExprTreeItem> _varTree;
+    private TreeView<ExprTreeItem>  _varTree;
 
     // The variable text
-    TextView _varText;
+    private TextView  _varText;
 
     // The list of expression tree items
-    List<ExprTreeItem> _exprItems = new ArrayList();
+    List<ExprTreeItem>  _exprItems = new ArrayList<>();
 
     /**
      * Creates a new DebugExprsPane.
      */
-    public DebugExprsPane(AppPane anAppPane)
+    public DebugExprsPane(AppPane projPane)
     {
-        _appPane = anAppPane;
-    }
-
-    /**
-     * Returns the process pane.
-     */
-    public ProcPane getProcPane()
-    {
-        return _appPane.getProcPane();
+        super(projPane);
+        _procPane = projPane.getProcPane();
     }
 
     /**
@@ -48,7 +40,7 @@ public class DebugExprsPane extends ViewOwner {
      */
     public DebugApp getDebugApp()
     {
-        return getProcPane().getSelDebugApp();
+        return _procPane.getSelDebugApp();
     }
 
     /**
@@ -199,6 +191,12 @@ public class DebugExprsPane extends ViewOwner {
         // Everything makes text focus
         requestFocus("ExprText");
     }
+
+    /**
+     * Override for title.
+     */
+    @Override
+    public String getTitle()  { return "Expressions"; }
 
     /**
      * A class to hold a ExprTableItem Variable.

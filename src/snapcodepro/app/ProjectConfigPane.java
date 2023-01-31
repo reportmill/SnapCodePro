@@ -472,14 +472,14 @@ public class ProjectConfigPane extends ViewOwner {
         int errorCount = _proj.getRootProject().getBuildIssues().getErrorCount();
         if (errorCount > 0) {
             SupportTray supportTray = _appPane.getSupportTray();
-            if (supportTray.getSelIndex() != SupportTray.PROBLEMS_PANE)
+            if (supportTray.getSelTool() instanceof BuildIssuesPane)
                 supportTray.showProblemsTool();
         }
 
         // If error count zero and SupportTray showing problems, close
         if (errorCount == 0) {
             SupportTray supportTray = _appPane.getSupportTray();
-            if (supportTray.getSelIndex() == SupportTray.PROBLEMS_PANE)
+            if (supportTray.getSelTool() instanceof BuildIssuesPane)
                 supportTray.hideTools();
         }
     }

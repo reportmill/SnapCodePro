@@ -1,47 +1,23 @@
 package snapcodepro.app;
 import javakit.project.Breakpoint;
 import javakit.project.Breakpoints;
-import snap.view.ViewOwner;
-import snapcodepro.project.ProjectX;
 import snap.view.ListView;
 import snap.view.ViewEvent;
 
 /**
- * A custom class.
+ * This class displays and edits project breakpoints.
  */
-public class BreakpointsPanel extends ViewOwner {
-
-    // The AppPane
-    AppPane _appPane;
-
-    // The Project
-    ProjectX _proj;
+public class BreakpointsPanel extends ProjectTool {
 
     // The breakpoints list
-    ListView<Breakpoint> _bpList;
+    private ListView<Breakpoint>  _breakpointsList;
 
     /**
      * Creates a new BreakpointsPanel.
      */
-    public BreakpointsPanel(AppPane anAP)
+    public BreakpointsPanel(ProjectPane projPane)
     {
-        _appPane = anAP;
-    }
-
-    /**
-     * Returns the AppPane.
-     */
-    public AppPane getAppPane()
-    {
-        return _appPane;
-    }
-
-    /**
-     * Returns the project.
-     */
-    public ProjectX getProject()
-    {
-        return _proj != null ? _proj : (_proj = ProjectX.getProjectForSite(_appPane.getRootSite()));
+        super(projPane);
     }
 
     /**
@@ -55,9 +31,9 @@ public class BreakpointsPanel extends ViewOwner {
     /**
      * Returns the selected Breakpoint.
      */
-    public Breakpoint getSelectedBreakpoint()
+    public Breakpoint getSelBreakpoint()
     {
-        return _bpList.getSelItem();
+        return _breakpointsList.getSelItem();
     }
 
     /**
@@ -65,9 +41,9 @@ public class BreakpointsPanel extends ViewOwner {
      */
     protected void initUI()
     {
-        _bpList = getView("BreakpointList", ListView.class);
-        enableEvents(_bpList, MouseRelease);
-        _bpList.setRowHeight(24);
+        _breakpointsList = getView("BreakpointList", ListView.class);
+        enableEvents(_breakpointsList, MouseRelease);
+        _breakpointsList.setRowHeight(24);
         getBreakpoints().addPropChangeListener(pce -> resetLater());
     }
 
@@ -77,7 +53,7 @@ public class BreakpointsPanel extends ViewOwner {
     @Override
     protected void resetUI()
     {
-        setViewEnabled("DeleteButton", getSelectedBreakpoint() != null);
+        setViewEnabled("DeleteButton", getSelBreakpoint() != null);
 
         setViewItems("BreakpointList", getBreakpoints());
     }
@@ -89,18 +65,23 @@ public class BreakpointsPanel extends ViewOwner {
     {
         // Handle DeleteButton
         if (anEvent.equals("DeleteButton"))
-            getProject().getBreakpoints().remove(getSelectedBreakpoint());
+            getBreakpoints().remove(getSelBreakpoint());
 
         // Handle DeleteAllButton
         if (anEvent.equals("DeleteAllButton"))
-            getProject().getBreakpoints().clear();
+            getBreakpoints().clear();
 
         // Handle BreakpointList
         if (anEvent.equals("BreakpointList") && anEvent.getClickCount() == 2) {
-            Breakpoint bp = getSelectedBreakpoint();
+            Breakpoint bp = getSelBreakpoint();
             String urls = bp.getFile().getURL().getString() + "#LineNumber=" + (bp.getLine() + 1);
-            getAppPane().getBrowser().setURLString(urls);
+            getBrowser().setURLString(urls);
         }
     }
 
+    /**
+     * Override for title.
+     */
+    @Override
+    public String getTitle()  { return "Breakpoints"; }
 }

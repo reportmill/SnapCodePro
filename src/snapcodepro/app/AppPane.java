@@ -19,13 +19,7 @@ import snap.web.WebSite;
 /**
  * The main view class for Projects.
  */
-public class AppPane extends ViewOwner {
-
-    // The list of sites
-    private WebSite[]  _sites = new WebSite[0];
-
-    // The PagePane to display project files for editing
-    private PagePane  _pagePane;
+public class AppPane extends ProjectPane {
 
     // The AppPaneToolBar
     protected AppPaneToolBar  _toolBar;
@@ -83,22 +77,11 @@ public class AppPane extends ViewOwner {
         super();
 
         // Create parts
-        _pagePane = new PagePane(this);
         _toolBar = new AppPaneToolBar(this);
         _filesPane = new AppFilesPane(this);
         _supportTray = new SupportTray(this);
         _statusBar = new StatusBar(this);
     }
-
-    /**
-     * Returns the PagePane.
-     */
-    public PagePane getPagePane()  { return _pagePane; }
-
-    /**
-     * Returns the PagePane.Browser.
-     */
-    public WebBrowser getBrowser()  { return _pagePane.getBrowser(); }
 
     /**
      * Returns the toolbar.
@@ -138,32 +121,17 @@ public class AppPane extends ViewOwner {
     public SupportTray getSupportTray()  { return _supportTray; }
 
     /**
-     * Returns the top level site.
-     */
-    public WebSite getRootSite()  { return _sites[0]; }
-
-    /**
-     * Returns the number of sites.
-     */
-    public int getSiteCount()  { return _sites.length; }
-
-    /**
-     * Returns the individual site at the given index.
-     */
-    public WebSite getSite(int anIndex)  { return _sites[anIndex]; }
-
-    /**
-     * Returns the list of sites.
-     */
-    public WebSite[] getSites()  { return _sites; }
-
-    /**
      * Adds a site to sites list.
      */
+    @Override
     public void addSite(WebSite aSite)
     {
-        // If site already added, just return
+        // Do normal version
         if (ArrayUtils.contains(_sites, aSite)) return;
+        super.addSite(aSite);
+
+        // Start listening to file changes
+        aSite.addFileChangeListener(_siteFileLsnr);
 
         // Create project for site
         ProjectX proj = ProjectX.getProjectForSite(aSite);
@@ -175,29 +143,31 @@ public class AppPane extends ViewOwner {
         proj.getBuildIssues().addPropChangeListener(pc -> projBuildIssuesDidChange(pc));
 
         // Add site
-        _sites = ArrayUtils.add(_sites, aSite);
         SitePane sitePane = SitePane.get(aSite, true);
         sitePane.setAppPane(this);
-        aSite.addFileChangeListener(_siteFileLsnr);
 
         // Add dependent sites
         for (ProjectX p : proj.getProjects())
             addSite(p.getSite());
 
-        // Clear root files and Reset UI
+        // Clear root files
         _filesPane._rootFiles = null;
-        resetLater();
     }
 
     /**
      * Removes a site from sites list.
      */
+    @Override
     public void removeSite(WebSite aSite)
     {
-        _sites = ArrayUtils.remove(_sites, aSite);
+        // Do normal version
+        super.removeSite(aSite);
+
+        // Stop listening to file changes
         aSite.removeFileChangeListener(_siteFileLsnr);
+
+        // Clear root files
         _filesPane._rootFiles = null;
-        resetLater();
     }
 
     /**
@@ -240,41 +210,6 @@ public class AppPane extends ViewOwner {
      * Returns the current open AppPane.
      */
     public static AppPane getOpenAppPane()  { return _openAppPane; }
-
-    /**
-     * Returns the selected file.
-     */
-    public WebFile getSelectedFile()  { return _pagePane.getSelectedFile(); }
-
-    /**
-     * Sets the selected site file.
-     */
-    public void setSelectedFile(WebFile aFile)
-    {
-        _pagePane.setSelectedFile(aFile);
-    }
-
-    /**
-     * Returns the selected site.
-     */
-    public WebSite getSelectedSite()
-    {
-        WebFile file = getSelectedFile();
-        WebSite site = file != null ? file.getSite() : null;
-        if (!ArrayUtils.containsId(getSites(), site))
-            site = getSite(0);
-        return site;
-    }
-
-    /**
-     * Returns the build directory.
-     */
-    public WebFile getBuildDir()
-    {
-        WebSite site = getSelectedSite();
-        ProjectX proj = site != null ? ProjectX.getProjectForSite(site) : null;
-        return proj != null ? proj.getBuildDir() : null;
-    }
 
     /**
      * Called when site file changes with File PropChange.
@@ -386,7 +321,7 @@ public class AppPane extends ViewOwner {
 
         // Handle CloseMenuItem, CloseFileAction
         if (anEvent.equals("CloseMenuItem") || anEvent.equals("CloseFileAction")) {
-            getPagePane().removeOpenFile(getSelectedFile());
+            _pagePane.removeOpenFile(getSelFile());
             anEvent.consume();
         }
 
@@ -447,7 +382,7 @@ public class AppPane extends ViewOwner {
      */
     public int saveFiles()
     {
-        WebFile rootDir = getSelectedSite().getRootDir();
+        WebFile rootDir = getSelSite().getRootDir();
         return _filesPane.saveFiles(rootDir, true);
     }
 

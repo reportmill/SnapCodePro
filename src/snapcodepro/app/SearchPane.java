@@ -22,12 +22,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A custom class.
+ * This class manages project search.
  */
-public class SearchPane extends ViewOwner {
-
-    // The app pane
-    private AppPane  _appPane;
+public class SearchPane extends ProjectTool {
 
     // The current search
     private Search  _search;
@@ -38,10 +35,9 @@ public class SearchPane extends ViewOwner {
     /**
      * Creates a new search pane for app pane.
      */
-    public SearchPane(AppPane anAppPane)
+    public SearchPane(ProjectPane projPane)
     {
-        super();
-        _appPane = anAppPane;
+        super(projPane);
     }
 
     /**
@@ -60,12 +56,12 @@ public class SearchPane extends ViewOwner {
     /**
      * Returns the current selected search result.
      */
-    public Result getSelectedResult()  { return _selResult; }
+    public Result getSelResult()  { return _selResult; }
 
     /**
      * Sets the current selected search result.
      */
-    public void setSelectedResult(Result aResult)
+    public void setSelResult(Result aResult)
     {
         _selResult = aResult;
     }
@@ -102,7 +98,7 @@ public class SearchPane extends ViewOwner {
 
         // Update ResultsList
         setViewItems("ResultsList", getResults());
-        setViewSelItem("ResultsList", getSelectedResult());
+        setViewSelItem("ResultsList", getSelResult());
     }
 
     /**
@@ -128,15 +124,21 @@ public class SearchPane extends ViewOwner {
 
             // Update SelResult
             Result result = (Result) anEvent.getSelItem();
-            setSelectedResult(result);
+            setSelResult(result);
 
             // Set in browser
             if (result != null) {
                 String resultURL = result.getURLString();
-                _appPane.getBrowser().setURLString(resultURL);
+                getBrowser().setURLString(resultURL);
             }
         }
     }
+
+    /**
+     * Override for title.
+     */
+    @Override
+    public String getTitle()  { return "Search"; }
 
     /**
      * Search for given term.
@@ -145,7 +147,7 @@ public class SearchPane extends ViewOwner {
     {
         _search = new Search();
         _search._string = aString;
-        for (WebSite site : _appPane.getSites())
+        for (WebSite site : _projPane.getSites())
             search(site.getRootDir(), _search._results, aString.toLowerCase());
         resetLater();
     }
@@ -162,7 +164,7 @@ public class SearchPane extends ViewOwner {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _appPane.getBuildDir())
+            if (aFile == _projPane.getBuildDir())
                 return;
             for (WebFile file : aFile.getFiles())
                 search(file, theResults, aString);
@@ -221,7 +223,7 @@ public class SearchPane extends ViewOwner {
         _search._kind = Search.Kind.Reference;
 
         // Iterate over all project sites
-        for (WebSite site : _appPane.getSites())
+        for (WebSite site : _projPane.getSites())
             searchReference(site.getRootDir(), _search._results, decl);
 
         // Update UI
@@ -240,7 +242,7 @@ public class SearchPane extends ViewOwner {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _appPane.getBuildDir())
+            if (aFile == _projPane.getBuildDir())
                 return;
             WebFile[] dirFiles = aFile.getFiles();
             for (WebFile file : dirFiles)
@@ -295,7 +297,7 @@ public class SearchPane extends ViewOwner {
         _search._kind = Search.Kind.Declaration;
 
         // Iterate over all project sites
-        for (WebSite site : _appPane.getSites())
+        for (WebSite site : _projPane.getSites())
             searchDeclaration(site.getRootDir(), _search._results, decl);
 
         // Update UI
@@ -314,7 +316,7 @@ public class SearchPane extends ViewOwner {
 
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _appPane.getBuildDir())
+            if (aFile == _projPane.getBuildDir())
                 return;
 
             WebFile[] dirFiles = aFile.getFiles();

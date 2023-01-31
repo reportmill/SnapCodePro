@@ -1,10 +1,10 @@
 package snapcodepro.app;
+import javakit.project.Project;
 import snap.geom.Polygon;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.ArrayUtils;
-import snapcodepro.project.ProjectX;
 import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
@@ -14,22 +14,17 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snap.web.WebUtils;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * A class to handle visual management of project files.
  */
-public class AppFilesPane extends ViewOwner {
+public class AppFilesPane extends ProjectTool {
 
     // The AppPane
     private AppPane  _appPane;
-
-    // The PagePane
-    private PagePane  _pagePane;
 
     // The file tree
     private TreeView<AppFile>  _filesTree;
@@ -47,45 +42,11 @@ public class AppFilesPane extends ViewOwner {
     /**
      * Creates a new AppPaneFilesPane.
      */
-    public AppFilesPane(AppPane anAppPane)
+    public AppFilesPane(AppPane projPane)
     {
-        _appPane = anAppPane;
-        _pagePane = _appPane.getPagePane();
+        super(projPane);
+        _appPane = projPane;
     }
-
-    /**
-     * Returns the AppPane.
-     */
-    public AppPane getAppPane()  { return _appPane; }
-
-    /**
-     * Returns the selected file.
-     */
-    public WebFile getSelectedFile()
-    {
-        return _appPane.getSelectedFile();
-    }
-
-    /**
-     * Returns the list of selected files.
-     */
-    public List<WebFile> getSelectedFiles()
-    {
-        WebFile sf = _appPane.getSelectedFile();
-        return sf == null ? Collections.EMPTY_LIST : Collections.singletonList(sf);
-        //List files = new ArrayList(); AppFile item = _app.getSelItem();
-        //if(item!=null && item.getFile()!=null) files.add(item.getFile()); return files;
-    }
-
-    /**
-     * Returns the top level site.
-     */
-    public WebSite getRootSite()  { return _appPane.getRootSite(); }
-
-    /**
-     * Returns the selected site.
-     */
-    public WebSite getSelectedSite()  { return _appPane.getSelectedSite(); }
 
     /**
      * Returns the root files.
@@ -96,9 +57,9 @@ public class AppFilesPane extends ViewOwner {
         if (_rootFiles != null) return _rootFiles;
 
         // Create RootFiles
-        List<AppFile> rootFiles = new ArrayList<>(_appPane.getSiteCount());
-        for (int i = 0, iMax = _appPane.getSiteCount(); i < iMax; i++) {
-            WebSite site = _appPane.getSite(i);
+        List<AppFile> rootFiles = new ArrayList<>(_projPane.getSiteCount());
+        for (int i = 0, iMax = _projPane.getSiteCount(); i < iMax; i++) {
+            WebSite site = _projPane.getSite(i);
             rootFiles.add(new AppFile(null, site.getRootDir()));
         }
 
@@ -116,7 +77,9 @@ public class AppFilesPane extends ViewOwner {
 
         // If root, search for file in RootFiles
         if (aFile.isRoot()) {
-            for (AppFile af : getRootFiles()) if (aFile == af.getFile()) return af;
+            for (AppFile af : getRootFiles())
+                if (aFile == af.getFile())
+                    return af;
             return null;
         }
 
@@ -124,7 +87,9 @@ public class AppFilesPane extends ViewOwner {
         for (WebFile par = aFile.getParent(); par != null; par = par.getParent()) {
             AppFile apar = getAppFile(par);
             if (apar != null) // && _filesTree.isExpanded(apar))
-                for (AppFile af : apar.getChildren()) if (aFile == af.getFile()) return af;
+                for (AppFile af : apar.getChildren())
+                    if (aFile == af.getFile())
+                        return af;
         }
 
         // Return not found
@@ -167,7 +132,7 @@ public class AppFilesPane extends ViewOwner {
         _filesTree.expandItem(afile.getParent());
 
         // If file is SelectedFile, make FilesTree select it
-        if (aFile == getSelectedFile())
+        if (aFile == getSelFile())
             _filesTree.setSelItem(afile);
     }
 
@@ -203,7 +168,7 @@ public class AppFilesPane extends ViewOwner {
         addKeyActionHandler("PasteAction", "Shortcut+V");
 
         // Register for Window.Focused change
-        _appPane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
+        _projPane.getWindow().addPropChangeListener(pc -> windowFocusChanged(), View.Focused_Prop);
     }
 
     /**
@@ -212,7 +177,7 @@ public class AppFilesPane extends ViewOwner {
     public void resetUI()
     {
         // Repaint tree
-        WebFile file = getAppPane().getSelectedFile();
+        WebFile file = getSelFile();
         AppFile afile = getAppFile(file);
         _filesTree.setItems(getRootFiles());
         _filesTree.setSelItem(afile);
@@ -252,8 +217,8 @@ public class AppFilesPane extends ViewOwner {
 
             // Handle MouseClick (double-click): RunSelectedFile
             if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
-                if (getSelectedFile().isFile())
-                    run(null, getSelectedFile(), false);
+                if (getSelFile().isFile())
+                    run(null, getSelFile(), false);
             }
 
             // Handle DragEvent
@@ -273,9 +238,9 @@ public class AppFilesPane extends ViewOwner {
             }
 
             // Handle DragGesture
-            else if (anEvent.isDragGesture() && getSelectedFile() != null && !anEvent.isConsumed()) {
+            else if (anEvent.isDragGesture() && getSelFile() != null && !anEvent.isConsumed()) {
                 Clipboard cb = anEvent.getClipboard();
-                cb.addData(getSelectedFile().getJavaFile());
+                cb.addData(getSelFile().getJavaFile());
                 cb.startDrag();
             }
 
@@ -283,7 +248,7 @@ public class AppFilesPane extends ViewOwner {
             else if (anEvent.isActionEvent()) { //if(anEvent.isSelectionEvent()) {
                 AppFile item = (AppFile) anEvent.getSelItem();
                 WebFile file = item != null ? item.getFile() : null;
-                _appPane.setSelectedFile(file);
+                setSelFile(file);
             }
         }
 
@@ -317,12 +282,12 @@ public class AppFilesPane extends ViewOwner {
 
         // Handle RefreshFileMenuItem
         if (anEvent.equals("RefreshFileMenuItem"))
-            for (WebFile file : getSelectedFiles())
+            for (WebFile file : getSelFiles())
                 file.reload();
 
         // Handle OpenInTextEditorMenuItem
         if (anEvent.equals("OpenInTextEditorMenuItem")) {
-            WebFile file = getSelectedFile();
+            WebFile file = getSelFile();
             WebURL url = file.getURL();
             WebPage page = new TextPage();
             page.setURL(url);
@@ -332,7 +297,7 @@ public class AppFilesPane extends ViewOwner {
 
         // Handle OpenInBrowserMenuItem
         if (anEvent.equals("OpenInBrowserMenuItem")) {
-            WebFile file = getSelectedFile();
+            WebFile file = getSelFile();
             WebBrowserPane bpane = new WebBrowserPane();
             bpane.getBrowser().setURL(file.getURL());
             bpane.getWindow().setVisible(true);
@@ -340,31 +305,31 @@ public class AppFilesPane extends ViewOwner {
 
         // Handle ShowFileMenuItem
         if (anEvent.equals("ShowFileMenuItem")) {
-            WebFile file = getSelectedFile();
+            WebFile file = getSelFile();
             if (!file.isDir()) file = file.getParent();
             File file2 = file.getJavaFile();
             FileUtils.openFile(file2);
         }
 
         // Handle RunFileMenuItem, DebugFileMenuItem
-        if (anEvent.equals("RunFileMenuItem")) run(null, getSelectedFile(), false);
-        if (anEvent.equals("DebugFileMenuItem")) run(null, getSelectedFile(), true);
+        if (anEvent.equals("RunFileMenuItem")) run(null, getSelFile(), false);
+        if (anEvent.equals("DebugFileMenuItem")) run(null, getSelFile(), true);
 
         // Handle UpdateFilesMenuItem
         if (anEvent.equals("UpdateFilesMenuItem"))
-            VcsPane.get(getSelectedSite()).updateFiles(null);
+            VcsPane.get(getSelSite()).updateFiles(null);
 
         // Handle ReplaceFileMenuItem
         if (anEvent.equals("ReplaceFilesMenuItem"))
-            VcsPane.get(getSelectedSite()).replaceFiles(null);
+            VcsPane.get(getSelSite()).replaceFiles(null);
 
         // Handle CommitFileMenuItem
         if (anEvent.equals("CommitFilesMenuItem"))
-            VcsPane.get(getSelectedSite()).commitFiles(null);
+            VcsPane.get(getSelSite()).commitFiles(null);
 
         // Handle DiffFilesMenuItem
         if (anEvent.equals("DiffFilesMenuItem")) {
-            WebFile file = getSelectedFile();
+            WebFile file = getSelFile();
             DiffPage diffPage = new DiffPage(file);
             _pagePane.setPageForURL(diffPage.getURL(), diffPage);
             _pagePane.setBrowserURL(diffPage.getURL());
@@ -380,7 +345,7 @@ public class AppFilesPane extends ViewOwner {
 
         // Handle ShowClassInfoMenuItem
         if (anEvent.equals("ShowClassInfoMenuItem")) {
-            WebFile javaFile = getSelectedFile();
+            WebFile javaFile = getSelFile();
             String classFilePath = javaFile.getPath().replace("/src/", "/bin/").replace(".java", ".class");
             WebFile classFile = javaFile.getSite().getFileForPath(classFilePath);
             if (classFile != null)
@@ -398,26 +363,28 @@ public class AppFilesPane extends ViewOwner {
     boolean addFiles(List<File> theFiles)
     {
         // Get target (selected) directory
-        WebSite site = getSelectedSite();
-        WebFile sfile = _appPane.getSelectedFile();
-        if (sfile.getSite() != site) sfile = site.getRootDir();
-        WebFile sdir = sfile.isDir() ? sfile : sfile.getParent();
+        WebSite site = getSelSite();
+        WebFile selFile = getSelFile();
+        if (selFile.getSite() != site)
+            selFile = site.getRootDir();
+        WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
 
         // Get SitePane and disable AutoBuild
-        SitePane spane = SitePane.get(site);
-        spane.setAutoBuildEnabled(false);
+        SitePane sitePane = SitePane.get(site);
+        sitePane.setAutoBuildEnabled(false);
 
         // Add files (disable site build)
         boolean success = true;
-        for (File file : theFiles)
-            if (!addFile(sdir, file)) {
+        for (File file : theFiles) {
+            if (!addFile(selDir, file)) {
                 success = false;
                 break;
             }
+        }
 
         // Enable auto build and build
-        spane.setAutoBuildEnabled(true);
-        spane.buildSite(false);
+        sitePane.setAutoBuildEnabled(true);
+        sitePane.buildSite(false);
 
         // Return files
         return success && theFiles.size() > 0;
@@ -461,19 +428,19 @@ public class AppFilesPane extends ViewOwner {
                 int option = 1;
                 if (!isDuplicating) {
                     String msg = "A file named " + name + " already exists in this location.\n Do you want to proceed?";
-                    DialogBox dbox = new DialogBox("Add File"); //dbox._comp = _appPane.getUI();
+                    DialogBox dbox = new DialogBox("Add File");
                     dbox.setWarningMessage(msg);
                     dbox.setOptions(options);
-                    option = dbox.showOptionDialog(_appPane.getUI(), defaultOption); // getAppPaneUI()
+                    option = dbox.showOptionDialog(_projPane.getUI(), defaultOption);
                     if (option < 0 || options[option].equals("Cancel")) return false;
                 }
 
                 // If user wants to Rename, ask for new name
                 if (options[option].equals("Rename")) {
                     if (isDuplicating) name = "Duplicate " + name;
-                    DialogBox dbox = new DialogBox("Rename File"); //dbox._comp = _appPane.getUI();
+                    DialogBox dbox = new DialogBox("Rename File");
                     dbox.setQuestionMessage("Enter new file name:");
-                    name = dbox.showInputDialog(_appPane.getUI(), name); //getAppPaneUI()
+                    name = dbox.showInputDialog(_projPane.getUI(), name);
                     if (name == null) return false;
                     name = name.replace(" ", "");
                     if (!StringUtils.endsWithIC(name, '.' + siteFile.getType())) name = name + '.' + siteFile.getType();
@@ -485,12 +452,9 @@ public class AppFilesPane extends ViewOwner {
             // Get file (force this time), set bytes, save and select file
             siteFile = site.createFileForPath(aDirectory.getDirPath() + name, false);
             siteFile.setBytes(FileUtils.getBytes(aFile));
-            try {
-                siteFile.save();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            _appPane.setSelectedFile(siteFile);
+            try { siteFile.save(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+            setSelFile(siteFile);
         }
 
         // Return true
@@ -535,7 +499,7 @@ public class AppFilesPane extends ViewOwner {
     {
         try { aFile.delete(); }
         catch (Exception e) { throw new RuntimeException(e); }
-        _appPane.getPagePane().removeOpenFile(aFile);
+        _pagePane.removeOpenFile(aFile);
     }
 
     /**
@@ -553,7 +517,7 @@ public class AppFilesPane extends ViewOwner {
     {
         // Handle directory
         if (aFile.isDir()) {
-            if (aFile == _appPane.getBuildDir()) return doSaveAll ? 1 : 0;
+            if (aFile == _projPane.getBuildDir()) return doSaveAll ? 1 : 0;
             for (WebFile file : aFile.getFiles()) {
                 int choice = saveFiles(file, doSaveAll);
                 if (choice < 0 || choice == 2)
@@ -564,10 +528,10 @@ public class AppFilesPane extends ViewOwner {
 
         // Handle file
         else if (aFile.isUpdateSet()) {
-            DialogBox dbox = new DialogBox("Save Modified File"); //dbox._comp = _appPane.getUI();
+            DialogBox dbox = new DialogBox("Save Modified File");
             dbox.setMessage("File has been modified:\n" + aFile.getPath());
             dbox.setOptions("Save File", "Save All Files", "Cancel");
-            int choice = doSaveAll ? 1 : dbox.showOptionDialog(_appPane.getUI(), "Save File"); //getAppPaneUI()
+            int choice = doSaveAll ? 1 : dbox.showOptionDialog(_projPane.getUI(), "Save File");
             if (choice == 0 || choice == 1)
                 try {
                     aFile.save();
@@ -585,13 +549,15 @@ public class AppFilesPane extends ViewOwner {
      */
     public void renameFile()
     {
-        WebFile file = _appPane.getSelectedFile();
-        if (file == null || !ArrayUtils.containsId(_appPane.getSites(), file.getSite())) return;
+        WebFile selFile = getSelFile();
+        if (selFile == null || !ArrayUtils.containsId(_projPane.getSites(), selFile.getSite()))
+            return;
+
         DialogBox dbox = new DialogBox("Rename File");
-        dbox.setMessage("Enter new name for " + file.getName());
-        String newName = dbox.showInputDialog(_appPane.getUI(), file.getName());
+        dbox.setMessage("Enter new name for " + selFile.getName());
+        String newName = dbox.showInputDialog(_projPane.getUI(), selFile.getName());
         if (newName != null)
-            renameFile(file, newName);
+            renameFile(selFile, newName);
     }
 
     /**
@@ -602,9 +568,9 @@ public class AppFilesPane extends ViewOwner {
         // TODO - this is totally bogus
         if (aFile.isDir() && aFile.getFileCount() > 0) {
             //File file = getLocalFile(aFile), file2 = new File(file.getParentFile(), aName); file.renameTo(file2);
-            DialogBox dbox = new DialogBox("Can't rename non-empty directory"); //dbox._comp = _appPane.getUI();
+            DialogBox dbox = new DialogBox("Can't rename non-empty directory");
             dbox.setErrorMessage("I know this is bogus, but app can't yet rename non-empty directory");
-            dbox.showMessageDialog(_appPane.getUI()); //getAppPaneUI()
+            dbox.showMessageDialog(_projPane.getUI()); //getAppPaneUI()
             return false;
         }
 
@@ -622,17 +588,14 @@ public class AppFilesPane extends ViewOwner {
         // Set bytes and save
         WebFile newFile = aFile.getSite().createFileForPath(path, aFile.isDir());
         newFile.setBytes(aFile.getBytes());
-        try {
-            newFile.save();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        try { newFile.save(); }
+        catch (Exception e) { throw new RuntimeException(e); }
 
         // Remove old file
         removeFile(aFile);
 
         // Select new file pane
-        _appPane.setSelectedFile(newFile);
+        setSelFile(newFile);
 
         // Return true
         return true;
@@ -664,7 +627,7 @@ public class AppFilesPane extends ViewOwner {
         }
 
         // Run dialog panel (just return if null), select type and extension
-        if (!form.showPanel(_appPane.getUI(), "New Project File", DialogBox.infoImage)) return;
+        if (!form.showPanel(_projPane.getUI(), "New Project File", DialogBox.infoImage)) return;
         String desc = form.getStringValue("EntryType");
         int index = 0;
         for (int i = 0; i < options.length; i++) if (desc.equals(options[i][0])) index = i;
@@ -673,22 +636,23 @@ public class AppFilesPane extends ViewOwner {
         if (isDir) extension = "";
 
         // Get source dir
-        WebSite site = getSelectedSite();
-        WebFile sfile = _appPane.getSelectedFile();
-        if (sfile.getSite() != site) sfile = site.getRootDir();
-        WebFile sdir = sfile.isDir() ? sfile : sfile.getParent();
-        if (extension.equals(".java") && sdir == site.getRootDir())
-            sdir = ProjectX.getProjectForSite(site).getSourceDir();
+        WebSite selSite = getSelSite();
+        WebFile selFile = getSelFile();
+        if (selFile.getSite() != selSite)
+            selFile = selSite.getRootDir();
+        WebFile selDir = selFile.isDir() ? selFile : selFile.getParent();
+        if (extension.equals(".java") && selDir == selSite.getRootDir())
+            selDir = Project.getProjectForSite(selSite).getSourceDir();
 
         // Get suggested "Untitled.xxx" path for AppPane.SelectedFile and extension
-        String path = sdir.getDirPath() + "Untitled" + extension;
+        String path = selDir.getDirPath() + "Untitled" + extension;
 
         // Create suggested file and page
-        WebFile file = site.createFileForPath(path, isDir);
+        WebFile file = selSite.createFileForPath(path, isDir);
         WebPage page = _pagePane.createPageForURL(file.getURL());
 
         // ShowNewFilePanel and save returned file
-        file = page.showNewFilePanel(_appPane.getUI(), file);
+        file = page.showNewFilePanel(_projPane.getUI(), file);
         if (file == null) return;
         try {
             file.save();
@@ -699,7 +663,7 @@ public class AppFilesPane extends ViewOwner {
         }
 
         // Select file and show in tree
-        _appPane.setSelectedFile(file);
+        setSelFile(file);
         showInTree(file);
     }
 
@@ -709,7 +673,7 @@ public class AppFilesPane extends ViewOwner {
     public void showRemoveFilePanel()
     {
         // Get selected files - if any are root, beep and return
-        List<WebFile> files = getSelectedFiles();
+        List<WebFile> files = getSelFiles();
         for (WebFile file : files)
             if (file.isRoot()) {
                 beep();
@@ -717,19 +681,21 @@ public class AppFilesPane extends ViewOwner {
             }
 
         // Give the user one last chance to bail
-        DialogBox dbox = new DialogBox("Remove File(s)"); //dbox._comp = _appPane.getUI();
-        dbox.setQuestionMessage("Are you sure you want to remove the currently selected File(s)?");
-        if (!dbox.showConfirmDialog(_appPane.getUI())) return; //_appPane.getUI()
+        DialogBox dialogBox = new DialogBox("Remove File(s)");
+        dialogBox.setQuestionMessage("Are you sure you want to remove the currently selected File(s)?");
+        if (!dialogBox.showConfirmDialog(_projPane.getUI()))
+            return;
 
         // Get top parent
         WebFile parent = files.size() > 0 ? files.get(0).getParent() : null;
-        for (WebFile file : files) parent = WebUtils.getCommonAncestor(parent, file);
+        for (WebFile file : files)
+            parent = WebUtils.getCommonAncestor(parent, file);
 
         // Remove files (check File.Exists in case previous file was a parent directory)
         removeFiles(files);
 
         // Update tree again
-        _appPane.setSelectedFile(parent);
+        setSelFile(parent);
     }
 
     /**
@@ -764,7 +730,7 @@ public class AppFilesPane extends ViewOwner {
         WebFile file = aFile;
         if (file == null && config != null) file = site.createFileForPath(config.getMainFilePath(), false);
         if (file == null) file = AppLauncher.getLastRunFile();
-        if (file == null) file = getSelectedFile();
+        if (file == null) file = getSelFile();
 
         // Send to AppLauncher
         new AppLauncher().runFile(_appPane, config, file, isDebug);
@@ -775,15 +741,15 @@ public class AppFilesPane extends ViewOwner {
      */
     public void copy()
     {
-        List<WebFile> dfiles = getSelectedFiles();
-        List<File> files = new ArrayList<>();
-        for (WebFile df : dfiles) {
-            if (df.getJavaFile() != null)
-                files.add(df.getJavaFile());
+        List<WebFile> selFiles = getSelFiles();
+        List<File> javaFiles = new ArrayList<>();
+        for (WebFile selFile : selFiles) {
+            if (selFile.getJavaFile() != null)
+                javaFiles.add(selFile.getJavaFile());
         }
 
         Clipboard clipboard = Clipboard.getCleared();
-        clipboard.addData(files);
+        clipboard.addData(javaFiles);
     }
 
     /**
@@ -791,9 +757,9 @@ public class AppFilesPane extends ViewOwner {
      */
     public void paste()
     {
-        Clipboard cb = Clipboard.get();
-        if (cb.hasFiles())
-            addFiles(cb.getJavaFiles());
+        Clipboard clipboard = Clipboard.get();
+        if (clipboard.hasFiles())
+            addFiles(clipboard.getJavaFiles());
     }
 
     /**
@@ -801,7 +767,7 @@ public class AppFilesPane extends ViewOwner {
      */
     protected void windowFocusChanged()
     {
-        if (_appPane.getWindow().isFocused()) {
+        if (_projPane.getWindow().isFocused()) {
             for (AppFile file : getRootFiles())
                 checkForExternalMods(file.getFile());
         }
@@ -869,6 +835,13 @@ public class AppFilesPane extends ViewOwner {
         anEvent.consume();
     }
 
-    static Border CLOSE_BOX_BORDER1 = Border.createLineBorder(Color.LIGHTGRAY, .5);
-    static Border CLOSE_BOX_BORDER2 = Border.createLineBorder(Color.BLACK, 1);
+    /**
+     * Override for title.
+     */
+    @Override
+    public String getTitle()  { return "Problems"; }
+
+    // Constants
+    private static Border CLOSE_BOX_BORDER1 = Border.createLineBorder(Color.LIGHTGRAY, .5);
+    private static Border CLOSE_BOX_BORDER2 = Border.createLineBorder(Color.BLACK, 1);
 }

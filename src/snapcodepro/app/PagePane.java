@@ -24,7 +24,7 @@ import java.util.List;
 public class PagePane extends ViewOwner {
 
     // The ProjectPane
-    private AppPane  _projPane;
+    private ProjectPane  _projPane;
 
     // A list of open files
     List<WebFile>  _openFiles = new ArrayList<>();
@@ -45,7 +45,7 @@ public class PagePane extends ViewOwner {
     /**
      * Constructor.
      */
-    public PagePane(AppPane aProjPane)
+    public PagePane(ProjectPane aProjPane)
     {
         super();
         _projPane = aProjPane;

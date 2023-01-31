@@ -1,5 +1,4 @@
 package snapcodepro.app;
-
 import com.sun.jdi.*;
 import snapcodepro.debug.DebugApp;
 import snap.gfx.Font;
@@ -12,34 +11,27 @@ import java.util.List;
 /**
  * A debug pane.
  */
-public class DebugVarsPane extends ViewOwner {
+public class DebugVarsPane extends ProjectTool {
 
-    // The AppPane
-    AppPane _appPane;
+    // The ProcPane
+    private ProcPane  _procPane;
 
     // The variable table
-    TreeView<VarTreeItem> _varTree;
+    private TreeView<VarTreeItem>  _varTree;
 
     // The variable text
-    TextView _varText;
+    private TextView  _varText;
 
     // Whether to reset VarTable
-    boolean _resetVarTable = true;
+    private boolean  _resetVarTable = true;
 
     /**
      * Creates a new DebugVarsPane.
      */
-    public DebugVarsPane(AppPane anAppPane)
+    public DebugVarsPane(AppPane projPane)
     {
-        _appPane = anAppPane;
-    }
-
-    /**
-     * Returns the process pane.
-     */
-    public ProcPane getProcPane()
-    {
-        return _appPane.getProcPane();
+        super(projPane);
+        _procPane = projPane.getProcPane();
     }
 
     /**
@@ -47,7 +39,7 @@ public class DebugVarsPane extends ViewOwner {
      */
     public DebugApp getDebugApp()
     {
-        return getProcPane().getSelDebugApp();
+        return _procPane.getSelDebugApp();
     }
 
     /**
@@ -79,17 +71,17 @@ public class DebugVarsPane extends ViewOwner {
         _varText.setPrefHeight(40);
 
         // Create SplitView with VarTable and VarText
-        SplitView split = new SplitView();
-        split.setItems(_varTree, _varText);
-        split.setVertical(true);
-        split.setGrowHeight(true);
+        SplitView splitView = new SplitView();
+        splitView.setItems(_varTree, _varText);
+        splitView.setVertical(true);
+        splitView.setGrowHeight(true);
 
         // Add to VBox with padding
-        ColView vbox = new ColView();
-        vbox.setFillWidth(true);
-        vbox.setPadding(2, 2, 2, 2);
-        vbox.addChild(split);
-        return vbox;
+        ColView colView = new ColView();
+        colView.setFillWidth(true);
+        colView.setPadding(2, 2, 2, 2);
+        colView.addChild(splitView);
+        return colView;
     }
 
     /**
@@ -163,6 +155,12 @@ public class DebugVarsPane extends ViewOwner {
         Collections.sort(vitems);
         return vitems;
     }
+
+    /**
+     * Override for title.
+     */
+    @Override
+    public String getTitle()  { return "Variables"; }
 
     /**
      * A class to hold a VarTree Variable.

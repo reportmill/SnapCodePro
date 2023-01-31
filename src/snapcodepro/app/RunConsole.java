@@ -1,5 +1,4 @@
 package snapcodepro.app;
-import snap.view.ViewOwner;
 import snapcodepro.debug.RunApp;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -14,10 +13,10 @@ import snap.web.WebFile;
 /**
  * A panel to run a process.
  */
-public class RunConsole extends ViewOwner {
+public class RunConsole extends ProjectTool {
 
-    // The AppPane
-    private AppPane  _appPane;
+    // The ProcPane
+    private ProcPane  _procPane;
 
     // The output text
     private RCTextView  _textView;
@@ -28,21 +27,16 @@ public class RunConsole extends ViewOwner {
     /**
      * Creates a new DebugPane.
      */
-    public RunConsole(AppPane anAppPane)
+    public RunConsole(AppPane projPane)
     {
-        super();
-        _appPane = anAppPane;
+        super(projPane);
+        _procPane = projPane.getProcPane();
     }
-
-    /**
-     * Returns the AppPane.
-     */
-    public AppPane getAppPane()  { return _appPane; }
 
     /**
      * Returns the ProcPane.
      */
-    public ProcPane getProcPane()  { return _appPane.getProcPane(); }
+    public ProcPane getProcPane()  { return _procPane; }
 
     /**
      * Clears the RunConsole text.
@@ -158,7 +152,7 @@ public class RunConsole extends ViewOwner {
             return "https://reportmill.com/jars/8u05/src.zip!" + aPath;
         if (aPath.startsWith("/javafx/"))
             return "https://reportmill.com/jars/8u05/javafx-src.zip!" + aPath;
-        ProjectX proj = ProjectX.getProjectForSite(_appPane.getRootSite());
+        ProjectX proj = ProjectX.getProjectForSite(getRootSite());
         if (proj == null) return aPath;
         WebFile file = proj.getProjectSet().getSourceFile(aPath);
         return file != null ? file.getURL().getString() : aPath;
@@ -217,6 +211,12 @@ public class RunConsole extends ViewOwner {
     }
 
     /**
+     * Override for title.
+     */
+    @Override
+    public String getTitle()  { return "Console"; }
+
+    /**
      * A TextView subclass to open links.
      */
     public static class RCTextView extends ConsoleView {
@@ -228,7 +228,7 @@ public class RunConsole extends ViewOwner {
          */
         protected void openLink(String aLink)
         {
-            _runConsole._appPane.getBrowser().setURLString(aLink);
+            _runConsole.getBrowser().setURLString(aLink);
         }
 
         /**

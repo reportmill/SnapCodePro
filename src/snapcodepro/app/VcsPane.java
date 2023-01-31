@@ -1,5 +1,4 @@
 package snapcodepro.app;
-
 import snapcodepro.project.ProjectX;
 import snapcodepro.project.VersionControl;
 import snap.util.ClientUtils;
@@ -272,7 +271,7 @@ public class VcsPane extends ViewOwner {
         }
 
         // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelectedFiles();
+        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelFiles();
         List<WebFile> sfiles = getCommitFiles(bfiles);
 
         // Run VersionControlFilesPane for files and op
@@ -341,7 +340,7 @@ public class VcsPane extends ViewOwner {
         }
 
         // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelectedFiles();
+        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelFiles();
         List<WebFile> sfiles = getUpdateFiles(bfiles);
 
         // Run VersionControlFilesPane for files and op
@@ -420,7 +419,7 @@ public class VcsPane extends ViewOwner {
         }
 
         // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelectedFiles();
+        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelFiles();
         List<WebFile> sfiles = getReplaceFiles(bfiles);
 
         // Run VersionControlFilesPane for files and op

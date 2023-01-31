@@ -1,5 +1,6 @@
 package snapcodepro.app;
 import snap.geom.Side;
+import snap.util.ArrayUtils;
 import snap.view.*;
 
 /**
@@ -13,16 +14,8 @@ public class SupportTray extends ViewOwner {
     // The tab view
     private TabView  _tabView;
 
-    // The list of tab owners
-    private ViewOwner[]  _tabOwners;
-
-    // Constants for tabs
-    public static final int PROBLEMS_PANE = 0;
-    public static final int RUN_PANE = 1;
-    public static final int DEBUG_PANE_VARS = 2;
-    public static final int DEBUG_PANE_EXPRS = 3;
-    public static final int BREAKPOINTS_PANE = 4;
-    public static final int SEARCH_PANE = 5;
+    // The array of ProjectTools
+    private ProjectTool[]  _trayTools;
 
     /**
      * Creates a new SupportTray for given AppPane.
@@ -30,6 +23,21 @@ public class SupportTray extends ViewOwner {
     public SupportTray(AppPane anAppPane)
     {
         _appPane = anAppPane;
+
+        // Set tools
+        _trayTools = new ProjectTool[] {
+                _appPane.getProblemsPane(), _appPane.getRunConsole(),
+                _appPane.getDebugVarsPane(), _appPane.getDebugExprsPane(),
+                _appPane.getBreakpointsPanel(), _appPane.getSearchPane()
+        };
+    }
+
+    /**
+     * Returns the tool for given class.
+     */
+    public ProjectTool getToolForClass(Class<? extends ProjectTool> aToolClass)
+    {
+        return ArrayUtils.findMatch(_trayTools, tool -> aToolClass.isInstance(tool));
     }
 
     /**
@@ -46,24 +54,52 @@ public class SupportTray extends ViewOwner {
     }
 
     /**
+     * Returns the selected tool.
+     */
+    public ProjectTool getSelTool()
+    {
+        Tab selTab = _tabView.getSelItem();
+        ProjectTool selTool = selTab != null ? (ProjectTool) selTab.getContentOwner() : null;
+        return selTool;
+    }
+
+    /**
+     * Sets the selected tool.
+     */
+    public void setSelTool(ProjectTool aTool)
+    {
+        int index = ArrayUtils.indexOfId(_trayTools, aTool);
+        setSelIndex(index);
+    }
+
+    /**
+     * Sets the selected index for given class.
+     */
+    public void setSelToolForClass(Class<? extends ProjectTool> aClass)
+    {
+        ProjectTool tool = getToolForClass(aClass);
+        setSelTool(tool);
+    }
+
+    /**
      * Shows the problems tool.
      */
-    public void showProblemsTool()  { setSelIndex(PROBLEMS_PANE); }
+    public void showProblemsTool()  { setSelToolForClass(BuildIssuesPane.class); }
 
     /**
      * Shows the search tool.
      */
-    public void showSearchTool()  { setSelIndex(SEARCH_PANE); }
+    public void showSearchTool()  { setSelToolForClass(SearchPane.class); }
 
     /**
      * Shows the run tool.
      */
-    public void showRunTool()  { setSelIndex(RUN_PANE); }
+    public void showRunTool()  { setSelToolForClass(RunConsole.class); }
 
     /**
      * Sets selected index to debug.
      */
-    public void showDebugTool()  { setSelIndex(DEBUG_PANE_VARS); }
+    public void showDebugTool()  { setSelToolForClass(DebugVarsPane.class); }
 
     /**
      * Hides selected tool.
@@ -75,13 +111,6 @@ public class SupportTray extends ViewOwner {
      */
     protected View createUI()
     {
-        // Set TabOwners
-        _tabOwners = new ViewOwner[] {
-                _appPane.getProblemsPane(), _appPane.getRunConsole(),
-                _appPane.getDebugVarsPane(), _appPane.getDebugExprsPane(),
-                _appPane.getBreakpointsPanel(), _appPane.getSearchPane()
-        };
-
         // Create/config TabView
         _tabView = new TabView();
         _tabView.setName("TabView");
@@ -96,13 +125,14 @@ public class SupportTray extends ViewOwner {
             _tabView.setPrefHeight(prefH);
         }, TabView.SelIndex_Prop);
 
-        // Add Tabs
-        _tabView.addTab("Problems", _appPane.getProblemsPane().getUI());
-        _tabView.addTab("Console", new Label("RunConsole"));
-        _tabView.addTab("Variables", new Label("DebugVarsPane"));
-        _tabView.addTab("Expressions", new Label("DebugExprsPane"));
-        _tabView.addTab("Breakpoints", new Label("Breakpoints"));
-        _tabView.addTab("Search", new Label("Search"));
+        // Get TabBuilder
+        Tab.Builder tabBuilder = new Tab.Builder(_tabView.getTabBar());
+
+        // Iterate over tools and add tab for each
+        for (ProjectTool tool : _trayTools) {
+            String title = tool.getTitle();
+            tabBuilder.title(title).contentOwner(tool).add();
+        }
 
         // Return
         return _tabView;
@@ -113,23 +143,9 @@ public class SupportTray extends ViewOwner {
      */
     protected void resetUI()
     {
-        int selIndex = _tabView.getSelIndex();
-        ViewOwner viewOwner = selIndex >= 0 ? _tabOwners[selIndex] : null;
+        Tab selTab = _tabView.getSelItem();
+        ViewOwner viewOwner = selTab != null ? selTab.getContentOwner() : null;
         if (viewOwner != null)
             viewOwner.resetLater();
-    }
-
-    /**
-     * Respond to UI changes.
-     */
-    protected void respondUI(ViewEvent anEvent)
-    {
-        // Handle TabView
-        int selIndex = _tabView.getSelIndex();
-        View selContent = selIndex >= 0 ? _tabView.getTabContent(selIndex) : null;
-        if (selContent instanceof Label) {
-            ViewOwner viewOwner = _tabOwners[selIndex];
-            _tabView.setTabContent(viewOwner.getUI(), selIndex);
-        }
     }
 }
