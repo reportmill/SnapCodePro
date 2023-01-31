@@ -1,5 +1,6 @@
 package snapcodepro.app;
-
+import snap.util.ListUtils;
+import snap.view.Tab;
 import snapcodepro.project.VersionControl;
 //import snap.project.VersionControlGit;
 import snap.props.PropChange;
@@ -12,34 +13,39 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 
+import java.util.List;
+
 /**
  * A class to manage UI aspects of a WebSite for app.
  */
 public class SitePane extends WebPage {
 
     // The AppPane that owns this SitePane
-    AppPane _appPane;
+    private AppPane  _appPane;
 
     // The WebSite
-    WebSite _site;
+    private WebSite  _site;
 
     // The ConsolePane
-    AppConsole _consolePane = new AppConsole();
+    private AppConsole  _consolePane = new AppConsole();
 
     // The ProjectPane
-    ProjectConfigPane _projPane;
+    private ProjectConfigPane  _projPane;
 
     // The VersionControl pane
-    VcsPane _vcp;
+    private VcsPane  _vcp;
 
     // The BuildPane
-    BuildPane _buildPane;
+    private BuildPane  _buildPane;
 
     // The HttpServerPane
-    HttpServerPane _httpServerPane;
+    private HttpServerPane  _httpServerPane;
+
+    // The top level TabView
+    private TabView  _tabView;
 
     // A PropChangeListener for Site file changes
-    PropChangeListener _siteFileLsnr = pc -> siteFileChanged(pc);
+    private PropChangeListener  _siteFileLsnr = pc -> siteFileChanged(pc);
 
     /**
      * Creates a new SitePane for given site.
@@ -178,23 +184,31 @@ public class SitePane extends WebPage {
      */
     public void setRemoteURLString(String urls)
     {
-        TabView tpane = _vcp.getUI().getParent(TabView.class);
-        if (tpane == null) return; // Bogus: TField should fire earlier
-        int index = -1;
-        for (int i = 0; i < tpane.getTabCount(); i++) if (tpane.getTabContent(i) == _vcp.getUI()) index = i;
+        // Sanity check
+        if (_tabView == null) return;
+
+        // Get VC tab
+        List<Tab> tabs = _tabView.getTabBar().getTabs();
+        Tab vcTab = ListUtils.findMatch(tabs, tab -> tab.getContentOwner() instanceof VcsPane);
+        int vcIndex = vcTab.getIndex();
 
         // Deactivate Version control pane and re-open site
         _vcp.deactivate();
         VersionControl.setRemoteURLString(_site, urls);
+
+        // Recreate VC and set in tab
         //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
         _vcp = new VcsPane(this);
-        if (_appPane != null) _vcp.setAppPane(_appPane);
+        if (_appPane != null)
+            _vcp.setAppPane(_appPane);
+        vcTab.setContentOwner(_vcp);
+
+        // Reopen site
         _vcp.openSite();
 
         // Reset UI
-        //TabView tpane = _vcp.getUI().getParent(TabView.class);
-        //int index = -1; for(int i=0;i<tpane.getTabCount();i++) if(tpane.getTabContent(i)==_vcp.getUI()) index = i;
-        tpane.setTabContent(_vcp.getUI(), index);
+        _tabView.setSelIndex(-1);
+        _tabView.setSelIndex(vcIndex);
     }
 
     /**
@@ -377,35 +391,35 @@ public class SitePane extends WebPage {
     protected View createUI()
     {
         // Create TabView
-        TabView _tview = new TabView();
+        _tabView = new TabView();
 
         // Add ProjectPane
         ProjectConfigPane projPane = getProjPane();
         if (projPane != null)
-            _tview.addTab("Settings", projPane.getUI()); //tab.setTooltip(new Tooltip("Project Settings"));
+            _tabView.addTab("Settings", projPane.getUI()); //tab.setTooltip(new Tooltip("Project Settings"));
 
         // Add VersionControlPane
         VcsPane vcp = getVersionControlPane();
         if (vcp != null) {
             //String title = vcp instanceof VcsPaneGit ? "Git" : "Versioning";
             String title = "Versioning";
-            _tview.addTab(title, vcp.getUI()); //tab.setTooltip(new Tooltip("Manage Remote Site"));
+            _tabView.addTab(title, vcp.getUI()); //tab.setTooltip(new Tooltip("Manage Remote Site"));
         }
 
         // Add console pane and return
         AppConsole consolePane = getConsolePane();
-        _tview.addTab("Console", consolePane.getUI());  //tab.setTooltip(new Tooltip("Console Text"));
+        _tabView.addTab("Console", consolePane.getUI());  //tab.setTooltip(new Tooltip("Console Text"));
 
         // Add BuildPane
         BuildPane buildPane = _buildPane;
-        _tview.addTab("Build Dir", buildPane.getUI());
+        _tabView.addTab("Build Dir", buildPane.getUI());
 
         // Add HttpServerPane
         HttpServerPane httpServPane = _httpServerPane;
-        _tview.addTab("HTTP-Server", httpServPane.getUI());
+        _tabView.addTab("HTTP-Server", httpServPane.getUI());
 
-        // Return TabView
-        return _tview;
+        // Return
+        return _tabView;
     }
 
     /**
