@@ -75,6 +75,8 @@ public class SearchPane extends ProjectTool {
         ListView<Result> resultsList = getView("ResultsList", ListView.class);
         resultsList.setCellConfigure(this::configureResultListCell);
         resultsList.setRowHeight(24);
+
+        setFirstFocus("SearchText");
     }
 
     /**
@@ -106,13 +108,12 @@ public class SearchPane extends ProjectTool {
      */
     public void respondUI(ViewEvent anEvent)
     {
-        // Handle SearchButton
-        if (anEvent.equals("SearchButton")) {
-            DialogBox dialogBox = new DialogBox("Search Panel");
-            dialogBox.setMessage("Enter search string:");
-            String string = dialogBox.showInputDialog(getUI(), null);
-            if (string != null)
+        // Handle SearchText
+        if (anEvent.equals("SearchText")) {
+            String string = anEvent.getStringValue();
+            if (string != null && string.length() > 0)
                 search(string);
+            else _search = null;
         }
 
         // Handle ClearButton
