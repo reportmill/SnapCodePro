@@ -40,7 +40,7 @@ public class AppPane extends ProjectPane {
     private SupportTray  _supportTray;
 
     // The Problems pane
-    private BuildIssuesPane  _problemsPane = new BuildIssuesPane(this);
+    private ProblemsPane _problemsPane = new ProblemsPane(this);
 
     // The RunConsole
     private RunConsole  _runConsole = new RunConsole(this);
@@ -229,6 +229,7 @@ public class AppPane extends ProjectPane {
     {
         // Get MainSplit
         _mainSplit = getUI(SplitView.class);
+        _mainSplit.setBorder(null);
 
         // Get MenuBar and register to process events
         MenuBar menuBar = getView("MenuBar", MenuBar.class);
@@ -240,6 +241,7 @@ public class AppPane extends ProjectPane {
 
         // Get PagePaneSplitView
         SplitView pagePaneSplitView = getView("PagePaneSplitView", SplitView.class);
+        pagePaneSplitView.setBorder(null);
 
         // Install PagePage UI
         View pagePaneUI = _pagePane.getUI();
@@ -350,7 +352,7 @@ public class AppPane extends ProjectPane {
     /**
      * Returns the problems pane.
      */
-    public BuildIssuesPane getProblemsPane()  { return _problemsPane; }
+    public ProblemsPane getProblemsPane()  { return _problemsPane; }
 
     /**
      * Returns the RunConsole.

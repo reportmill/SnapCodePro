@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ColView Padding="7,0,0,0" Spacing="3">
-  <font name="Arial" size="12" />
-  <Label Name="BuildStatusLabel" Padding="0,0,0,5" text="Problems:" />
-  <ListView Name="ErrorsList" GrowWidth="true" GrowHeight="true">
-    <font name="Arial" size="14" />
-  </ListView>
-</ColView>

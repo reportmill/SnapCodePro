@@ -10,7 +10,7 @@ import snap.web.WebFile;
 /**
  * A pane/panel to show current build issues.
  */
-public class BuildIssuesPane extends ProjectTool {
+public class ProblemsPane extends ProjectTool {
 
     // The selected issue
     private BuildIssue  _selIssue;
@@ -22,7 +22,7 @@ public class BuildIssuesPane extends ProjectTool {
     /**
      * Creates a new ProblemsPane.
      */
-    public BuildIssuesPane(ProjectPane projPane)
+    public ProblemsPane(ProjectPane projPane)
     {
         super(projPane);
     }

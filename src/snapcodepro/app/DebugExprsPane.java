@@ -1,11 +1,7 @@
 package snapcodepro.app;
 import snapcodepro.debug.DebugApp;
 import snapcodepro.debug.ExprEval;
-import snap.geom.HPos;
-import snap.gfx.Font;
-import snap.gfx.Image;
 import snap.view.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,12 +42,11 @@ public class DebugExprsPane extends ProjectTool {
     /**
      * Create UI.
      */
-    protected View createUI()
+    @Override
+    protected void initUI()
     {
         // Create VarTree and configure
-        _varTree = new TreeView();
-        _varTree.setGrowHeight(true);
-        _varTree.setFont(Font.Arial11);
+        _varTree = getView("TreeView", TreeView.class);
         TreeCol c0 = _varTree.getCol(0);
         c0.setHeaderText("Name");
         c0.setPrefWidth(450);
@@ -75,42 +70,8 @@ public class DebugExprsPane extends ProjectTool {
             titem._expr = titem._name = (String)e.getNewValue(); resetVarTable(); } });*/
 
         // Create VarText TextView and configure in ScrollView
-        _varText = new TextView();
+        _varText = getView("TextView", TextView.class);
         _varText.setWrapLines(true);
-        _varText.setPrefHeight(40);
-
-        // Create SplitView with VarTree and VarText
-        SplitView split = new SplitView();
-        split.setItems(_varTree, _varText);
-        split.setVertical(true);
-        split.setGrowHeight(true);
-
-        // Create Buttons
-        Label label = new Label("Expr: ");
-        label.setPadding(0, 0, 0, 5);
-        TextField tfield = new TextField();
-        tfield.setName("ExprText");
-        tfield.setPrefWidth(300);
-        tfield.setFont(Font.Arial11);
-        Image addImage = getImage("ExprAdd.png"), remImage = getImage("ExprRemove.png");
-        Button addBtn = new Button();
-        addBtn.setImage(addImage);
-        addBtn.setName("AddButton");
-        Button remBtn = new Button();
-        remBtn.setImage(remImage);
-        remBtn.setName("RemoveButton");
-        addBtn.setPrefSize(32, 24);
-        remBtn.setPrefSize(32, 24);
-        addBtn.setLeanX(HPos.RIGHT);
-        RowView hbox = new RowView();
-        hbox.setChildren(label, tfield, addBtn, remBtn);
-
-        // Add to VBox with padding
-        ColView vbox = new ColView();
-        vbox.setFillWidth(true);
-        vbox.setChildren(hbox, split);
-        vbox.setPadding(2, 2, 2, 2);
-        return vbox;
     }
 
     /**

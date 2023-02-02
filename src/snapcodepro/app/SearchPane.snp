@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView width="640" height="480" PrefWidth="640" PrefHeight="480">
-  <Label Name="SearchResultsText" x="4" y="4" width="474" height="22" GrowWidth="true" text="Label">
-    <font name="Arial" size="12" />
-  </Label>
-  <Button Name="SearchButton" x="482" y="4" width="75" height="22" LeanX="RIGHT" text="Search" />
-  <Button Name="ClearButton" x="561" y="4" width="75" height="22" LeanX="RIGHT" text="Clear" />
-  <ListView Name="ResultsList" x="2" y="30" width="636" height="448" GrowWidth="true" GrowHeight="true">
-    <font name="Arial" size="12" />
-  </ListView>
-</SpringView>
+<ColView FillWidth="true">
+  <font name="Arial" size="12" />
+  <RowView MinHeight="30">
+    <Label Margin="0,8,0,8" text="Search:" />
+    <Label Name="SearchResultsText" GrowWidth="true" />
+    <Button Name="SearchButton" PrefWidth="75" PrefHeight="22" text="Search" />
+    <Button Name="ClearButton" PrefWidth="75" PrefHeight="22" Margin="0,8,0,5" text="Clear" />
+  </RowView>
+  <ListView Name="ResultsList" Margin="0,5,5,5" GrowHeight="true" />
+</ColView>

@@ -45,11 +45,10 @@ public class DebugVarsPane extends ProjectTool {
     /**
      * Create UI.
      */
-    protected View createUI()
+    protected void initUI()
     {
         // Create VarTree and configure
-        _varTree = new TreeView();
-        _varTree.setGrowHeight(true);
+        _varTree = getView("TreeView", TreeView.class);
         _varTree.setFont(Font.Arial11);
         TreeCol c0 = _varTree.getCol(0);
         c0.setHeaderText("Name");
@@ -66,22 +65,8 @@ public class DebugVarsPane extends ProjectTool {
         _varTree.setResolver(new VarTreeResolver());
 
         // Create VarText TextView and configure in ScrollView
-        _varText = new TextView();
+        _varText = getView("TextView", TextView.class);
         _varText.setWrapLines(true);
-        _varText.setPrefHeight(40);
-
-        // Create SplitView with VarTable and VarText
-        SplitView splitView = new SplitView();
-        splitView.setItems(_varTree, _varText);
-        splitView.setVertical(true);
-        splitView.setGrowHeight(true);
-
-        // Add to VBox with padding
-        ColView colView = new ColView();
-        colView.setFillWidth(true);
-        colView.setPadding(2, 2, 2, 2);
-        colView.addChild(splitView);
-        return colView;
     }
 
     /**

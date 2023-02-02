@@ -84,7 +84,7 @@ public class SupportTray extends ViewOwner {
     /**
      * Shows the problems tool.
      */
-    public void showProblemsTool()  { setSelToolForClass(BuildIssuesPane.class); }
+    public void showProblemsTool()  { setSelToolForClass(ProblemsPane.class); }
 
     /**
      * Shows the search tool.
