@@ -51,8 +51,6 @@ public class HomePage extends WebPage {
         enableEvents("Header", MouseRelease);
         enableEvents("JavaPlayground", MouseEvents);
         enableEvents("NewSnapScene", MouseEvents);
-        enableEvents("AddSnapKit", MouseEvents);
-        enableEvents("AddSnapTea", MouseEvents);
         enableEvents("NewJavaFile", MouseEvents);
         enableEvents("NewFile", MouseEvents);
         enableEvents("SnapDocs", MouseEvents);
@@ -112,25 +110,6 @@ public class HomePage extends WebPage {
         // Handle NewFile
         if (anEvent.equals("NewFile") && anEvent.isMouseRelease())
             getAppPane().showNewFilePanel();
-
-        // Handle AddSnapKit
-        if (anEvent.equals("AddSnapKit") && anEvent.isMouseRelease()) {
-            ProjectConfigPane ppane = ProjectConfigPane.getProjectPane(getRootSite());
-            ppane.addProject("SnapKit", "https://github.com/reportmill/SnapKit.git");
-        }
-
-        // Handle AddSnapTea
-        if (anEvent.equals("AddSnapTea") && anEvent.isMouseRelease()) {
-            ProjectConfigPane ppane = ProjectConfigPane.getProjectPane(getRootSite());
-            if (ppane.getProject().getProjectSet().getProject("SnapKit") == null)
-                ppane.addProject("SnapKit", "https://github.com/reportmill/SnapKit.git");
-            if (ppane.getProject().getProjectSet().getProject("CJDom") == null)
-                ppane.addProject("SnapTea", "https://github.com/reportmill/SnapTea.git");
-            //if(ppane.getProject().getProjectSet().getProject("CJDom")==null)
-            //    ppane.addProject("CJDom", "https://github.com/reportmill/CJDom.git");
-            //if(ppane.getProject().getProjectSet().getProject("SnapCJ")==null)
-            //    ppane.addProject("SnapCJ", "https://github.com/reportmill/SnapCJ.git");
-        }
 
         // Handle SnapDocs
         if (anEvent.equals("SnapDocs") && anEvent.isMouseRelease())

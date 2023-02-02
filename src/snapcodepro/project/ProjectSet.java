@@ -1,7 +1,8 @@
 package snapcodepro.project;
-
+import javakit.project.Project;
 import javakit.project.ProjectConfig;
 import javakit.project.ProjectFiles;
+import snap.util.ArrayUtils;
 import snap.util.ListUtils;
 import snap.util.TaskMonitor;
 import snap.web.WebFile;
@@ -18,13 +19,16 @@ import java.util.List;
 public class ProjectSet {
 
     // The master project
-    ProjectX _proj;
+    private ProjectX  _proj;
 
     // The list of projects this project depends on
-    ProjectX[] _projects;
+    private ProjectX[]  _projects;
 
-    // The array of class paths and library paths
-    String[] _cpaths, _lpaths;
+    // The array of class paths
+    private String[]  _classPaths;
+
+    // The array of library paths
+    private String[]  _libPaths;
 
     /**
      * Creates a new ProjectSet for given Project.
@@ -32,14 +36,6 @@ public class ProjectSet {
     public ProjectSet(ProjectX aProj)
     {
         _proj = aProj;
-    }
-
-    /**
-     * Returns the project.
-     */
-    public ProjectX getProject()
-    {
-        return _proj;
     }
 
     /**
@@ -57,13 +53,14 @@ public class ProjectSet {
 
         // Get parent site
         WebSite projectSite = _proj.getSite();
-        WebSite parSite = projectSite.getURL().getSite(); // Get parent site
+        WebURL parentSiteURL = projectSite.getURL();
+        WebSite parentSite = parentSiteURL.getSite();
 
         // Iterate over project paths
         for (String projPath : projPaths) {
 
             // Get URL and site for project path
-            WebURL projURL = parSite.getURL(projPath);
+            WebURL projURL = parentSite.getURL(projPath);
             WebSite projSite = projURL.getAsSite();
 
             // Get Project
@@ -99,7 +96,7 @@ public class ProjectSet {
 
         // Clear caches
         _projects = null;
-        _cpaths = _lpaths = null;
+        _classPaths = _libPaths = null;
     }
 
     /**
@@ -112,20 +109,19 @@ public class ProjectSet {
 
         // Clear caches
         _projects = null;
-        _cpaths = _lpaths = null;
+        _classPaths = _libPaths = null;
     }
 
     /**
      * Returns the child project with given name.
      */
-    public ProjectX getProject(String aName)
+    public Project getProject(String aName)
     {
-        String name = aName;
-        if (name.startsWith("/")) name = name.substring(1);
-        for (ProjectX proj : getProjects())
-            if (proj.getName().equals(name))
-                return proj;
-        return null;
+        String name = aName.startsWith("/") ? aName.substring(1) : aName;
+
+        // Return project with matching name
+        Project[] projects = getProjects();
+        return ArrayUtils.findMatch(projects, proj -> proj.getName().equals(name));
     }
 
     /**
@@ -133,12 +129,20 @@ public class ProjectSet {
      */
     public WebFile getFile(String aPath)
     {
+        // Check main project
         WebFile file = _proj.getFile(aPath);
-        if (file != null) return file;
-        for (ProjectX p : getProjects()) {
-            file = p.getFile(aPath);
-            if (file != null) return file;
+        if (file != null)
+            return file;
+
+        // Check dependent projects
+        Project[] projects = getProjects();
+        for (Project proj : projects) {
+            file = proj.getFile(aPath);
+            if (file != null)
+                return file;
         }
+
+        // Return not found
         return null;
     }
 
@@ -149,10 +153,18 @@ public class ProjectSet {
     {
         // Look for file in root project, then dependent projects
         WebFile file = _proj.getSourceFile(aPath, false, false);
-        if (file == null)
-            for (ProjectX proj : getProjects())
-                if ((file = proj.getSourceFile(aPath, false, false)) != null) break;
-        return file;
+        if (file != null)
+            return file;
+
+        Project[] projects = getProjects();
+        for (Project proj : projects) {
+            file = proj.getSourceFile(aPath, false, false);
+            if (file != null)
+                return file;
+        }
+
+        // Return not found
+        return null;
     }
 
     /**
@@ -161,28 +173,28 @@ public class ProjectSet {
     public String[] getClassPaths()
     {
         // If already set, just return
-        if (_cpaths != null) return _cpaths;
+        if (_classPaths != null) return _classPaths;
 
         // Get Project ClassPaths
         String[] classPaths = _proj.getClassPaths();
 
         // Get dependent projects
-        ProjectX[] projs = getProjects();
-        if (projs.length == 0)
-            return _cpaths = classPaths;
+        Project[] projects = getProjects();
+        if (projects.length == 0)
+            return _classPaths = classPaths;
 
         // Get list for LibPaths with base paths
         List<String> classPathsList = new ArrayList<>();
         Collections.addAll(classPathsList, classPaths);
 
         // Iterate over projects and add Project.ClassPaths for each
-        for (ProjectX proj : projs) {
+        for (Project proj : projects) {
             String[] projClassPaths = proj.getClassPaths();
             ListUtils.addAllUnique(classPathsList, projClassPaths);
         }
 
         // Set/return
-        return _cpaths = classPathsList.toArray(new String[0]);
+        return _classPaths = classPathsList.toArray(new String[0]);
     }
 
     /**
@@ -191,29 +203,29 @@ public class ProjectSet {
     public String[] getLibPaths()
     {
         // If already set, just return
-        if (_lpaths != null) return _lpaths;
+        if (_libPaths != null) return _libPaths;
 
         // Get LibPaths for this proj
         ProjectConfig projConfig = _proj.getProjectConfig();
         String[] libPaths = projConfig.getLibPathsAbsolute();
 
         // Get dependent projects (if none, just return LibPaths)
-        ProjectX[] projs = getProjects();
-        if (projs.length == 0)
-            return _lpaths = libPaths;
+        Project[] projects = getProjects();
+        if (projects.length == 0)
+            return _libPaths = libPaths;
 
         // Get list for LibPaths with base paths
         List<String> libPathsList = new ArrayList<>();
         Collections.addAll(libPathsList, libPaths);
 
         // Iterate over projects and add Project.ClassPaths for each
-        for (ProjectX proj : projs) {
+        for (Project proj : projects) {
             String[] projClassPaths = proj.getClassPaths();
             ListUtils.addAllUnique(libPathsList, projClassPaths);
         }
 
         // Set/return
-        return _lpaths = libPathsList.toArray(new String[0]);
+        return _libPaths = libPathsList.toArray(new String[0]);
     }
 
     /**
@@ -222,8 +234,9 @@ public class ProjectSet {
     public void addBuildFilesAll()
     {
         _proj.addBuildFilesAll();
-        for (ProjectX p : getProjects())
-            p.addBuildFilesAll();
+        Project[] projects = getProjects();
+        for (Project proj : projects)
+            proj.addBuildFilesAll();
     }
 
     /**
@@ -234,7 +247,8 @@ public class ProjectSet {
         boolean success = true;
 
         // Build child projects
-        for (ProjectX proj : getProjects()) {
+        Project[] projects = getProjects();
+        for (Project proj : projects) {
             if (!proj.buildProject(aTM)) {
                 success = false;
                 break;
@@ -258,13 +272,15 @@ public class ProjectSet {
             return file;
 
         // Check subprojects
-        for (ProjectX proj : getProjects()) {
+        Project[] projects = getProjects();
+        for (Project proj : projects) {
             projFiles = proj.getProjectFiles();
             file = projFiles.getJavaFileForClassName(aClassName);
             if (file != null)
                 return file;
         }
 
+        // Return not found
         return null;
     }
 }

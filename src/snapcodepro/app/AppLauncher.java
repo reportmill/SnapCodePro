@@ -1,9 +1,9 @@
 package snapcodepro.app;
-
 import javakit.project.Breakpoint;
 import javakit.project.ProjectFiles;
 import snapcodepro.debug.DebugApp;
 import snapcodepro.debug.RunApp;
+import snapcodepro.project.ProjectSet;
 import snapcodepro.project.ProjectX;
 import snap.util.FilePathUtils;
 import snap.web.WebFile;
@@ -19,51 +19,31 @@ import java.util.List;
 public class AppLauncher {
 
     // The run config
-    RunConfig _config;
+    private RunConfig  _config;
 
     // The file to launch
-    WebFile _file;
-
-    // The url to launch
-    WebURL _url;
+    private WebFile  _file;
 
     // The Project
-    ProjectX _proj;
+    private ProjectX  _proj;
 
     // The last executed file
-    static WebFile _lastRunFile;
+    private static WebFile  _lastRunFile;
 
     /**
      * Returns the WebFile.
      */
-    public WebFile getFile()
-    {
-        return _file;
-    }
+    public WebFile getFile()  { return _file; }
 
     /**
      * Returns the WebURL.
      */
-    public WebURL getURL()
-    {
-        return _file.getURL();
-    }
-
-    /**
-     * Returns the URL String.
-     */
-    public String getURLString()
-    {
-        return getURL().getString();
-    }
+    public WebURL getURL()  { return _file.getURL(); }
 
     /**
      * Returns the app args.
      */
-    public String getAppArgs()
-    {
-        return _config != null ? _config.getAppArgs() : null;
-    }
+    public String getAppArgs()  { return _config != null ? _config.getAppArgs() : null; }
 
     /**
      * Runs the provided file for given run mode.
@@ -84,17 +64,13 @@ public class AppLauncher {
         }
 
         // Get class file for given file (should be JavaFile)
+        ProjectFiles projectFiles = _proj.getProjectFiles();
         WebFile classFile;
-        if (runFile.getType().equals("java")) {
-            ProjectFiles projectFiles = _proj.getProjectFiles();
+        if (runFile.getType().equals("java"))
             classFile = projectFiles.getClassFileForJavaFile(runFile);
-        }
 
         // Try generic way to get class file
-        else {
-            ProjectFiles projectFiles = _proj.getProjectFiles();
-            classFile = projectFiles.getBuildFile(runFile.getPath(), false, runFile.isDir());
-        }
+        else classFile = projectFiles.getBuildFile(runFile.getPath(), false, runFile.isDir());
 
         // If ClassFile found, set run file
         if (classFile != null)
@@ -102,7 +78,6 @@ public class AppLauncher {
 
         // Set URL
         _file = runFile;
-        _url = _file.getURL();
         _config = aConfig;
 
         // Set last run file
@@ -121,7 +96,7 @@ public class AppLauncher {
     {
         // Get run command as string array
         List<String> commands = getCommand();
-        String[] command = commands.toArray(new String[commands.size()]);
+        String[] command = commands.toArray(new String[0]);
 
         // Print run command to console
         System.err.println(String.join(" ", command));
@@ -138,18 +113,19 @@ public class AppLauncher {
     {
         // Get run command as string array (minus actual run)
         List<String> commands = getDebugCommand();
-        String[] command = commands.toArray(new String[commands.size()]);
+        String[] command = commands.toArray(new String[0]);
 
         // Print run command to console
         System.err.println("debug " + String.join(" ", command));
 
         // Create DebugApp and add project breakpoints
         DebugApp proc = new DebugApp(getURL(), command);
-        for (Breakpoint bp : _proj.getBreakpoints())
-            proc.addBreakpoint(bp);
+        for (Breakpoint breakpoint : _proj.getBreakpoints())
+            proc.addBreakpoint(breakpoint);
 
         // Add app to process pane and exec
-        anAppPane.getProcPane().execProc(proc);
+        ProcPane procPane = anAppPane.getProcPane();
+        procPane.execProc(proc);
     }
 
     /**
@@ -158,22 +134,26 @@ public class AppLauncher {
     protected List<String> getCommand()
     {
         // Get basic run command and add to list
-        List<String> commands = new ArrayList();
-        String java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-        commands.add(java);
+        List<String> commands = new ArrayList<>();
+        String javaCmdPath = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+        commands.add(javaCmdPath);
 
         // Get Class path and add to list
-        String[] cpaths = _proj.getProjectSet().getClassPaths(), cpathsNtv = FilePathUtils.getNativePaths(cpaths);
-        String cpath = FilePathUtils.getJoinedPath(cpathsNtv);
+        ProjectSet projectSet = _proj.getProjectSet();
+        String[] classPaths = projectSet.getClassPaths();
+        String[] classPathsNtv = FilePathUtils.getNativePaths(classPaths);
+        String classPath = FilePathUtils.getJoinedPath(classPathsNtv);
         commands.add("-cp");
-        commands.add(cpath);
+        commands.add(classPath);
 
         // Add class name
-        commands.add(_proj.getClassNameForFile(getFile()));
+        String className = _proj.getClassNameForFile(getFile());
+        commands.add(className);
 
         // Add App Args
-        if (getAppArgs() != null && getAppArgs().length() > 0)
-            commands.add(getAppArgs());
+        String appArgs = getAppArgs();
+        if (appArgs != null && appArgs.length() > 0)
+            commands.add(appArgs);
 
         // Return commands
         return commands;
@@ -192,9 +172,5 @@ public class AppLauncher {
     /**
      * Returns the last run file.
      */
-    public static WebFile getLastRunFile()
-    {
-        return _lastRunFile;
-    }
-
+    public static WebFile getLastRunFile()  { return _lastRunFile; }
 }

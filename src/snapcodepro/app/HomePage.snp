@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DocView Align="CENTER">
-  <PageView PrefWidth="612" PrefHeight="792">
+  <PageView PrefWidth="612" PrefHeight="662">
     <effect type="shadow" radius="10" dx="0" dy="0" />
     <SpringView Name="Header" x="36" y="36" width="540" height="109" PrefWidth="540" PrefHeight="109">
       <LineBorder />
@@ -80,35 +80,7 @@
         </RichText>
       </TextArea>
     </SpringView>
-    <SpringView Name="AddSnapKit" x="36" y="469" width="255" height="130" PrefWidth="255" PrefHeight="130">
-      <RectView width="255" height="130" GrowWidth="true" GrowHeight="true" LeanX="CENTER" LeanY="CENTER">
-        <LineBorder />
-        <fill type="image" resource="1161328792" />
-      </RectView>
-      <TextArea x="4" y="6.547" width="242" height="117.842" Align="CENTER_LEFT" Rich="true" WrapText="true">
-        <effect type="shadow" radius="5" dx="2" dy="2" color="#00000086" />
-        <RichText>
-          <font name="Arial Bold" size="24" />
-          <pgraph align="center" />
-          <string>Add SnapKit  Project</string>
-        </RichText>
-      </TextArea>
-    </SpringView>
-    <SpringView Name="AddSnapTea" x="321" y="469" width="255" height="130" PrefWidth="255" PrefHeight="130">
-      <RectView width="255" height="130" GrowWidth="true" GrowHeight="true" LeanX="CENTER" LeanY="CENTER">
-        <LineBorder />
-        <fill type="image" resource="1161328792" />
-      </RectView>
-      <TextArea x="7" y="6.547" width="242" height="117.842" Align="CENTER_LEFT" Rich="true" WrapText="true">
-        <effect type="shadow" radius="5" dx="2" dy="2" color="#00000086" />
-        <RichText>
-          <font name="Arial Bold" size="24" />
-          <pgraph align="center" />
-          <string>Add SnapTea Project</string>
-        </RichText>
-      </TextArea>
-    </SpringView>
-    <SpringView Name="SnapDocs" x="36" y="621" width="255" height="130" PrefWidth="255" PrefHeight="130">
+    <SpringView Name="SnapDocs" x="36" y="469" width="255" height="130" PrefWidth="255" PrefHeight="130">
       <RectView width="255" height="130" GrowWidth="true" GrowHeight="true" LeanX="CENTER" LeanY="CENTER">
         <LineBorder />
         <fill type="image" resource="1161328792" />
@@ -122,7 +94,7 @@
         </RichText>
       </TextArea>
     </SpringView>
-    <SpringView Name="RMDocs" x="321" y="621" width="255" height="130" PrefWidth="255" PrefHeight="130">
+    <SpringView Name="RMDocs" x="321" y="469" width="255" height="130" PrefWidth="255" PrefHeight="130">
       <RectView width="255" height="130" GrowWidth="true" GrowHeight="true" LeanX="CENTER" LeanY="CENTER">
         <LineBorder />
         <fill type="image" resource="1161328792" />

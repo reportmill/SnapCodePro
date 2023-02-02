@@ -3,6 +3,7 @@ import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.ide.NodeMatcher;
 import javakit.project.JavaAgent;
+import javakit.project.Project;
 import javakit.project.ProjectConfig;
 import snapcodepro.project.ProjectX;
 import snapcodepro.project.ProjectSet;
@@ -165,7 +166,8 @@ public class ProjectConfigPane extends ViewOwner {
     public void addProject(String aName, String aURLString, View aView)
     {
         // If already set, just return
-        if (_proj.getProjectSet().getProject(aName) != null) {
+        ProjectSet projectSet = _proj.getProjectSet();
+        if (projectSet.getProject(aName) != null) {
             DialogBox.showWarningDialog(aView, "Error Adding Project", "Project already present: " + aName);
             return;
         }
@@ -245,7 +247,8 @@ public class ProjectConfigPane extends ViewOwner {
         }
 
         // Get named project
-        ProjectX proj = _proj.getProjectSet().getProject(aName);
+        ProjectSet projectSet = _proj.getProjectSet();
+        Project proj = projectSet.getProject(aName);
         if (proj == null) {
             View view = isUISet() && getUI().isShowing() ? getUI() : getAppPane().getUI();
             DialogBox.showWarningDialog(view, "Error Removing Project", "Project not found");
