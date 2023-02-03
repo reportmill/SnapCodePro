@@ -7,6 +7,7 @@ import javakit.resolver.JavaMember;
 import javakit.parse.JavaTextDoc;
 import snap.util.Convert;
 import snap.util.ListUtils;
+import snapcodepro.apptools.SearchPane;
 import snapcodepro.project.ProjectX;
 import snap.text.TextBoxLine;
 import snap.view.View;
@@ -329,9 +330,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     private void showReferences(JNode aNode)
     {
         if (getAppPane() == null) return;
-        getAppPane().getSearchPane().searchReference(aNode);
-        SupportTray supportTray = getAppPane().getSupportTray();
-        supportTray.showSearchTool();
+        ProjectTools projTools = getAppPane().getProjectTools();
+        projTools.getSearchTool().searchReference(aNode);
+        projTools.showToolForClass(SearchPane.class);
     }
 
     /**
@@ -340,9 +341,9 @@ public class JavaPage extends WebPage implements WebFile.Updater {
     private void showDeclarations(JNode aNode)
     {
         if (getAppPane() == null) return;
-        getAppPane().getSearchPane().searchDeclaration(aNode);
-        SupportTray supportTray = getAppPane().getSupportTray();
-        supportTray.showSearchTool();
+        ProjectTools projTools = getAppPane().getProjectTools();
+        projTools.getSearchTool().searchDeclaration(aNode);
+        projTools.showToolForClass(SearchPane.class);
     }
 
     /**

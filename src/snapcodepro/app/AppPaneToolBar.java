@@ -6,18 +6,18 @@ import snap.viewx.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+import snapcodepro.apptools.DebugTool;
+import snapcodepro.apptools.SearchPane;
+
 import java.util.*;
 
 /**
  * ToolBar.
  */
-public class AppPaneToolBar extends ViewOwner {
+public class AppPaneToolBar extends ProjectTool {
 
     // The AppPane
     private AppPane  _appPane;
-
-    // The PagePane
-    private PagePane  _pagePane;
 
     // A placeholder for fill from toolbar button under mouse
     private Paint  _tempFill;
@@ -34,19 +34,9 @@ public class AppPaneToolBar extends ViewOwner {
      */
     public AppPaneToolBar(AppPane anAppPane)
     {
+        super(anAppPane);
         _appPane = anAppPane;
-        _pagePane = _appPane.getPagePane();
     }
-
-    /**
-     * Returns the AppPane.
-     */
-    public AppPane getAppPane()  { return _appPane; }
-
-    /**
-     * Returns the RootSite.
-     */
-    public WebSite getRootSite()  { return _appPane.getRootSite(); }
 
     /**
      * Selects the search text.
@@ -122,7 +112,7 @@ public class AppPaneToolBar extends ViewOwner {
     @Override
     protected void resetUI()
     {
-        Image img = getAppPane().isShowSideBar() ? SIDEBAR_EXPAND : SIDEBAR_COLLAPSE;
+        Image img = _appPane.isShowSideBar() ? SIDEBAR_EXPAND : SIDEBAR_COLLAPSE;
         getView("ExpandButton", Button.class).setImage(img);
     }
 
@@ -133,8 +123,7 @@ public class AppPaneToolBar extends ViewOwner {
     protected void respondUI(ViewEvent anEvent)
     {
         // Get AppPane and AppBrowser
-        AppPane appPane = getAppPane();
-        WebBrowser appBrowser = _pagePane.getBrowser();
+        WebBrowser appBrowser = getBrowser();
 
         // Handle MouseEnter: Make buttons glow
         if (anEvent.isMouseEnter()) {
@@ -167,23 +156,16 @@ public class AppPaneToolBar extends ViewOwner {
 
         // Handle RunButton
         if (anEvent.equals("RunButton") && anEvent.isMouseRelease()) {
-            AppFilesPane filesPane = appPane.getFilesPane();
-            filesPane.runDefaultConfig(false);
+            DebugTool debugTool = _projTools.getDebugTool();
+            debugTool.runDefaultConfig(false);
         }
 
         // Handle RunConfigMenuItems
         if (anEvent.getName().endsWith("RunConfigMenuItem")) {
-            String name = anEvent.getName().replace("RunConfigMenuItem", "");
-            RunConfigs runConfigs = RunConfigs.get(getRootSite());
-            RunConfig runConfig = runConfigs.getRunConfig(name);
-            if (runConfig != null) {
-                runConfigs.getRunConfigs().remove(runConfig);
-                runConfigs.getRunConfigs().add(0, runConfig);
-                runConfigs.writeFile();
-                setRunMenuButtonItems();
-                AppFilesPane filesPane = appPane.getFilesPane();
-                filesPane.runDefaultConfig(false);
-            }
+            String configName = anEvent.getName().replace("RunConfigMenuItem", "");
+            DebugTool debugTool = _projTools.getDebugTool();
+            debugTool.runConfigForName(configName, false);
+            setRunMenuButtonItems();
         }
 
         // Handle RunConfigsMenuItem
@@ -200,8 +182,8 @@ public class AppPaneToolBar extends ViewOwner {
 
         // Handle ExpandButton
         if (anEvent.equals("ExpandButton")) {
-            boolean showSideBar = !appPane.isShowSideBar();
-            appPane.setShowSideBar(showSideBar);
+            boolean showSideBar = !_appPane.isShowSideBar();
+            _appPane.setShowSideBar(showSideBar);
         }
     }
 
@@ -245,9 +227,9 @@ public class AppPaneToolBar extends ViewOwner {
                 _pagePane.setBrowserURL(url);
             }
             else {
-                _appPane.getSearchPane().search(text);
-                SupportTray supportTray = _appPane.getSupportTray();
-                supportTray.showSearchTool();
+                SearchPane searchTool = _projTools.getSearchTool();
+                searchTool.search(text);
+                _projTools.showToolForClass(SearchPane.class);
             }
         }
 
@@ -300,7 +282,7 @@ public class AppPaneToolBar extends ViewOwner {
         if (aPrefix.length() == 0) return Collections.EMPTY_LIST;
         List<WebFile> files = new ArrayList<>();
 
-        for (WebSite site : getAppPane().getSites())
+        for (WebSite site : _projPane.getSites())
             getFilesForPrefix(aPrefix, site.getRootDir(), files);
         files.sort(_fileComparator);
         return files;

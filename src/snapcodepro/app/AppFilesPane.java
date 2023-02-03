@@ -14,6 +14,7 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 import snap.web.WebUtils;
+import snapcodepro.apptools.DebugTool;
 import snapcodepro.apptools.VcsPane;
 
 import java.io.File;
@@ -219,8 +220,10 @@ public class AppFilesPane extends ProjectTool {
 
             // Handle MouseClick (double-click): RunSelectedFile
             if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
-                if (getSelFile().isFile())
-                    runConfigOrFile(null, getSelFile(), false);
+                if (getSelFile().isFile()) {
+                    DebugTool debugTool = _projTools.getDebugTool();
+                    debugTool.runConfigOrFile(null, getSelFile(), false);
+                }
             }
 
             // Handle DragEvent
@@ -314,8 +317,14 @@ public class AppFilesPane extends ProjectTool {
         }
 
         // Handle RunFileMenuItem, DebugFileMenuItem
-        if (anEvent.equals("RunFileMenuItem")) runConfigOrFile(null, getSelFile(), false);
-        if (anEvent.equals("DebugFileMenuItem")) runConfigOrFile(null, getSelFile(), true);
+        if (anEvent.equals("RunFileMenuItem")) {
+            DebugTool debugTool = _projTools.getDebugTool();
+            debugTool.runConfigOrFile(null, getSelFile(), false);
+        }
+        if (anEvent.equals("DebugFileMenuItem")) {
+            DebugTool debugTool = _projTools.getDebugTool();
+            debugTool.runConfigOrFile(null, getSelFile(), true);
+        }
 
         // Handle UpdateFilesMenuItem
         if (anEvent.equals("UpdateFilesMenuItem"))
@@ -698,41 +707,6 @@ public class AppFilesPane extends ProjectTool {
 
         // Update tree again
         setSelFile(parent);
-    }
-
-    /**
-     * Run application.
-     */
-    public void runDefaultConfig(boolean withDebug)
-    {
-        WebSite site = getRootSite();
-        RunConfig config = RunConfigs.get(site).getRunConfig();
-        runConfigOrFile(config, null, withDebug);
-    }
-
-    /**
-     * Runs a given RunConfig or file as a separate process.
-     */
-    protected void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
-    {
-        // Automatically save all files
-        saveAllFiles();
-
-        // Get site and RunConfig (if available)
-        WebSite site = getRootSite();
-        RunConfig config = aConfig != null || aFile != null ? aConfig : RunConfigs.get(site).getRunConfig();
-
-        // Get file
-        WebFile file = aFile;
-        if (file == null && config != null)
-            file = site.createFileForPath(config.getMainFilePath(), false);
-        if (file == null)
-            file = AppLauncher.getLastRunFile();
-        if (file == null)
-            file = getSelFile();
-
-        // Send to AppLauncher
-        new AppLauncher().runFile(_appPane, config, file, isDebug);
     }
 
     /**

@@ -8,6 +8,7 @@ import snap.web.WebFile;
 import snap.web.WebURL;
 import snapcodepro.app.AppPane;
 import snapcodepro.app.JavaPage;
+import snapcodepro.app.ProjectTool;
 import snapcodepro.app.SupportTray;
 import snapcodepro.debug.*;
 import java.util.ArrayList;
@@ -16,10 +17,10 @@ import java.util.List;
 /**
  * The ProcPane manages run/debug processes for AppPane.
  */
-public class ProcPane extends ViewOwner implements RunApp.AppListener {
+public class ProcPane extends ProjectTool implements RunApp.AppListener {
 
     // The AppPane
-    private AppPane _appPane;
+    private AppPane  _appPane;
 
     // The list of recently run apps
     private List<RunApp>  _apps = new ArrayList<>();
@@ -50,9 +51,10 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
     /**
      * Creates a new ProcPane.
      */
-    public ProcPane(AppPane anAP)
+    public ProcPane(AppPane projPane)
     {
-        _appPane = anAP;
+        super(projPane);
+        _appPane = projPane;
     }
 
     /**
@@ -462,36 +464,38 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
     protected void respondUI(ViewEvent anEvent)
     {
         // The Selected App, DebugApp
-        RunApp app = getSelApp();
-        DebugApp dapp = getSelDebugApp();
+        RunApp selApp = getSelApp();
+        DebugApp debugApp = getSelDebugApp();
 
         // Handle DebugButton
-        if (anEvent.equals("DebugButton"))
-            getAppPane().getFilesPane().runDefaultConfig(true);
+        if (anEvent.equals("DebugButton")) {
+            DebugTool debugTool = _projTools.getDebugTool();
+            debugTool.runDefaultConfig(true);
+        }
 
             // Handle ResumeButton
         else if (anEvent.equals("ResumeButton"))
-            dapp.resume();
+            debugApp.resume();
 
             // Handle SuspendButton
         else if (anEvent.equals("SuspendButton"))
-            dapp.pause();
+            debugApp.pause();
 
             // Handle TerminateButton
         else if (anEvent.equals("TerminateButton"))
-            app.terminate();
+            selApp.terminate();
 
             // Handle StepIntoButton
         else if (anEvent.equals("StepIntoButton"))
-            dapp.stepIntoLine();
+            debugApp.stepIntoLine();
 
             // Handle StepOverButton
         else if (anEvent.equals("StepOverButton"))
-            dapp.stepOverLine();
+            debugApp.stepOverLine();
 
             // Handle StepReturnButton
         else if (anEvent.equals("StepReturnButton"))
-            dapp.stepOut();
+            debugApp.stepOut();
 
             // Handle RunToLineButton
         else if (anEvent.equals("RunToLineButton")) {
@@ -501,7 +505,7 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
             JavaTextArea tarea = jpage.getTextArea();
             WebFile file = jpage.getFile();
             int line = tarea.getSel().getStartLine().getIndex();
-            dapp.runToLine(file, line);
+            debugApp.runToLine(file, line);
         }
 
         // Handle ProcTree

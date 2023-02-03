@@ -5,6 +5,8 @@ import snap.view.ViewOwner;
 import snap.viewx.WebBrowser;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import snapcodepro.apptools.DebugTool;
+import snapcodepro.apptools.SearchPane;
 
 /**
  * This class is the top level controller for an open project.
@@ -49,6 +51,16 @@ public class ProjectPane extends ViewOwner {
      * Returns the ProjectTools helper.
      */
     public ProjectTools getProjectTools()  { return _projTools; }
+
+    /**
+     * Returns the debug tool.
+     */
+    public DebugTool getDebugTool()  { return _projTools.getDebugTool(); }
+
+    /**
+     * Returns the SearchPane.
+     */
+    public SearchPane getSearchTool()  { return _projTools.getSearchTool(); }
 
     /**
      * Returns the array of sites.

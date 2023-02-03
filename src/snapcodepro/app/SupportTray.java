@@ -28,11 +28,13 @@ public class SupportTray extends ViewOwner {
     {
         _appPane = anAppPane;
 
+        ProjectTools projTools = anAppPane.getProjectTools();
+
         // Set tools
         _trayTools = new ProjectTool[] {
                 _appPane.getProblemsPane(), _appPane.getRunConsole(),
                 _appPane.getDebugVarsPane(), _appPane.getDebugExprsPane(),
-                _appPane.getBreakpointsPanel(), _appPane.getSearchPane()
+                _appPane.getBreakpointsPanel(), projTools.getSearchTool()
         };
     }
 

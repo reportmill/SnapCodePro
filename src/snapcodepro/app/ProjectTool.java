@@ -15,6 +15,9 @@ public class ProjectTool extends ViewOwner {
     // The ProjectPane
     protected ProjectPane  _projPane;
 
+    // The ProjectTools
+    protected ProjectTools  _projTools;
+
     // The PagePane
     protected PagePane  _pagePane;
 
@@ -25,6 +28,7 @@ public class ProjectTool extends ViewOwner {
     {
         super();
         _projPane = projPane;
+        _projTools = projPane.getProjectTools();
         _pagePane = projPane.getPagePane();
     }
 

@@ -55,9 +55,6 @@ public class AppPane extends ProjectPane {
     // The BreakpointsPanel
     private BreakpointsPanel _breakpointsPanel = new BreakpointsPanel(this);
 
-    // The SearchPane
-    private SearchPane _searchPane = new SearchPane(this);
-
     // The StatusBar
     private StatusBar  _statusBar;
 
@@ -374,11 +371,6 @@ public class AppPane extends ProjectPane {
      * Returns the BreakpointsPanel.
      */
     public BreakpointsPanel getBreakpointsPanel()  { return _breakpointsPanel; }
-
-    /**
-     * Returns the SearchPane.
-     */
-    public SearchPane getSearchPane()  { return _searchPane; }
 
     /**
      * Saves any unsaved files.
