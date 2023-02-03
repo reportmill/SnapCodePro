@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A class to represent a project file in AppFilesPane.
+ * A class to represent a project file in FilesPane.
  */
 public class AppFile implements Comparable<AppFile> {
 

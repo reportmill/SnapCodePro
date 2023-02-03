@@ -108,7 +108,7 @@ public class DebugTool extends ProjectTool {
     {
         // Automatically save all files
         AppPane appPane = (AppPane) _projPane;
-        AppFilesPane filesPane = appPane.getFilesPane();
+        FilesPane filesPane = appPane.getFilesPane();
         filesPane.saveAllFiles();
         appPane.saveFiles();
 

@@ -53,7 +53,7 @@ public class VcsPane extends ProjectTool {
         _site.setProp(VcsPane.class.getName(), this);
         _vc = VersionControl.get(_site);
 
-        // Add listener to update AppFilesPane.FilesTree when file status changed
+        // Add listener to update FilesPane.FilesTree when file status changed
         _vc.addPropChangeListener(pc -> {
             WebFile file = (WebFile) pc.getSource();
             if (_appPane != null) _appPane.getFilesPane().updateFile(file);

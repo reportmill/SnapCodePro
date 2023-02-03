@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DocView Align="CENTER">
-  <PageView PrefWidth="612" PrefHeight="662">
+  <PageView PrefWidth="612" PrefHeight="634">
     <effect type="shadow" radius="10" dx="0" dy="0" />
     <SpringView Name="Header" x="36" y="36" width="540" height="109" PrefWidth="540" PrefHeight="109">
       <LineBorder />

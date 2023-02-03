@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * A class to handle visual management of project files.
  */
-public class AppFilesPane extends ProjectTool {
+public class FilesPane extends ProjectTool {
 
     // The AppPane
     private AppPane  _appPane;
@@ -39,13 +39,13 @@ public class AppFilesPane extends ProjectTool {
     protected List<AppFile>  _rootFiles;
 
     // Images for files tree/list
-    private static Image FILES_TREE_ICON = Image.get(AppFilesPane.class, "FilesTree.png");
-    private static Image FILES_LIST_ICON = Image.get(AppFilesPane.class, "FilesList.png");
+    private static Image FILES_TREE_ICON = Image.get(FilesPane.class, "FilesTree.png");
+    private static Image FILES_LIST_ICON = Image.get(FilesPane.class, "FilesList.png");
 
     /**
      * Creates a new AppPaneFilesPane.
      */
-    public AppFilesPane(AppPane projPane)
+    public FilesPane(AppPane projPane)
     {
         super(projPane);
         _appPane = projPane;
@@ -144,6 +144,10 @@ public class AppFilesPane extends ProjectTool {
      */
     protected void initUI()
     {
+        // Configure RowView
+        RowView rowView = getView("RowView", RowView.class);
+        rowView.setBorder(Color.GRAY7, 1);
+
         // Get the FilesTree
         _filesTree = getView("FilesTree", TreeView.class);
         _filesTree.setResolver(new AppFile.AppFileTreeResolver());
@@ -151,7 +155,7 @@ public class AppFilesPane extends ProjectTool {
 
         // Get FilesList
         _filesList = getView("FilesList", ListView.class);
-        _filesList.setRowHeight(30);
+        _filesList.setRowHeight(24);
         _filesList.setAltPaint(Color.WHITE);
         _filesList.setCellConfigure(this::configureFilesListCell);
         enableEvents(_filesList, MousePress, MouseRelease);

@@ -26,11 +26,11 @@ public class AppPane extends ProjectPane {
     // The main SplitView that holds sidebar and browser
     private SplitView  _mainSplit;
 
-    // The SplitView that holds FilesPane and ProcPane
-    private SplitView  _sideBarSplit;
+    // The side bar view holding FilesPane
+    private BoxView  _sideBarBox;
 
     // The FilesPane
-    protected AppFilesPane  _filesPane;
+    protected FilesPane _filesPane;
 
     // The SupportTray
     private SupportTray  _supportTray;
@@ -65,7 +65,7 @@ public class AppPane extends ProjectPane {
 
         // Create parts
         _toolBar = new AppPaneToolBar(this);
-        _filesPane = new AppFilesPane(this);
+        _filesPane = new FilesPane(this);
         _supportTray = new SupportTray(this);
         _statusBar = new StatusBar(this);
     }
@@ -78,7 +78,7 @@ public class AppPane extends ProjectPane {
     /**
      * Returns the files pane.
      */
-    public AppFilesPane getFilesPane()  { return _filesPane; }
+    public FilesPane getFilesPane()  { return _filesPane; }
 
     /**
      * Returns the processes pane.
@@ -98,8 +98,8 @@ public class AppPane extends ProjectPane {
         if (aValue == isShowSideBar()) return;
         _showSideBar = aValue;
         if (aValue)
-            _mainSplit.addItemWithAnim(_sideBarSplit, 220, 0);
-        else _mainSplit.removeItemWithAnim(_sideBarSplit);
+            _mainSplit.addItemWithAnim(_sideBarBox, 220, 0);
+        else _mainSplit.removeItemWithAnim(_sideBarBox);
     }
 
     /**
@@ -217,6 +217,7 @@ public class AppPane extends ProjectPane {
         // Get MainSplit
         _mainSplit = getUI(SplitView.class);
         _mainSplit.setBorder(null);
+        _mainSplit.setDividerSpan(5);
 
         // Get MenuBar and register to process events
         MenuBar menuBar = getView("MenuBar", MenuBar.class);
@@ -229,6 +230,7 @@ public class AppPane extends ProjectPane {
         // Get PagePaneSplitView
         SplitView pagePaneSplitView = getView("PagePaneSplitView", SplitView.class);
         pagePaneSplitView.setBorder(null);
+        pagePaneSplitView.setDividerSpan(5);
 
         // Install PagePage UI
         View pagePaneUI = _pagePane.getUI();
@@ -239,17 +241,16 @@ public class AppPane extends ProjectPane {
         _pagePane.getBrowser().addPropChangeListener(pc -> pagePaneBrowserDidPropChange(pc),
                 WebBrowser.Activity_Prop, WebBrowser.Status_Prop, WebBrowser.Loading_Prop);
 
-        // Get SideBarSplitView
-        _sideBarSplit = getView("SideBarSplitView", SplitView.class);
-        _sideBarSplit.setBorder(null);
-        _sideBarSplit.setClipToBounds(true);
+        // Get SideBarBox
+        _sideBarBox = getView("SideBarBox", BoxView.class);
+        _sideBarBox.setClipToBounds(true);
 
         // Add FilesPane
         View filesPaneUI = _filesPane.getUI();
         filesPaneUI.setGrowHeight(true);
 
         // Add ProcPane
-        _sideBarSplit.addItem(filesPaneUI);
+        _sideBarBox.setContent(filesPaneUI);
 
         // Add SupportTray to MainSplit
         TabView supportTrayUI = (TabView) _supportTray.getUI();

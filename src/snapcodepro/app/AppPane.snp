@@ -28,7 +28,7 @@
       </Menu>
     </MenuBar>
     <SplitView Name="PagePaneSplitView" GrowHeight="true">
-      <SplitView Name="SideBarSplitView" PrefWidth="220" Vertical="true" />
+      <BoxView Name="SideBarBox" PrefWidth="220" FillWidth="true" FillHeight="true" />
     </SplitView>
   </ColView>
 </SplitView>
