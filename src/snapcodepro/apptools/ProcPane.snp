@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView PrefWidth="200" PrefHeight="180" Padding="0,0,2,0" FillWidth="true">
-  <RowView>
-    <font name="Arial Bold" size="12" />
-    <Label name="ProcessesLabel" text=" Processes" PrefWidth="160" />
-    <Button Name="DebugButton" PrefWidth="24" PrefHeight="24" LeanX="RIGHT" image="Debug.gif" ShowBorder="false" />
-  </RowView>
-  <RowView Padding="0,0,2,8" Spacing="4">
+<ColView PrefWidth="220" PrefHeight="180" Padding="0,5,5,5" FillWidth="true">
+  <RowView PrefHeight="32" Spacing="4">
     <Button Name="ResumeButton" PrefWidth="24" PrefHeight="24" image="Resume.gif" ShowBorder="false" />
     <Button Name="SuspendButton" PrefWidth="24" PrefHeight="24" image="Suspend.gif" ShowBorder="false" />
     <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false" />

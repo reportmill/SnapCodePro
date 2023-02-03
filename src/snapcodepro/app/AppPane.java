@@ -1,12 +1,10 @@
 package snapcodepro.app;
-import javakit.project.Breakpoint;
+import javakit.ide.JavaTextPane;
 import javakit.project.Breakpoints;
 import javakit.project.BuildIssue;
-import javakit.ide.JavaTextPane;
 import snap.util.ArrayUtils;
 import snap.viewx.WebBrowser;
 import snapcodepro.apptools.*;
-import snapcodepro.debug.RunApp;
 import snapcodepro.project.ProjectX;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
@@ -34,9 +32,6 @@ public class AppPane extends ProjectPane {
     // The FilesPane
     protected AppFilesPane  _filesPane;
 
-    // The ProcPane manages run/debug processes
-    private ProcPane _procPane = new ProcPane(this);
-
     // The SupportTray
     private SupportTray  _supportTray;
 
@@ -45,12 +40,6 @@ public class AppPane extends ProjectPane {
 
     // The RunConsole
     private RunConsole  _runConsole = new RunConsole(this);
-
-    // The DebugVarsPane
-    private DebugVarsPane _debugVarsPane = new DebugVarsPane(this);
-
-    // The DebugExprsPane
-    private DebugExprsPane _debugExprsPane = new DebugExprsPane(this);
 
     // The BreakpointsPanel
     private BreakpointsPanel _breakpointsPanel = new BreakpointsPanel(this);
@@ -94,7 +83,7 @@ public class AppPane extends ProjectPane {
     /**
      * Returns the processes pane.
      */
-    public ProcPane getProcPane()  { return _procPane; }
+    public ProcPane getProcPane()  { return _projTools.getDebugTool().getProcPane(); }
 
     /**
      * Returns whether is showing SideBar (holds FilesPane and ProcPane).
@@ -260,9 +249,7 @@ public class AppPane extends ProjectPane {
         filesPaneUI.setGrowHeight(true);
 
         // Add ProcPane
-        View procPaneUI = _procPane.getUI();
-        procPaneUI.setPrefHeight(250);
-        _sideBarSplit.setItems(filesPaneUI, procPaneUI);
+        _sideBarSplit.addItem(filesPaneUI);
 
         // Add SupportTray to MainSplit
         TabView supportTrayUI = (TabView) _supportTray.getUI();
@@ -291,7 +278,6 @@ public class AppPane extends ProjectPane {
 
         // Reset FilesPane and SupportTray
         _filesPane.resetLater();
-        _procPane.resetLater();
         _supportTray.resetLater();
         _statusBar.resetLater();
     }
@@ -325,12 +311,6 @@ public class AppPane extends ProjectPane {
             anEvent.consume();
         }
 
-        // Handle ProcessesList
-        if (anEvent.equals("ProcessesList")) {
-            SupportTray supportTray = getSupportTray();
-            supportTray.showDebugTool();
-        }
-
         // Handle ShowJavaHomeMenuItem
         if (anEvent.equals("ShowJavaHomeMenuItem")) {
             String java = System.getProperty("java.home");
@@ -356,16 +336,6 @@ public class AppPane extends ProjectPane {
      * Returns the RunConsole.
      */
     public RunConsole getRunConsole()  { return _runConsole; }
-
-    /**
-     * Returns the DebugVarsPane.
-     */
-    public DebugVarsPane getDebugVarsPane()  { return _debugVarsPane; }
-
-    /**
-     * Returns the DebugExprsPane.
-     */
-    public DebugExprsPane getDebugExprsPane()  { return _debugExprsPane; }
 
     /**
      * Returns the BreakpointsPanel.
@@ -416,31 +386,8 @@ public class AppPane extends ProjectPane {
      */
     private void projBreakpointsDidChange(PropChange pc)
     {
-        if (pc.getPropertyName() != Breakpoints.ITEMS_PROP) return;
-
-        // Handle Breakpoint added
-        Breakpoint nval = (Breakpoint) pc.getNewValue();
-        if (nval != null) {
-
-            // Tell active processes about breakpoint change
-            for (RunApp rp : getProcPane().getProcs())
-                rp.addBreakpoint(nval);
-        }
-
-        // Handle Breakpoint removed
-        else {
-
-            Breakpoint oval = (Breakpoint) pc.getOldValue();
-
-            // Make current JavaPage.TextArea resetLater
-            WebPage page = getBrowser().getPageForURL(oval.getFile().getURL());
-            if (page instanceof JavaPage)
-                ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
-
-            // Tell active processes about breakpoint change
-            for (RunApp rp : getProcPane().getProcs())
-                rp.removeBreakpoint(oval);
-        }
+        DebugTool debugTool = _projTools.getDebugTool();
+        debugTool.projBreakpointsDidChange(pc);
     }
 
     /**

@@ -1,5 +1,4 @@
 package snapcodepro.apptools;
-import snapcodepro.app.AppPane;
 import snapcodepro.app.ProjectTool;
 import snapcodepro.debug.DebugApp;
 import snapcodepro.debug.ExprEval;
@@ -12,8 +11,8 @@ import java.util.List;
  */
 public class DebugExprsPane extends ProjectTool {
 
-    // The ProcPane
-    private ProcPane  _procPane;
+    // The DebugTool
+    private DebugTool  _debugTool;
 
     // The variable table
     private TreeView<ExprTreeItem>  _varTree;
@@ -22,15 +21,15 @@ public class DebugExprsPane extends ProjectTool {
     private TextView  _varText;
 
     // The list of expression tree items
-    List<ExprTreeItem>  _exprItems = new ArrayList<>();
+    private List<ExprTreeItem>  _exprItems = new ArrayList<>();
 
     /**
      * Creates a new DebugExprsPane.
      */
-    public DebugExprsPane(AppPane projPane)
+    public DebugExprsPane(DebugTool debugTool)
     {
-        super(projPane);
-        _procPane = projPane.getProcPane();
+        super(debugTool.getProjectPane());
+        _debugTool = debugTool;
     }
 
     /**
@@ -38,7 +37,7 @@ public class DebugExprsPane extends ProjectTool {
      */
     public DebugApp getDebugApp()
     {
-        return _procPane.getSelDebugApp();
+        return _debugTool.getSelDebugApp();
     }
 
     /**
@@ -51,7 +50,8 @@ public class DebugExprsPane extends ProjectTool {
         _varTree = getView("TreeView", TreeView.class);
         TreeCol c0 = _varTree.getCol(0);
         c0.setHeaderText("Name");
-        c0.setPrefWidth(450);
+        c0.setPrefWidth(150);
+        c0.setGrowWidth(true);
         TreeCol c1 = new TreeCol();
         c1.setHeaderText("Value");
         c1.setPrefWidth(150);
@@ -74,6 +74,7 @@ public class DebugExprsPane extends ProjectTool {
         // Create VarText TextView and configure in ScrollView
         _varText = getView("TextView", TextView.class);
         _varText.setWrapLines(true);
+        _varText.getScrollView().setBorder(null);
     }
 
     /**

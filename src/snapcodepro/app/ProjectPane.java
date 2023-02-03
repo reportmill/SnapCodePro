@@ -23,7 +23,7 @@ public class ProjectPane extends ViewOwner {
     protected PagePane  _pagePane;
 
     // The ProjectTool manager
-    private ProjectTools  _projTools;
+    protected ProjectTools  _projTools;
 
     /**
      * Constructor.
@@ -35,6 +35,7 @@ public class ProjectPane extends ViewOwner {
         // Create parts
         _pagePane = new PagePane(this);
         _projTools = new ProjectTools(this);
+        _projTools.createTools();
     }
 
     /**

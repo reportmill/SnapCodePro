@@ -1,8 +1,13 @@
 package snapcodepro.apptools;
 import javakit.project.Breakpoint;
+import javakit.project.Breakpoints;
 import javakit.project.Project;
 import javakit.project.ProjectFiles;
+import snap.gfx.Color;
+import snap.props.PropChange;
 import snap.util.FilePathUtils;
+import snap.view.*;
+import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
@@ -20,6 +25,18 @@ import java.util.List;
  */
 public class DebugTool extends ProjectTool {
 
+    // The ProcPane manages run/debug processes
+    private ProcPane  _procPane;
+
+    // The SplitView
+    private SplitView  _splitView;
+
+    // The DebugVarsPane
+    private DebugVarsPane  _debugVarsPane;
+
+    // The DebugExprsPane
+    private DebugExprsPane  _debugExprsPane;
+
     // The last executed file
     private static WebFile  _lastRunFile;
 
@@ -29,6 +46,34 @@ public class DebugTool extends ProjectTool {
     public DebugTool(ProjectPane projectPane)
     {
         super(projectPane);
+
+        // Create parts
+        _procPane = new ProcPane(this);
+        _debugVarsPane = new DebugVarsPane(this);
+        _debugExprsPane = new DebugExprsPane(this);
+    }
+
+    /**
+     * Returns the processes pane.
+     */
+    public ProcPane getProcPane()  { return _procPane; }
+
+    /**
+     * Returns the DebugVarsPane.
+     */
+    public DebugVarsPane getDebugVarsPane()  { return _debugVarsPane; }
+
+    /**
+     * Returns the DebugExprsPane.
+     */
+    public DebugExprsPane getDebugExprsPane()  { return _debugExprsPane; }
+
+    /**
+     * Returns the debug app.
+     */
+    public DebugApp getSelDebugApp()
+    {
+        return _procPane.getSelDebugApp();
     }
 
     /**
@@ -132,8 +177,106 @@ public class DebugTool extends ProjectTool {
         }
 
         // Create RunApp and exec
-        ProcPane procPane = ((AppPane) _projPane).getProcPane();
+        ProcPane procPane = getProcPane();
         procPane.execProc(proc);
+    }
+
+    /**
+     * Initialize UI.
+     */
+    @Override
+    protected void initUI()
+    {
+        // Config RowView
+        RowView rowView = getView("RowView", RowView.class);
+        rowView.setBorder(Color.GRAY8, 1);
+
+        // Get/config SplitView
+        _splitView = getView("SplitView", SplitView.class);
+        _splitView.setBorder(null);
+        int DIVIDER_SPAN = 2;
+        Color DIVIDER_FILL = new Color(.87);
+        _splitView.setDividerSpan(DIVIDER_SPAN);
+        Divider divider = _splitView.getDivider();
+        divider.setFill(DIVIDER_FILL);
+        divider.setBorder(null);
+        divider.setReach(3);
+
+        // Add ProcPane
+        View procPaneUI = _procPane.getUI();
+        _splitView.addItem(procPaneUI);
+
+        // Add DebugVars
+        View debugVarsUI = _debugVarsPane.getUI();
+        _splitView.addItem(debugVarsUI);
+
+        // Add DebugExprs
+        View debugExprsUI = _debugExprsPane.getUI();
+        _splitView.addItem(debugExprsUI);
+    }
+
+    /**
+     * Reset UI.
+     */
+    @Override
+    protected void resetUI()
+    {
+        _procPane.resetLater();
+        _debugVarsPane.resetLater();
+        _debugExprsPane.resetLater();
+    }
+
+    /**
+     * Respond UI.
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        // Handle DebugButton
+        if (anEvent.equals("DebugButton"))
+            runDefaultConfig(true);
+    }
+
+    /**
+     * Override for title.
+     */
+    @Override
+    public String getTitle()  { return "Debug"; }
+
+    /**
+     * Called when Project.BreakPoints change.
+     */
+    public void projBreakpointsDidChange(PropChange pc)
+    {
+        if (pc.getPropName() != Breakpoints.ITEMS_PROP) return;
+
+        // Get processes
+        ProcPane procPane = getProcPane();
+        List<RunApp> processes = procPane.getProcs();
+
+        // Handle Breakpoint added
+        Breakpoint addedBreakpoint = (Breakpoint) pc.getNewValue();
+        if (addedBreakpoint != null) {
+
+            // Tell active processes about breakpoint change
+            for (RunApp rp : processes)
+                rp.addBreakpoint(addedBreakpoint);
+        }
+
+        // Handle Breakpoint removed
+        else {
+
+            Breakpoint removedBreakpoint = (Breakpoint) pc.getOldValue();
+
+            // Make current JavaPage.TextArea resetLater
+            WebPage page = getBrowser().getPageForURL(removedBreakpoint.getFile().getURL());
+            if (page instanceof JavaPage)
+                ((JavaPage) page).getTextPane().buildIssueOrBreakPointMarkerChanged();
+
+            // Tell active processes about breakpoint change
+            for (RunApp rp : processes)
+                rp.removeBreakpoint(removedBreakpoint);
+        }
     }
 
     /**

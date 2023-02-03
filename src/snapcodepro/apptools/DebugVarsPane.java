@@ -1,11 +1,9 @@
 package snapcodepro.apptools;
 import com.sun.jdi.*;
-import snapcodepro.app.AppPane;
 import snapcodepro.app.ProjectTool;
 import snapcodepro.debug.DebugApp;
 import snap.gfx.Font;
 import snap.view.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,8 +13,8 @@ import java.util.List;
  */
 public class DebugVarsPane extends ProjectTool {
 
-    // The ProcPane
-    private ProcPane  _procPane;
+    // The DebugTool
+    private DebugTool  _debugTool;
 
     // The variable table
     private TreeView<VarTreeItem>  _varTree;
@@ -30,10 +28,10 @@ public class DebugVarsPane extends ProjectTool {
     /**
      * Creates a new DebugVarsPane.
      */
-    public DebugVarsPane(AppPane projPane)
+    public DebugVarsPane(DebugTool debugTool)
     {
-        super(projPane);
-        _procPane = projPane.getProcPane();
+        super(debugTool.getProjectPane());
+        _debugTool = debugTool;
     }
 
     /**
@@ -41,7 +39,7 @@ public class DebugVarsPane extends ProjectTool {
      */
     public DebugApp getDebugApp()
     {
-        return _procPane.getSelDebugApp();
+        return _debugTool.getSelDebugApp();
     }
 
     /**
@@ -54,14 +52,14 @@ public class DebugVarsPane extends ProjectTool {
         _varTree.setFont(Font.Arial11);
         TreeCol c0 = _varTree.getCol(0);
         c0.setHeaderText("Name");
-        c0.setPrefWidth(150);
+        c0.setPrefWidth(100);
         TreeCol c1 = new TreeCol();
         c1.setHeaderText("Value");
-        c1.setPrefWidth(150);
+        c1.setPrefWidth(100);
         c1.setGrowWidth(true);
         TreeCol c2 = new TreeCol();
         c2.setHeaderText("Type");
-        c2.setPrefWidth(150);
+        c2.setPrefWidth(100);
         c2.setGrowWidth(true);
         _varTree.addCols(c1, c2);
         _varTree.setResolver(new VarTreeResolver());
@@ -69,6 +67,7 @@ public class DebugVarsPane extends ProjectTool {
         // Create VarText TextView and configure in ScrollView
         _varText = getView("TextView", TextView.class);
         _varText.setWrapLines(true);
+        _varText.getScrollView().setBorder(null);
     }
 
     /**

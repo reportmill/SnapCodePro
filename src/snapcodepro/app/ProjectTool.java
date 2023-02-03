@@ -33,6 +33,11 @@ public class ProjectTool extends ViewOwner {
     }
 
     /**
+     * Returns the ProjectPane.
+     */
+    public ProjectPane getProjectPane()  { return _projPane; }
+
+    /**
      * Returns the top level site.
      */
     public WebSite getRootSite()  { return _projPane.getRootSite(); }

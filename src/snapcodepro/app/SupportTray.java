@@ -2,10 +2,7 @@ package snapcodepro.app;
 import snap.geom.Side;
 import snap.util.ArrayUtils;
 import snap.view.*;
-import snapcodepro.apptools.DebugVarsPane;
-import snapcodepro.apptools.ProblemsPane;
-import snapcodepro.apptools.RunConsole;
-import snapcodepro.apptools.SearchPane;
+import snapcodepro.apptools.*;
 
 /**
  * A class to hold TabView for ProblemsPane, RunConsole, DebugPane.
@@ -32,9 +29,9 @@ public class SupportTray extends ViewOwner {
 
         // Set tools
         _trayTools = new ProjectTool[] {
-                _appPane.getProblemsPane(), _appPane.getRunConsole(),
-                _appPane.getDebugVarsPane(), _appPane.getDebugExprsPane(),
-                _appPane.getBreakpointsPanel(), projTools.getSearchTool()
+                _appPane.getProblemsPane(), projTools.getDebugTool(),
+                _appPane.getRunConsole(), _appPane.getBreakpointsPanel(),
+                projTools.getSearchTool()
         };
     }
 
@@ -93,11 +90,6 @@ public class SupportTray extends ViewOwner {
     public void showProblemsTool()  { setSelToolForClass(ProblemsPane.class); }
 
     /**
-     * Shows the search tool.
-     */
-    public void showSearchTool()  { setSelToolForClass(SearchPane.class); }
-
-    /**
      * Shows the run tool.
      */
     public void showRunTool()  { setSelToolForClass(RunConsole.class); }
@@ -105,7 +97,7 @@ public class SupportTray extends ViewOwner {
     /**
      * Sets selected index to debug.
      */
-    public void showDebugTool()  { setSelToolForClass(DebugVarsPane.class); }
+    public void showDebugTool()  { setSelToolForClass(DebugTool.class); }
 
     /**
      * Hides selected tool.
@@ -127,7 +119,7 @@ public class SupportTray extends ViewOwner {
 
         // Bogus: Manually set TabView PrefHeight
         _tabView.addPropChangeListener(pc -> {
-            double prefH = _tabView.getContent() != null ? 240 : 30;
+            double prefH = _tabView.getContent() != null ? 280 : 30;
             _tabView.setPrefHeight(prefH);
         }, TabView.SelIndex_Prop);
 

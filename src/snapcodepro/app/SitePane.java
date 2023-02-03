@@ -346,7 +346,7 @@ public class SitePane extends WebPage {
     {
         // Get source and property name
         WebFile file = (WebFile) aPC.getSource();
-        String pname = aPC.getPropertyName();
+        String pname = aPC.getPropName();
 
         // Handle Saved property: Call fileAdded or fileSaved
         if (pname == WebFile.Saved_Prop) {

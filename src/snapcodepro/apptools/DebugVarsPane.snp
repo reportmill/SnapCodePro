@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView FillWidth="true">
+<ColView PrefWidth="200" GrowWidth="true" FillWidth="true">
   <font name="Arial" size="12" />
   <RowView MinHeight="32">
-    <Label Margin="0,8,0,8" text="Debug Variables:" />
+    <Label Margin="0,8,0,8" text="Variables:" />
     <Label Name="NameLabel" />
   </RowView>
   <SplitView Vertical="true" Margin="0,5,5,5" GrowHeight="true">

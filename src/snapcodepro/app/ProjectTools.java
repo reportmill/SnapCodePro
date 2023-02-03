@@ -23,10 +23,15 @@ public class ProjectTools {
     {
         super();
         _projPane = projectPane;
+    }
 
-        // Create core tools
-        _debugTool = new DebugTool(projectPane);
-        _searchTool = new SearchPane(projectPane);
+    /**
+     * Create tools.
+     */
+    protected void createTools()
+    {
+        _debugTool = new DebugTool(_projPane);
+        _searchTool = new SearchPane(_projPane);
     }
 
     /**

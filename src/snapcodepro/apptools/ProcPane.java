@@ -22,6 +22,9 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
     // The AppPane
     private AppPane  _appPane;
 
+    // The DebugTool
+    private DebugTool  _debugTool;
+
     // The list of recently run apps
     private List<RunApp>  _apps = new ArrayList<>();
 
@@ -51,10 +54,11 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
     /**
      * Creates a new ProcPane.
      */
-    public ProcPane(AppPane projPane)
+    public ProcPane(DebugTool aDebugTool)
     {
-        super(projPane);
-        _appPane = projPane;
+        super(aDebugTool.getProjectPane());
+        _debugTool = aDebugTool;
+        _appPane = (AppPane) _projPane;
     }
 
     /**
@@ -70,12 +74,12 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
     /**
      * Returns the DebugVarsPane.
      */
-    public DebugVarsPane getDebugVarsPane()  { return _appPane.getDebugVarsPane(); }
+    public DebugVarsPane getDebugVarsPane()  { return _debugTool.getDebugVarsPane(); }
 
     /**
      * Returns the DebugExprsPane.
      */
-    public DebugExprsPane getDebugExprsPane()  { return _appPane.getDebugExprsPane(); }
+    public DebugExprsPane getDebugExprsPane()  { return _debugTool.getDebugExprsPane(); }
 
     /**
      * Returns the list of processes.
@@ -399,22 +403,6 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
         _procTree = getView("ProcTree", TreeView.class);
         _procTree.setResolver(new ProcTreeResolver());
         _procTree.setRowHeight(20);
-
-        // Add this so clicking on Processes label causes resetLater
-        View plabel = getView("ProcessesLabel");
-        enableEvents(plabel, MousePress);
-        plabel.addEventFilter(e -> doProcLabelClick(plabel), MousePress);
-    }
-
-    /**
-     * Bogus debug hook.
-     */
-    private void doProcLabelClick(View plabel)
-    {
-        plabel.getAnimCleared(200).setTransX(30).getAnim(400).setTransX(0).play();
-        DebugApp dapp = getSelDebugApp();
-        if (dapp == null) return;
-        dapp.reset();
     }
 
     /**
@@ -467,37 +455,31 @@ public class ProcPane extends ProjectTool implements RunApp.AppListener {
         RunApp selApp = getSelApp();
         DebugApp debugApp = getSelDebugApp();
 
-        // Handle DebugButton
-        if (anEvent.equals("DebugButton")) {
-            DebugTool debugTool = _projTools.getDebugTool();
-            debugTool.runDefaultConfig(true);
-        }
-
-            // Handle ResumeButton
-        else if (anEvent.equals("ResumeButton"))
+        // Handle ResumeButton
+        if (anEvent.equals("ResumeButton"))
             debugApp.resume();
 
-            // Handle SuspendButton
+        // Handle SuspendButton
         else if (anEvent.equals("SuspendButton"))
             debugApp.pause();
 
-            // Handle TerminateButton
+        // Handle TerminateButton
         else if (anEvent.equals("TerminateButton"))
             selApp.terminate();
 
-            // Handle StepIntoButton
+        // Handle StepIntoButton
         else if (anEvent.equals("StepIntoButton"))
             debugApp.stepIntoLine();
 
-            // Handle StepOverButton
+        // Handle StepOverButton
         else if (anEvent.equals("StepOverButton"))
             debugApp.stepOverLine();
 
-            // Handle StepReturnButton
+        // Handle StepReturnButton
         else if (anEvent.equals("StepReturnButton"))
             debugApp.stepOut();
 
-            // Handle RunToLineButton
+        // Handle RunToLineButton
         else if (anEvent.equals("RunToLineButton")) {
             WebPage page = getAppPane().getBrowser().getPage();
             JavaPage jpage = page instanceof JavaPage ? (JavaPage) page : null;
