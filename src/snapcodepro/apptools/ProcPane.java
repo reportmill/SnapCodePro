@@ -467,7 +467,7 @@ public class ProcPane extends ViewOwner implements RunApp.AppListener {
 
         // Handle DebugButton
         if (anEvent.equals("DebugButton"))
-            getAppPane().getFilesPane().debug();
+            getAppPane().getFilesPane().runDefaultConfig(true);
 
             // Handle ResumeButton
         else if (anEvent.equals("ResumeButton"))

@@ -5,7 +5,6 @@ import snap.view.ViewOwner;
 import snap.viewx.WebBrowser;
 import snap.web.WebFile;
 import snap.web.WebSite;
-import snapcodepro.project.ProjectX;
 
 /**
  * This class is the top level controller for an open project.
@@ -21,6 +20,9 @@ public class ProjectPane extends ViewOwner {
     // The PagePane to display project files for editing
     protected PagePane  _pagePane;
 
+    // The ProjectTool manager
+    private ProjectTools  _projTools;
+
     /**
      * Constructor.
      */
@@ -30,6 +32,7 @@ public class ProjectPane extends ViewOwner {
 
         // Create parts
         _pagePane = new PagePane(this);
+        _projTools = new ProjectTools(this);
     }
 
     /**
@@ -41,6 +44,11 @@ public class ProjectPane extends ViewOwner {
      * Returns the PagePane.Browser.
      */
     public WebBrowser getBrowser()  { return _pagePane.getBrowser(); }
+
+    /**
+     * Returns the ProjectTools helper.
+     */
+    public ProjectTools getProjectTools()  { return _projTools; }
 
     /**
      * Returns the array of sites.

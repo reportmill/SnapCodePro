@@ -220,7 +220,7 @@ public class AppFilesPane extends ProjectTool {
             // Handle MouseClick (double-click): RunSelectedFile
             if (anEvent.isMouseClick() && anEvent.getClickCount() == 2) {
                 if (getSelFile().isFile())
-                    run(null, getSelFile(), false);
+                    runConfigOrFile(null, getSelFile(), false);
             }
 
             // Handle DragEvent
@@ -314,8 +314,8 @@ public class AppFilesPane extends ProjectTool {
         }
 
         // Handle RunFileMenuItem, DebugFileMenuItem
-        if (anEvent.equals("RunFileMenuItem")) run(null, getSelFile(), false);
-        if (anEvent.equals("DebugFileMenuItem")) run(null, getSelFile(), true);
+        if (anEvent.equals("RunFileMenuItem")) runConfigOrFile(null, getSelFile(), false);
+        if (anEvent.equals("DebugFileMenuItem")) runConfigOrFile(null, getSelFile(), true);
 
         // Handle UpdateFilesMenuItem
         if (anEvent.equals("UpdateFilesMenuItem"))
@@ -703,23 +703,17 @@ public class AppFilesPane extends ProjectTool {
     /**
      * Run application.
      */
-    public void run()
+    public void runDefaultConfig(boolean withDebug)
     {
-        run(null, null, false);
-    }
-
-    /**
-     * Debug application.
-     */
-    public void debug()
-    {
-        run(null, null, true);
+        WebSite site = getRootSite();
+        RunConfig config = RunConfigs.get(site).getRunConfig();
+        runConfigOrFile(config, null, withDebug);
     }
 
     /**
      * Runs a given RunConfig or file as a separate process.
      */
-    protected void run(RunConfig aConfig, WebFile aFile, boolean isDebug)
+    protected void runConfigOrFile(RunConfig aConfig, WebFile aFile, boolean isDebug)
     {
         // Automatically save all files
         saveAllFiles();
@@ -730,9 +724,12 @@ public class AppFilesPane extends ProjectTool {
 
         // Get file
         WebFile file = aFile;
-        if (file == null && config != null) file = site.createFileForPath(config.getMainFilePath(), false);
-        if (file == null) file = AppLauncher.getLastRunFile();
-        if (file == null) file = getSelFile();
+        if (file == null && config != null)
+            file = site.createFileForPath(config.getMainFilePath(), false);
+        if (file == null)
+            file = AppLauncher.getLastRunFile();
+        if (file == null)
+            file = getSelFile();
 
         // Send to AppLauncher
         new AppLauncher().runFile(_appPane, config, file, isDebug);

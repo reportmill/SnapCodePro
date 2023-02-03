@@ -166,7 +166,10 @@ public class AppPaneToolBar extends ViewOwner {
             appBrowser.reloadPage();
 
         // Handle RunButton
-        if (anEvent.equals("RunButton") && anEvent.isMouseRelease()) appPane._filesPane.run();
+        if (anEvent.equals("RunButton") && anEvent.isMouseRelease()) {
+            AppFilesPane filesPane = appPane.getFilesPane();
+            filesPane.runDefaultConfig(false);
+        }
 
         // Handle RunConfigMenuItems
         if (anEvent.getName().endsWith("RunConfigMenuItem")) {
@@ -178,7 +181,8 @@ public class AppPaneToolBar extends ViewOwner {
                 runConfigs.getRunConfigs().add(0, runConfig);
                 runConfigs.writeFile();
                 setRunMenuButtonItems();
-                appPane._filesPane.run();
+                AppFilesPane filesPane = appPane.getFilesPane();
+                filesPane.runDefaultConfig(false);
             }
         }
 
