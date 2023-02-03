@@ -2,6 +2,10 @@ package snapcodepro.app;
 import snap.geom.Side;
 import snap.util.ArrayUtils;
 import snap.view.*;
+import snapcodepro.apptools.DebugVarsPane;
+import snapcodepro.apptools.ProblemsPane;
+import snapcodepro.apptools.RunConsole;
+import snapcodepro.apptools.SearchPane;
 
 /**
  * A class to hold TabView for ProblemsPane, RunConsole, DebugPane.

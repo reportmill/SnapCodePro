@@ -1,4 +1,7 @@
-package snapcodepro.app;
+package snapcodepro.apptools;
+import snapcodepro.app.AppPane;
+import snapcodepro.app.ProjectTool;
+import snapcodepro.app.SitePane;
 import snapcodepro.project.ProjectX;
 import snapcodepro.project.VersionControl;
 import snap.util.ClientUtils;
@@ -7,7 +10,6 @@ import snap.util.TaskRunner;
 import snap.view.ProgressBar;
 import snap.view.SpringView;
 import snap.view.ViewEvent;
-import snap.view.ViewOwner;
 import snap.viewx.DialogBox;
 import snap.viewx.LoginPage;
 import snap.viewx.TaskRunnerPanel;
@@ -15,7 +17,6 @@ import snap.viewx.WebBrowser;
 import snap.web.AccessException;
 import snap.web.WebFile;
 import snap.web.WebSite;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +25,7 @@ import java.util.List;
 /**
  * Manages VersionControl operations in application.
  */
-public class VcsPane extends ViewOwner {
+public class VcsPane extends ProjectTool {
 
     // The AppPane
     AppPane _appPane;
@@ -46,6 +47,7 @@ public class VcsPane extends ViewOwner {
      */
     public VcsPane(SitePane aSitePane)
     {
+        super(aSitePane.getAppPane());
         _sitePane = aSitePane;
         _site = _sitePane.getSite();
         _site.setProp(VcsPane.class.getName(), this);
@@ -271,7 +273,7 @@ public class VcsPane extends ViewOwner {
         }
 
         // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelFiles();
+        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane.getFilesPane().getSelFiles();
         List<WebFile> sfiles = getCommitFiles(bfiles);
 
         // Run VersionControlFilesPane for files and op
@@ -340,7 +342,7 @@ public class VcsPane extends ViewOwner {
         }
 
         // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelFiles();
+        List<WebFile> bfiles = theFiles != null ? theFiles : getSelFiles();
         List<WebFile> sfiles = getUpdateFiles(bfiles);
 
         // Run VersionControlFilesPane for files and op
@@ -419,7 +421,7 @@ public class VcsPane extends ViewOwner {
         }
 
         // Get base files and all files to transfer
-        List<WebFile> bfiles = theFiles != null ? theFiles : _appPane._filesPane.getSelFiles();
+        List<WebFile> bfiles = theFiles != null ? theFiles : getSelFiles();
         List<WebFile> sfiles = getReplaceFiles(bfiles);
 
         // Run VersionControlFilesPane for files and op
@@ -484,7 +486,7 @@ public class VcsPane extends ViewOwner {
     /**
      * Called when file added to project.
      */
-    void fileAdded(WebFile aFile)
+    public void fileAdded(WebFile aFile)
     {
         _vc.fileAdded(aFile);
     }
@@ -492,7 +494,7 @@ public class VcsPane extends ViewOwner {
     /**
      * Called when file removed from project.
      */
-    void fileRemoved(WebFile aFile)
+    public void fileRemoved(WebFile aFile)
     {
         _vc.fileRemoved(aFile);
     }
@@ -500,7 +502,7 @@ public class VcsPane extends ViewOwner {
     /**
      * Called when file saved in project.
      */
-    void fileSaved(WebFile aFile)
+    public void fileSaved(WebFile aFile)
     {
         _vc.fileSaved(aFile);
     }

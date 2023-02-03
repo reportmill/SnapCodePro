@@ -1,6 +1,7 @@
 package snapcodepro.app;
 import snap.util.ListUtils;
 import snap.view.Tab;
+import snapcodepro.apptools.VcsPane;
 import snapcodepro.project.VersionControl;
 //import snap.project.VersionControlGit;
 import snap.props.PropChange;
@@ -33,7 +34,7 @@ public class SitePane extends WebPage {
     private ProjectConfigPane  _projPane;
 
     // The VersionControl pane
-    private VcsPane  _vcp;
+    private VcsPane _vcp;
 
     // The BuildPane
     private BuildPane  _buildPane;
@@ -58,11 +59,6 @@ public class SitePane extends WebPage {
         // Set ProjectPane
         _projPane = new ProjectConfigPane(this);
 
-        // Set VersionControlPane
-        String urls = getRemoteURLString();
-        //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
-        _vcp = new VcsPane(this);
-
         // Set BuildPane
         _buildPane = new BuildPane(this);
 
@@ -85,8 +81,14 @@ public class SitePane extends WebPage {
     {
         _appPane = anAP;
         _consolePane._appPane = anAP;
-        if (_projPane != null) _projPane.setAppPane(anAP);
-        if (_vcp != null) _vcp.setAppPane(anAP);
+        if (_projPane != null)
+            _projPane.setAppPane(anAP);
+
+        // Set VersionControlPane
+        String urls = getRemoteURLString();
+        //_vcp = VersionControl.get(_site) instanceof VersionControlGit ? new VcsPaneGit(this) : new VcsPane(this);
+        _vcp = new VcsPane(this);
+        _vcp.setAppPane(anAP);
     }
 
     /**
@@ -364,7 +366,8 @@ public class SitePane extends WebPage {
     void fileAdded(WebFile aFile)
     {
         if (_projPane != null) _projPane.fileAdded(aFile);
-        if (_vcp != null) _vcp.fileAdded(aFile);
+        if (_vcp != null)
+            _vcp.fileAdded(aFile);
     }
 
     /**
@@ -373,7 +376,8 @@ public class SitePane extends WebPage {
     void fileRemoved(WebFile aFile)
     {
         if (_projPane != null) _projPane.fileRemoved(aFile);
-        if (_vcp != null) _vcp.fileRemoved(aFile);
+        if (_vcp != null)
+            _vcp.fileRemoved(aFile);
     }
 
     /**
@@ -382,7 +386,8 @@ public class SitePane extends WebPage {
     void fileSaved(WebFile aFile)
     {
         if (_projPane != null) _projPane.fileSaved(aFile);
-        if (_vcp != null) _vcp.fileSaved(aFile);
+        if (_vcp != null)
+            _vcp.fileSaved(aFile);
     }
 
     /**

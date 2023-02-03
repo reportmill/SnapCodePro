@@ -1,4 +1,6 @@
-package snapcodepro.app;
+package snapcodepro.apptools;
+import snapcodepro.app.AppPane;
+import snapcodepro.app.ProjectTool;
 import snapcodepro.debug.DebugApp;
 import snapcodepro.debug.ExprEval;
 import snap.view.*;

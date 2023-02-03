@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snapcodepro.app;
+package snapcodepro.apptools;
 import javakit.parse.JFile;
 import javakit.parse.JNode;
 import javakit.project.JavaAgent;
@@ -11,6 +11,9 @@ import javakit.resolver.JavaParameterizedType;
 import javakit.ide.NodeMatcher;
 import javakit.ide.JavaTextUtils;
 import snap.gfx.Image;
+import snapcodepro.app.ProjectPane;
+import snapcodepro.app.ProjectTool;
+import snapcodepro.app.SitePane;
 import snapcodepro.project.JavaData;
 import snap.util.ArrayUtils;
 import snap.view.*;

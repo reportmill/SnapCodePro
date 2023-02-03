@@ -1,8 +1,10 @@
-package snapcodepro.app;
+package snapcodepro.apptools;
 import javakit.project.Breakpoint;
 import javakit.project.Breakpoints;
 import snap.view.ListView;
 import snap.view.ViewEvent;
+import snapcodepro.app.ProjectPane;
+import snapcodepro.app.ProjectTool;
 
 /**
  * This class displays and edits project breakpoints.

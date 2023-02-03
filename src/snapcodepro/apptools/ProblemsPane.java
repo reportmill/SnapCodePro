@@ -1,4 +1,4 @@
-package snapcodepro.app;
+package snapcodepro.apptools;
 import javakit.project.BuildIssue;
 import javakit.ide.JavaTextUtils;
 import javakit.project.BuildIssues;
@@ -6,6 +6,8 @@ import javakit.project.Project;
 import snap.gfx.Image;
 import snap.view.*;
 import snap.web.WebFile;
+import snapcodepro.app.ProjectPane;
+import snapcodepro.app.ProjectTool;
 
 /**
  * A pane/panel to show current build issues.

@@ -1,5 +1,7 @@
-package snapcodepro.app;
+package snapcodepro.apptools;
 import com.sun.jdi.*;
+import snapcodepro.app.AppPane;
+import snapcodepro.app.ProjectTool;
 import snapcodepro.debug.DebugApp;
 import snap.gfx.Font;
 import snap.view.*;

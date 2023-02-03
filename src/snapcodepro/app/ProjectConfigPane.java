@@ -5,6 +5,7 @@ import javakit.ide.NodeMatcher;
 import javakit.project.JavaAgent;
 import javakit.project.Project;
 import javakit.project.ProjectConfig;
+import snapcodepro.apptools.ProblemsPane;
 import snapcodepro.project.ProjectX;
 import snapcodepro.project.ProjectSet;
 import snapcodepro.project.VersionControl;

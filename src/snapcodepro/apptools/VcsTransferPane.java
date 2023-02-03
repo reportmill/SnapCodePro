@@ -1,4 +1,4 @@
-package snapcodepro.app;
+package snapcodepro.apptools;
 import snap.geom.Pos;
 import snap.gfx.Image;
 import snapcodepro.project.VersionControl.Op;

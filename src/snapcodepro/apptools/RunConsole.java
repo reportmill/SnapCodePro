@@ -1,4 +1,6 @@
-package snapcodepro.app;
+package snapcodepro.apptools;
+import snapcodepro.app.AppPane;
+import snapcodepro.app.ProjectTool;
 import snapcodepro.debug.RunApp;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -16,7 +18,7 @@ import snap.web.WebFile;
 public class RunConsole extends ProjectTool {
 
     // The ProcPane
-    private ProcPane  _procPane;
+    private ProcPane _procPane;
 
     // The output text
     private RCTextView  _textView;

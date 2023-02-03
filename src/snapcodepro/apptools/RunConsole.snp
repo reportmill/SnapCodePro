@@ -8,6 +8,6 @@
     <Button Name="TerminateButton" PrefWidth="24" PrefHeight="24" image="Terminate.gif" ShowBorder="false" />
   </RowView>
   <ScrollView Margin="0,5,5,5" GrowHeight="true">
-    <View Name="OutputText" Class="snapcodepro.app.RunConsole$RCTextView" />
+    <View Name="OutputText" Class="snapcodepro.apptools.RunConsole$RCTextView" />
   </ScrollView>
 </ColView>

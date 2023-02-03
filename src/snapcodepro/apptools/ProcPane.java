@@ -1,4 +1,4 @@
-package snapcodepro.app;
+package snapcodepro.apptools;
 import javakit.ide.JavaTextArea;
 import snap.gfx.Image;
 import snap.util.ListUtils;
@@ -6,6 +6,9 @@ import snap.view.*;
 import snap.viewx.WebPage;
 import snap.web.WebFile;
 import snap.web.WebURL;
+import snapcodepro.app.AppPane;
+import snapcodepro.app.JavaPage;
+import snapcodepro.app.SupportTray;
 import snapcodepro.debug.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +19,7 @@ import java.util.List;
 public class ProcPane extends ViewOwner implements RunApp.AppListener {
 
     // The AppPane
-    private AppPane  _appPane;
+    private AppPane _appPane;
 
     // The list of recently run apps
     private List<RunApp>  _apps = new ArrayList<>();

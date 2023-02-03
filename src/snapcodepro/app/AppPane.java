@@ -5,6 +5,7 @@ import javakit.project.BuildIssue;
 import javakit.ide.JavaTextPane;
 import snap.util.ArrayUtils;
 import snap.viewx.WebBrowser;
+import snapcodepro.apptools.*;
 import snapcodepro.debug.RunApp;
 import snapcodepro.project.ProjectX;
 import snap.props.PropChange;
@@ -34,7 +35,7 @@ public class AppPane extends ProjectPane {
     protected AppFilesPane  _filesPane;
 
     // The ProcPane manages run/debug processes
-    private ProcPane  _procPane = new ProcPane(this);
+    private ProcPane _procPane = new ProcPane(this);
 
     // The SupportTray
     private SupportTray  _supportTray;
@@ -46,16 +47,16 @@ public class AppPane extends ProjectPane {
     private RunConsole  _runConsole = new RunConsole(this);
 
     // The DebugVarsPane
-    private DebugVarsPane  _debugVarsPane = new DebugVarsPane(this);
+    private DebugVarsPane _debugVarsPane = new DebugVarsPane(this);
 
     // The DebugExprsPane
-    private DebugExprsPane  _debugExprsPane = new DebugExprsPane(this);
+    private DebugExprsPane _debugExprsPane = new DebugExprsPane(this);
 
     // The BreakpointsPanel
-    private BreakpointsPanel  _breakpointsPanel = new BreakpointsPanel(this);
+    private BreakpointsPanel _breakpointsPanel = new BreakpointsPanel(this);
 
     // The SearchPane
-    private SearchPane  _searchPane = new SearchPane(this);
+    private SearchPane _searchPane = new SearchPane(this);
 
     // The StatusBar
     private StatusBar  _statusBar;
